@@ -1,40 +1,81 @@
-var nconf = require('nconf'),
+var Nconf = require('nconf'),
     path = require('path'),
+    _debug = require('ghost-ignition').debug._base,
+    debug = _debug('ghost:config'),
     localUtils = require('./utils'),
-    packageInfo = require('../../../package.json'),
-    env = process.env.NODE_ENV || 'development';
+    env = process.env.NODE_ENV || 'development',
+    _private = {};
 
-nconf.set('NODE_ENV', env);
+_private.loadNconf = function loadNconf(options) {
+    debug('config start');
+    options = options || {};
 
-/**
- * command line arguments
- */
-nconf.argv();
+    var baseConfigPath = options.baseConfigPath || __dirname,
+        customConfigPath = options.customConfigPath || process.cwd(),
+        nconf = new Nconf.Provider();
 
-/**
- * env arguments
- */
-nconf.env();
+    /**
+     * no channel can override the overrides
+     */
+    nconf.file('overrides', path.join(baseConfigPath, 'overrides.json'));
 
-/**
- * load config files
- */
-nconf.file('1', __dirname + '/overrides.json');
-nconf.file('2', path.join(process.cwd(), 'config.' + env + '.json'));
-nconf.file('3', __dirname + '/env/config.' + env + '.json');
-nconf.file('4', __dirname + '/defaults.json');
+    /**
+     * command line arguments
+     */
+    nconf.argv();
 
-/**
- * transform all relative paths to absolute paths
- */
-localUtils.makePathsAbsolute.bind(nconf)();
+    /**
+     * env arguments
+     */
+    nconf.env({
+        separator: '__',
+        parseValues: true
+    });
 
-/**
- * values we have to set manual
- * @TODO: ghost-cli?
- */
-nconf.set('ghostVersion', packageInfo.version);
+    nconf.file('custom-env', path.join(customConfigPath, 'config.' + env + '.json'));
+    nconf.file('default-env', path.join(baseConfigPath, 'env', 'config.' + env + '.json'));
+    nconf.file('defaults', path.join(baseConfigPath, 'defaults.json'));
 
-module.exports = nconf;
-module.exports.isPrivacyDisabled = localUtils.isPrivacyDisabled.bind(nconf);
-module.exports.getContentPath = localUtils.getContentPath.bind(nconf);
+    /**
+     * transform all relative paths to absolute paths
+     * transform sqlite filename path for Ghost-CLI
+     */
+    nconf.makePathsAbsolute = localUtils.makePathsAbsolute.bind(nconf);
+    nconf.isPrivacyDisabled = localUtils.isPrivacyDisabled.bind(nconf);
+    nconf.getContentPath = localUtils.getContentPath.bind(nconf);
+    nconf.sanitizeDatabaseProperties = localUtils.sanitizeDatabaseProperties.bind(nconf);
+    nconf.doesContentPathExist = localUtils.doesContentPathExist.bind(nconf);
+
+    nconf.sanitizeDatabaseProperties();
+    nconf.makePathsAbsolute(nconf.get('paths'), 'paths');
+    if (nconf.get('database:client') === 'sqlite3') {
+        nconf.makePathsAbsolute(nconf.get('database:connection'), 'database:connection');
+    }
+    /**
+     * Check if the URL in config has a protocol
+     */
+    nconf.checkUrlProtocol = localUtils.checkUrlProtocol.bind(nconf);
+    nconf.checkUrlProtocol();
+
+    /**
+     * Ensure that the content path exists
+     */
+    nconf.doesContentPathExist();
+
+    /**
+     * values we have to set manual
+     */
+    nconf.set('env', env);
+
+    // Wrap this in a check, because else nconf.get() is executed unnecessarily
+    // To output this, use DEBUG=ghost:*,ghost-config
+    if (_debug.enabled('ghost-config')) {
+        debug(nconf.get());
+    }
+
+    debug('config end');
+    return nconf;
+};
+
+module.exports = _private.loadNconf();
+module.exports.loadNconf = _private.loadNconf;

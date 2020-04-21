@@ -1,27 +1,71 @@
-var Settings,
+const Promise = require('bluebird'),
+    _ = require('lodash'),
+    uuid = require('uuid'),
+    crypto = require('crypto'),
+    keypair = require('keypair'),
     ghostBookshelf = require('./base'),
-    uuid           = require('node-uuid'),
-    _              = require('lodash'),
-    errors         = require('../errors'),
-    Promise        = require('bluebird'),
-    validation     = require('../data/validation'),
-    events         = require('../events'),
-    internalContext = {context: {internal: true}},
-    i18n           = require('../i18n'),
+    common = require('../lib/common'),
+    validation = require('../data/validation'),
+    settingsCache = require('../services/settings/cache'),
+    internalContext = {context: {internal: true}};
 
-    defaultSettings;
+let Settings, defaultSettings;
+
+const doBlock = fn => fn();
+
+const getMembersKey = doBlock(() => {
+    let UNO_KEYPAIRINO;
+    return function getMembersKey(type) {
+        if (!UNO_KEYPAIRINO) {
+            UNO_KEYPAIRINO = keypair({bits: 1024});
+        }
+        return UNO_KEYPAIRINO[type];
+    };
+});
+
+const getGhostKey = doBlock(() => {
+    let UNO_KEYPAIRINO;
+    return function getGhostKey(type) {
+        if (!UNO_KEYPAIRINO) {
+            UNO_KEYPAIRINO = keypair({bits: 1024});
+        }
+        return UNO_KEYPAIRINO[type];
+    };
+});
 
 // For neatness, the defaults file is split into categories.
 // It's much easier for us to work with it as a single level
 // instead of iterating those categories every time
 function parseDefaultSettings() {
     var defaultSettingsInCategories = require('../data/schema/').defaultSettings,
-        defaultSettingsFlattened = {};
+        defaultSettingsFlattened = {},
+        dynamicDefault = {
+            db_hash: () => uuid.v4(),
+            public_hash: () => crypto.randomBytes(15).toString('hex'),
+            // @TODO: session_secret would ideally be named "admin_session_secret"
+            session_secret: () => crypto.randomBytes(32).toString('hex'),
+            members_session_secret: () => crypto.randomBytes(32).toString('hex'),
+            theme_session_secret: () => crypto.randomBytes(32).toString('hex'),
+            members_public_key: () => getMembersKey('public'),
+            members_private_key: () => getMembersKey('private'),
+            members_email_auth_secret: () => crypto.randomBytes(64).toString('hex'),
+            ghost_public_key: () => getGhostKey('public'),
+            ghost_private_key: () => getGhostKey('private')
+        };
 
     _.each(defaultSettingsInCategories, function each(settings, categoryName) {
         _.each(settings, function each(setting, settingName) {
             setting.type = categoryName;
             setting.key = settingName;
+
+            setting.getDefaultValue = function getDefaultValue() {
+                const getDynamicDefault = dynamicDefault[setting.key];
+                if (getDynamicDefault) {
+                    return getDynamicDefault();
+                } else {
+                    return setting.defaultValue;
+                }
+            };
 
             defaultSettingsFlattened[settingName] = setting;
         });
@@ -46,47 +90,70 @@ Settings = ghostBookshelf.Model.extend({
 
     defaults: function defaults() {
         return {
-            uuid: uuid.v4(),
             type: 'core'
         };
     },
 
-    emitChange: function emitChange(event) {
-        events.emit('settings' + '.' + event, this);
+    emitChange: function emitChange(event, options) {
+        const eventToTrigger = 'settings' + '.' + event;
+        ghostBookshelf.Model.prototype.emitChange.bind(this)(this, eventToTrigger, options);
     },
 
-    initialize: function initialize() {
-        ghostBookshelf.Model.prototype.initialize.apply(this, arguments);
+    onDestroyed: function onDestroyed(model, options) {
+        ghostBookshelf.Model.prototype.onDestroyed.apply(this, arguments);
 
-        this.on('created', function (model) {
-            model.emitChange('added');
-            model.emitChange(model.attributes.key + '.' + 'added');
-        });
-        this.on('updated', function (model) {
-            model.emitChange('edited');
-            model.emitChange(model.attributes.key + '.' + 'edited');
-        });
-        this.on('destroyed', function (model) {
-            model.emitChange('deleted');
-            model.emitChange(model.attributes.key + '.' + 'deleted');
-        });
+        model.emitChange('deleted', options);
+        model.emitChange(model._previousAttributes.key + '.' + 'deleted', options);
     },
 
-    validate: function validate() {
-        var self = this,
-            setting = this.toJSON();
+    onCreated: function onCreated(model, response, options) {
+        ghostBookshelf.Model.prototype.onCreated.apply(this, arguments);
 
-        return validation.validateSchema(self.tableName, setting).then(function then() {
-            return validation.validateSettings(getDefaultSettings(), self);
-        }).then(function () {
-            var themeName = setting.value || '';
+        model.emitChange('added', options);
+        model.emitChange(model.attributes.key + '.' + 'added', options);
+    },
 
-            if (setting.key !== 'activeTheme') {
-                return;
-            }
+    onUpdated: function onUpdated(model, response, options) {
+        ghostBookshelf.Model.prototype.onUpdated.apply(this, arguments);
 
-            return validation.validateActiveTheme(themeName);
-        });
+        model.emitChange('edited', options);
+        model.emitChange(model.attributes.key + '.' + 'edited', options);
+    },
+
+    onValidate: function onValidate() {
+        var self = this;
+
+        return ghostBookshelf.Model.prototype.onValidate.apply(this, arguments)
+            .then(function then() {
+                return validation.validateSettings(getDefaultSettings(), self);
+            });
+    },
+
+    format() {
+        const attrs = ghostBookshelf.Model.prototype.format.apply(this, arguments);
+
+        // @NOTE: type TEXT will transform boolean to "0"
+        if (_.isBoolean(attrs.value)) {
+            attrs.value = attrs.value.toString();
+        }
+
+        return attrs;
+    },
+
+    parse() {
+        const attrs = ghostBookshelf.Model.prototype.parse.apply(this, arguments);
+
+        // transform "0" to false
+        // transform "false" to false
+        if (attrs.value === '0' || attrs.value === '1') {
+            attrs.value = !!+attrs.value;
+        }
+
+        if (attrs.value === 'false' || attrs.value === 'true') {
+            attrs.value = JSON.parse(attrs.value);
+        }
+
+        return attrs;
     }
 }, {
     findOne: function (data, options) {
@@ -102,9 +169,9 @@ Settings = ghostBookshelf.Model.extend({
         return Promise.resolve(ghostBookshelf.Model.findOne.call(this, data, options));
     },
 
-    edit: function (data, options) {
-        var self = this;
-        options = this.filterOptions(options, 'edit');
+    edit: function (data, unfilteredOptions) {
+        var options = this.filterOptions(unfilteredOptions, 'edit'),
+            self = this;
 
         if (!Array.isArray(data)) {
             data = [data];
@@ -112,79 +179,106 @@ Settings = ghostBookshelf.Model.extend({
 
         return Promise.map(data, function (item) {
             // Accept an array of models as input
-            if (item.toJSON) { item = item.toJSON(); }
+            if (item.toJSON) {
+                item = item.toJSON();
+            }
             if (!(_.isString(item.key) && item.key.length > 0)) {
-                return Promise.reject(new errors.ValidationError(i18n.t('errors.models.settings.valueCannotBeBlank')));
+                return Promise.reject(new common.errors.ValidationError({message: common.i18n.t('errors.models.settings.valueCannotBeBlank')}));
             }
 
             item = self.filterData(item);
 
             return Settings.forge({key: item.key}).fetch(options).then(function then(setting) {
-                var saveData = {};
-
                 if (setting) {
-                    if (item.hasOwnProperty('value')) {
-                        saveData.value = item.value;
-                    }
-                    // Internal context can overwrite type (for fixture migrations)
-                    if (options.context && options.context.internal && item.hasOwnProperty('type')) {
-                        saveData.type = item.type;
-                    }
                     // it's allowed to edit all attributes in case of importing/migrating
                     if (options.importing) {
-                        saveData = item;
-                    }
+                        return setting.save(item, options);
+                    } else {
+                        // If we have a value, set it.
+                        if (Object.prototype.hasOwnProperty.call(item, 'value')) {
+                            setting.set('value', item.value);
+                        }
+                        // Internal context can overwrite type (for fixture migrations)
+                        if (options.context && options.context.internal && Object.prototype.hasOwnProperty.call(item, 'type')) {
+                            setting.set('type', item.type);
+                        }
 
-                    return setting.save(saveData, options);
+                        // If anything has changed, save the updated model
+                        if (setting.hasChanged()) {
+                            return setting.save(null, options);
+                        }
+
+                        return setting;
+                    }
                 }
 
-                return Promise.reject(new errors.NotFoundError(i18n.t('errors.models.settings.unableToFindSetting', {key: item.key})));
-            }, errors.logAndThrowError);
+                return Promise.reject(new common.errors.NotFoundError({message: common.i18n.t('errors.models.settings.unableToFindSetting', {key: item.key})}));
+            });
         });
     },
 
-    populateDefault: function (key) {
-        if (!getDefaultSettings()[key]) {
-            return Promise.reject(new errors.NotFoundError(i18n.t('errors.models.settings.unableToFindDefaultSetting', {key: key})));
+    populateDefaults: function populateDefaults(unfilteredOptions) {
+        var options = this.filterOptions(unfilteredOptions, 'populateDefaults'),
+            self = this;
+
+        if (!options.context) {
+            options.context = internalContext.context;
         }
 
-        return this.findOne({key: key}).then(function then(foundSetting) {
-            if (foundSetting) {
-                return foundSetting;
-            }
+        return this
+            .findAll(options)
+            .then(function checkAllSettings(allSettings) {
+                var usedKeys = allSettings.models.map(function mapper(setting) {
+                        return setting.get('key');
+                    }),
+                    insertOperations = [];
 
-            var defaultSetting = _.clone(getDefaultSettings()[key]);
-            defaultSetting.value = defaultSetting.defaultValue;
+                _.each(getDefaultSettings(), function forEachDefault(defaultSetting, defaultSettingKey) {
+                    var isMissingFromDB = usedKeys.indexOf(defaultSettingKey) === -1;
+                    if (isMissingFromDB) {
+                        defaultSetting.value = defaultSetting.getDefaultValue();
+                        insertOperations.push(Settings.forge(defaultSetting).save(null, options));
+                    }
+                });
 
-            return Settings.forge(defaultSetting).save(null, internalContext);
-        });
+                if (insertOperations.length > 0) {
+                    return Promise.all(insertOperations).then(function fetchAllToReturn() {
+                        return self.findAll(options);
+                    });
+                }
+
+                return allSettings;
+            });
     },
 
-    populateDefaults: function populateDefaults(options) {
-        options = options || {};
+    permissible: function permissible(modelId, action, context, unsafeAttrs, loadedPermissions, hasUserPermission, hasApiKeyPermission) {
+        let isEdit = (action === 'edit');
+        let isOwner;
 
-        options = _.merge({}, options, internalContext);
-
-        return this.findAll(options).then(function then(allSettings) {
-            var usedKeys = allSettings.models.map(function mapper(setting) { return setting.get('key'); }),
-                insertOperations = [];
-
-            _.each(getDefaultSettings(), function each(defaultSetting, defaultSettingKey) {
-                var isMissingFromDB = usedKeys.indexOf(defaultSettingKey) === -1;
-                // Temporary code to deal with old databases with currentVersion settings
-                if (defaultSettingKey === 'databaseVersion' && usedKeys.indexOf('currentVersion') !== -1) {
-                    isMissingFromDB = false;
+        function isChangingMembers() {
+            if (unsafeAttrs && unsafeAttrs.key === 'labs') {
+                let editedValue = JSON.parse(unsafeAttrs.value);
+                if (editedValue.members !== undefined) {
+                    return editedValue.members !== settingsCache.get('labs').members;
                 }
-                if (isMissingFromDB) {
-                    defaultSetting.value = defaultSetting.defaultValue;
-                    insertOperations.push(Settings.forge(defaultSetting).save(null, options));
-                }
-            });
+            }
+        }
 
-            return Promise.all(insertOperations);
-        });
+        isOwner = loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Owner'});
+
+        if (isEdit && isChangingMembers()) {
+            // Only allow owner to toggle members flag
+            hasUserPermission = isOwner;
+        }
+
+        if (hasUserPermission && hasApiKeyPermission) {
+            return Promise.resolve();
+        }
+
+        return Promise.reject(new common.errors.NoPermissionError({
+            message: common.i18n.t('errors.models.post.notEnoughPermission')
+        }));
     }
-
 });
 
 module.exports = {

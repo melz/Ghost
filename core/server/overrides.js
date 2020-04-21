@@ -1,4 +1,19 @@
-var moment = require('moment-timezone');
+/**
+ * If we enable bluebird debug logs we see a huge memory usage.
+ * You can reproduce by removing this line and import a big database export into Ghost.
+ * `NODE_ENV=development node index.js`
+ */
+process.env.BLUEBIRD_DEBUG = 0;
+
+const moment = require('moment-timezone');
+
+/**
+ * oembed-parser uses promise-wtf to extend the global Promise with .finally
+ *   - require it before global Bluebird Promise override so that promise-wtf
+ *     doesn't error due to Bluebird's Promise already having a .finally
+ *   - https://github.com/ndaidong/promise-wtf/issues/25
+ */
+const {extract, hasProvider} = require('oembed-parser'); // eslint-disable-line
 
 /**
  * force UTC
@@ -9,23 +24,7 @@ var moment = require('moment-timezone');
  */
 moment.tz.setDefault('UTC');
 
-// jscs:disable
-var _ = require('lodash'),
-    toPairs = require('lodash.topairs'),
-    fromPairs = require('lodash.frompairs'),
-    toString = require('lodash.tostring'),
-    pickBy = require('lodash.pickby'),
-    uniqBy = require('lodash.uniqby'),
-    orderBy = require('lodash.orderby'),
-    omitBy = require('lodash.omitby');
-
 /**
- * lodash 4.x functions we use
+ * https://github.com/TryGhost/Ghost/issues/9064
  */
-_.toPairs = toPairs;
-_.fromPairs = fromPairs;
-_.toString = toString;
-_.omitBy = omitBy;
-_.uniqBy = uniqBy;
-_.pickBy = pickBy;
-_.orderBy = orderBy;
+global.Promise = require('bluebird');

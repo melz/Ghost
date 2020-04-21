@@ -1,9 +1,9 @@
-var _       = require('lodash'),
+var _ = require('lodash'),
     Promise = require('bluebird'),
-    path    = require('path'),
-    config  = require('../../../config'),
-    utils   = require('../../../utils'),
-    storage = require('../../../storage'),
+    path = require('path'),
+    config = require('../../../config'),
+    urlUtils = require('../../../lib/url-utils'),
+    storage = require('../../../adapters/storage'),
 
     ImageHandler;
 
@@ -16,7 +16,7 @@ ImageHandler = {
     loadFile: function (files, baseDir) {
         var store = storage.getStorage(),
             baseDirRegex = baseDir ? new RegExp('^' + baseDir + '/') : new RegExp(''),
-            imageFolderRegexes = _.map(config.get('paths').imagesRelPath.split('/'), function (dir) {
+            imageFolderRegexes = _.map(urlUtils.STATIC_IMAGE_URL_PREFIX.split('/'), function (dir) {
                 return new RegExp('^' + dir + '/');
             });
 
@@ -36,10 +36,9 @@ ImageHandler = {
         });
 
         return Promise.map(files, function (image) {
-            return store.getUniqueFileName(store, image, image.targetDir).then(function (targetFilename) {
-                image.newPath = (utils.url.getSubdir() + '/' +
-                    config.get('paths').imagesRelPath + '/' + path.relative(config.getContentPath('images'), targetFilename))
-                        .replace(new RegExp('\\' + path.sep, 'g'), '/');
+            return store.getUniqueFileName(image, image.targetDir).then(function (targetFilename) {
+                image.newPath = urlUtils.urlJoin('/', urlUtils.getSubdir(), urlUtils.STATIC_IMAGE_URL_PREFIX,
+                    path.relative(config.getContentPath('images'), targetFilename));
 
                 return image;
             });

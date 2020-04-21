@@ -3,69 +3,96 @@
  * Parts of the model code which can be split out and unit tested
  */
 var _ = require('lodash'),
-    tagUpdate;
+    Promise = require('bluebird'),
+    ObjectId = require('bson-objectid'),
+    common = require('../../lib/common'),
+    attach, detach;
 
-tagUpdate = {
-    fetchCurrentPost: function fetchCurrentPost(PostModel, id, options) {
-        return PostModel.forge({id: id}).fetch(_.extend({}, options, {withRelated: ['tags']}));
-    },
+/**
+ * Attach wrapper (please never call attach manual!)
+ *
+ * We register the creating event to be able to hook into the model creation process of Bookshelf.
+ * We need to load the model again, because of a known bookshelf issue:
+ * see https://github.com/tgriesser/bookshelf/issues/629
+ * (withRelated option causes a null value for the foreign key)
+ *
+ * roles [1,2]
+ * roles [{id: 1}, {id: 2}]
+ * roles [{role_id: 1}]
+ * roles [BookshelfModel]
+ */
+attach = function attach(Model, effectedModelId, relation, modelsToAttach, options) {
+    options = options || {};
 
-    fetchMatchingTags: function fetchMatchingTags(TagModel, tagsToMatch, options) {
-        if (_.isEmpty(tagsToMatch)) {
-            return false;
-        }
-        return TagModel.forge()
-            .query('whereIn', 'name', _.map(tagsToMatch, 'name')).fetchAll(options);
-    },
+    var fetchedModel,
+        localOptions = {transacting: options.transacting};
 
-    detachTagFromPost: function detachTagFromPost(post, tag, options) {
-        return function () {
-            // See tgriesser/bookshelf#294 for an explanation of _.omit(options, 'query')
-            return post.tags().detach(tag.id, _.omit(options, 'query'));
-        };
-    },
+    return Model.forge({id: effectedModelId}).fetch(localOptions)
+        .then(function successFetchedModel(_fetchedModel) {
+            fetchedModel = _fetchedModel;
 
-    attachTagToPost: function attachTagToPost(post, tag, index, options) {
-        return function () {
-            // See tgriesser/bookshelf#294 for an explanation of _.omit(options, 'query')
-            return post.tags().attach({tag_id: tag.id, sort_order: index}, _.omit(options, 'query'));
-        };
-    },
+            if (!fetchedModel) {
+                throw new common.errors.NotFoundError({level: 'critical', help: effectedModelId});
+            }
 
-    createTagThenAttachTagToPost: function createTagThenAttachTagToPost(TagModel, post, tag, index, options) {
-        var fields = ['name', 'slug', 'description', 'image', 'visibility', 'parent_id', 'meta_title', 'meta_description'];
-        return function () {
-            return TagModel.add(_.pick(tag, fields), options).then(function then(createdTag) {
-                return tagUpdate.attachTagToPost(post, createdTag, index, options)();
+            fetchedModel.related(relation).on('creating', function (collection, data) {
+                data.id = ObjectId.generate();
             });
-        };
-    },
 
-    updateTagOrderForPost: function updateTagOrderForPost(post, tag, index, options) {
-        return function () {
-            return post.tags().updatePivot(
-                {sort_order: index}, _.extend({}, options, {query: {where: {tag_id: tag.id}}})
-            );
-        };
-    },
+            return Promise.resolve(modelsToAttach)
+                .then(function then(models) {
+                    models = _.map(models, function mapper(model) {
+                        if (model.id) {
+                            return model.id;
+                        } else if (!_.isObject(model)) {
+                            return model.toString();
+                        } else {
+                            return model;
+                        }
+                    });
 
-    // Test if two tags are the same, checking ID first, and falling back to name
-    tagsAreEqual: function tagsAreEqual(tag1, tag2) {
-        if (tag1.hasOwnProperty('id') && tag2.hasOwnProperty('id')) {
-            return parseInt(tag1.id, 10) === parseInt(tag2.id, 10);
-        }
-        return tag1.name.toString() === tag2.name.toString();
-    },
-    tagSetsAreEqual: function tagSetsAreEqual(tags1, tags2) {
-        // If the lengths are different, they cannot be the same
-        if (tags1.length !== tags2.length) {
-            return false;
-        }
-        // Return if no item is not the same (double negative is horrible)
-        return !_.some(tags1, function (tag1, index) {
-            return !tagUpdate.tagsAreEqual(tag1, tags2[index]);
+                    return fetchedModel.related(relation).attach(models, localOptions);
+                });
+        })
+        .finally(function () {
+            if (!fetchedModel) {
+                return;
+            }
+
+            fetchedModel.related(relation).off('creating');
         });
-    }
 };
 
-module.exports.tagUpdate = tagUpdate;
+detach = function detach(Model, effectedModelId, relation, modelsToAttach, options) {
+    options = options || {};
+
+    var fetchedModel,
+        localOptions = {transacting: options.transacting};
+
+    return Model.forge({id: effectedModelId}).fetch(localOptions)
+        .then(function successFetchedModel(_fetchedModel) {
+            fetchedModel = _fetchedModel;
+
+            if (!fetchedModel) {
+                throw new common.errors.NotFoundError({level: 'critical', help: effectedModelId});
+            }
+
+            return Promise.resolve(modelsToAttach)
+                .then(function then(models) {
+                    models = _.map(models, function mapper(model) {
+                        if (model.id) {
+                            return model.id;
+                        } else if (!_.isObject(model)) {
+                            return model.toString();
+                        } else {
+                            return model;
+                        }
+                    });
+
+                    return fetchedModel.related(relation).detach(models, localOptions);
+                });
+        });
+};
+
+module.exports.attach = attach;
+module.exports.detach = detach;

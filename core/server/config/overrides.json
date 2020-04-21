@@ -3,65 +3,79 @@
         "appRoot": ".",
         "corePath": "core/",
         "clientAssets": "core/built/assets",
-        "imagesRelPath": "content/images",
-        "helperTemplates": "core/server/helpers/tpl/",
-        "adminViews": "core/server/views/",
-        "internalAppPath": "core/server/apps/",
-        "internalStoragePath": "core/server/storage/",
-        "internalSchedulingPath": "core/server/scheduling/"
+        "helperTemplates": "core/frontend/helpers/tpl/",
+        "adminViews": "core/server/web/admin/views/",
+        "defaultViews": "core/server/views/",
+        "defaultSettings": "core/frontend/services/settings/",
+        "internalAppPath": "core/frontend/apps/",
+        "internalAdaptersPath": "core/server/adapters/",
+        "migrationPath": "core/server/data/migrations",
+        "publicFilePath": "core/server/public"
     },
-    "internalApps": [
-        "private-blogging",
-        "subscribers",
-        "amp"
-    ],
-    "routeKeywords": {
-        "tag": "tag",
-        "author": "author",
-        "page": "page",
-        "preview": "p",
-        "private": "private",
-        "subscribe": "subscribe",
-        "amp": "amp"
+    "apps": {
+        "internal": [
+            "private-blogging",
+            "amp"
+        ]
     },
     "slugs": {
-        "reserved": ["admin", "app", "apps", "archive", "archives", "categories",
-            "category", "dashboard", "feed", "ghost-admin", "login", "logout",
-            "page", "pages", "post", "posts", "public", "register", "setup",
-            "signin", "signout", "signup", "user", "users", "wp-admin", "wp-login"],
         "protected": ["ghost", "rss", "amp"]
     },
     "uploads": {
-        "subscribers": {
+        "members": {
             "extensions": [".csv"],
-            "contentTypes": ["text/csv", "application/csv", "application/octet-stream"]
+            "contentTypes": ["text/csv", "application/csv", "application/octet-stream", "application/vnd.ms-excel"]
         },
         "images": {
-            "extensions": [".jpg", ".jpeg", ".gif", ".png", ".svg", ".svgz"],
-            "contentTypes": ["image/jpeg", "image/png", "image/gif", "image/svg+xml"]
+            "extensions": [".jpg", ".jpeg", ".gif", ".png", ".svg", ".svgz", ".ico"],
+            "contentTypes": ["image/jpeg", "image/png", "image/gif", "image/svg+xml", "image/x-icon", "image/vnd.microsoft.icon"]
+        },
+        "icons": {
+            "extensions": [".png", ".ico"],
+            "contentTypes": ["image/png", "image/x-icon", "image/vnd.microsoft.icon"]
         },
         "db": {
             "extensions": [".json", ".zip"],
-            "contentTypes": ["application/octet-stream", "application/json", "application/zip", "application/x-zip-compressed"]
+            "contentTypes": ["text/plain", "application/octet-stream", "application/json", "application/zip", "application/x-zip-compressed"]
         },
         "themes": {
             "extensions": [".zip"],
             "contentTypes": ["application/zip", "application/x-zip-compressed", "application/octet-stream"]
-        }
-    },
-    "storage": {
-        "active": {
-            "themes": "local-file-store"
+        },
+        "redirects": {
+            "extensions": [".json"],
+            "contentTypes": ["text/plain", "application/octet-stream", "application/json"]
+        },
+        "routes": {
+            "extensions": [".yaml"],
+            "contentTypes": ["text/plain", "text/yaml", "application/octet-stream", "application/yaml", "application/x-yaml"]
         }
     },
     "times": {
         "cannotScheduleAPostBeforeInMinutes": 2,
-        "publishAPostBySchedulerToleranceInMinutes": 2
-    },
-    "theme": {
-        "timezone": "Etc/UTC"
+        "publishAPostBySchedulerToleranceInMinutes": 2,
+        "getImageSizeTimeoutInMS": 5000
     },
     "maintenance": {
         "enabled": false
+    },
+    "api": {
+        "versions": {
+            "all": ["v2", "v3", "canary"],
+            "canary": {
+                "admin": "canary/admin",
+                "content": "canary/content",
+                "members": "canary/members"
+            },
+            "v3": {
+                "admin": "v3/admin",
+                "content": "v3/content",
+                "members": "v3/members"
+            },
+            "v2": {
+                "admin": "v2/admin",
+                "content": "v2/content"
+            }
+        }
     }
 }
