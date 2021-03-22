@@ -6,9 +6,8 @@ const uuid = require('uuid');
 const should = require('should');
 const supertest = require('supertest');
 const sinon = require('sinon');
-const config = require('../../../../../core/server/config');
-const models = require('../../../../../core/server/models');
-const common = require('../../../../../core/server/lib/common');
+const config = require('../../../../../core/shared/config');
+const {events} = require('../../../../../core/server/lib/common');
 const testUtils = require('../../../../utils');
 const localUtils = require('./utils');
 
@@ -37,7 +36,7 @@ describe('DB API', function () {
     beforeEach(function () {
         eventsTriggered = {};
 
-        sinon.stub(common.events, 'emit').callsFake((eventName, eventObj) => {
+        sinon.stub(events, 'emit').callsFake((eventName, eventObj) => {
             if (!eventsTriggered[eventName]) {
                 eventsTriggered[eventName] = [];
             }
@@ -60,7 +59,7 @@ describe('DB API', function () {
                 const jsonResponse = res.body;
                 should.exist(jsonResponse.db);
                 jsonResponse.db.should.have.length(1);
-                Object.keys(jsonResponse.db[0].data).length.should.eql(28);
+                Object.keys(jsonResponse.db[0].data).length.should.eql(29);
             });
     });
 
@@ -131,7 +130,7 @@ describe('DB API', function () {
             .expect(415);
     });
 
-    it('backup can be triggered by backup integration', function () {
+    it('export can be triggered by backup integration', function () {
         const backupQuery = `?filename=test`;
         const fsStub = sinon.stub(fs, 'writeFile').resolves();
 
@@ -147,7 +146,7 @@ describe('DB API', function () {
             });
     });
 
-    it('backup can not be triggered by integration other than backup', function () {
+    it('export can not be triggered by integration other than backup', function () {
         const fsStub = sinon.stub(fs, 'writeFile').resolves();
 
         return request.post(localUtils.API.getApiQuery(`db/backup`))
@@ -162,7 +161,7 @@ describe('DB API', function () {
             });
     });
 
-    it('backup can be triggered by Admin authentication', function () {
+    it('export can be triggered by Admin authentication', function () {
         const fsStub = sinon.stub(fs, 'writeFile').resolves();
 
         return request.post(localUtils.API.getApiQuery(`db/backup`))

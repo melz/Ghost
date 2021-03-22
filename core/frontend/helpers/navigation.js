@@ -13,13 +13,15 @@ module.exports = function navigation(options) {
     options.data = options.data || {};
 
     const key = options.hash.type && options.hash.type === 'secondary' ? 'secondary_navigation' : 'navigation';
-    options.hash.isSecondary = options.hash.type && options.hash.type === 'secondary';
+    // Set isSecondary so we can compare in the template
+    options.hash.isSecondary = !!(options.hash.type && options.hash.type === 'secondary');
+    // Remove type, so it's not accessible
     delete options.hash.type;
 
-    var navigationData = options.data.site[key],
-        currentUrl = options.data.root.relativeUrl,
-        self = this,
-        output;
+    const navigationData = options.data.site[key];
+    const currentUrl = options.data.root.relativeUrl;
+    const self = this;
+    let output;
 
     if (!_.isObject(navigationData) || _.isFunction(navigationData)) {
         throw new errors.IncorrectUsageError({
@@ -46,13 +48,13 @@ module.exports = function navigation(options) {
     }
 
     // strips trailing slashes and compares urls
-    function _isCurrentUrl(href, currentUrl) {
-        if (!currentUrl) {
+    function _isCurrentUrl(href, url) {
+        if (!url) {
             return false;
         }
 
-        var strippedHref = href.replace(/\/+$/, ''),
-            strippedCurrentUrl = currentUrl.replace(/\/+$/, '');
+        const strippedHref = href.replace(/\/+$/, '');
+        const strippedCurrentUrl = url.replace(/\/+$/, '');
         return strippedHref === strippedCurrentUrl;
     }
 
@@ -62,7 +64,7 @@ module.exports = function navigation(options) {
     }
 
     output = navigationData.map(function (e) {
-        var out = {};
+        const out = {};
         out.current = _isCurrentUrl(e.url, currentUrl);
         out.label = e.label;
         out.slug = slugify(e.label);

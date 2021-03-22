@@ -1,14 +1,19 @@
 const nock = require('nock');
+const sinon = require('sinon');
 const should = require('should');
 const supertest = require('supertest');
 const testUtils = require('../../../../utils/index');
-const config = require('../../../../../core/server/config/index');
+const config = require('../../../../../core/shared/config/index');
 const localUtils = require('./utils');
+
+// for sinon stubs
+const dnsPromises = require('dns').promises;
 
 const ghost = testUtils.startGhost;
 
 describe('Oembed API (v2)', function () {
-    let ghostServer, request;
+    let ghostServer;
+    let request;
 
     before(function () {
         return ghost()
@@ -19,6 +24,18 @@ describe('Oembed API (v2)', function () {
             .then(() => {
                 return localUtils.doAuth(request);
             });
+    });
+
+    beforeEach(function () {
+        // ensure sure we're not network dependent
+        sinon.stub(dnsPromises, 'lookup').callsFake(function () {
+            return Promise.resolve({address: '123.123.123.123'});
+        });
+    });
+
+    afterEach(function () {
+        sinon.restore();
+        nock.cleanAll();
     });
 
     it('can fetch an embed', function (done) {

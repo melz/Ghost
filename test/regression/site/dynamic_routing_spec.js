@@ -10,7 +10,7 @@ const path = require('path');
 const testUtils = require('../../utils');
 const configUtils = require('../../utils/configUtils');
 const cheerio = require('cheerio');
-const config = require('../../../core/server/config');
+const config = require('../../../core/shared/config');
 const api = require('../../../core/server/api');
 const settingsCache = require('../../../core/server/services/settings/cache');
 const ghost = testUtils.startGhost;
@@ -37,7 +37,7 @@ describe('Dynamic Routing', function () {
 
     before(function () {
         // Default is always casper. We use the old compatible 1.4 casper theme for these tests. Available in the test content folder.
-        var originalSettingsCacheGetFn = settingsCache.get;
+        const originalSettingsCacheGetFn = settingsCache.get;
         sinon.stub(settingsCache, 'get').callsFake(function (key, options) {
             if (key === 'active_theme') {
                 return 'casper-1.4';
@@ -68,7 +68,7 @@ describe('Dynamic Routing', function () {
                         return done(err);
                     }
 
-                    var $ = cheerio.load(res.text);
+                    const $ = cheerio.load(res.text);
 
                     should.not.exist(res.headers['x-cache-invalidate']);
                     should.not.exist(res.headers['X-CSRF-Token']);
@@ -200,7 +200,7 @@ describe('Dynamic Routing', function () {
                         return done(err);
                     }
 
-                    var $ = cheerio.load(res.text);
+                    const $ = cheerio.load(res.text);
 
                     should.not.exist(res.headers['x-cache-invalidate']);
                     should.not.exist(res.headers['X-CSRF-Token']);
@@ -412,19 +412,21 @@ describe('Dynamic Routing', function () {
     });
 
     describe('Author', function () {
-        var lockedUser = {
-                name: 'Locked so what',
-                slug: 'locked-so-what',
-                email: 'locked@example.com',
-                status: 'locked'
-            },
-            suspendedUser = {
-                name: 'Suspended meeh',
-                slug: 'suspended-meeh',
-                email: 'suspended@example.com',
-                status: 'inactive'
-            },
-            ownerSlug = 'ghost-owner';
+        const lockedUser = {
+            name: 'Locked so what',
+            slug: 'locked-so-what',
+            email: 'locked@example.com',
+            status: 'locked'
+        };
+
+        const suspendedUser = {
+            name: 'Suspended meeh',
+            slug: 'suspended-meeh',
+            email: 'suspended@example.com',
+            status: 'inactive'
+        };
+
+        const ownerSlug = 'ghost-owner';
 
         before(function (done) {
             testUtils.clearData().then(function () {
@@ -552,7 +554,7 @@ describe('Dynamic Routing', function () {
 
             it('should redirect to editor', function (done) {
                 request.get('/author/ghost-owner/edit/')
-                    .expect('Location', 'http://127.0.0.1:2369/ghost/#/team/ghost-owner/')
+                    .expect('Location', 'http://127.0.0.1:2369/ghost/#/staff/ghost-owner/')
                     .expect('Cache-Control', testUtils.cacheRules.public)
                     .expect(302)
                     .end(doEnd(done));
@@ -699,6 +701,8 @@ describe('Dynamic Routing', function () {
             }).then(function () {
                 return testUtils.fixtures.overrideOwnerUser('ghost-owner');
             }).then(function () {
+                return testUtils.initFixtures('settings');
+            }).then(function () {
                 done();
             }).catch(done);
         });
@@ -727,7 +731,7 @@ describe('Dynamic Routing', function () {
                     path: path.join(config.get('paths:appRoot'), 'test', 'utils', 'fixtures', 'settings', 'newroutes.yaml')
                 }
             }).then(() => {
-                return testUtils.integrationTesting.urlService.waitTillFinished({dbIsReady: true});
+                return testUtils.integrationTesting.urlService.isFinished({disableDbReadyEvent: true});
             });
         });
 

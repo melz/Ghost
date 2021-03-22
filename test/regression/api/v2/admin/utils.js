@@ -18,8 +18,11 @@ const expectedProperties = {
     invites: ['invites', 'meta'],
     themes: ['themes'],
 
+    site: ['title', 'url', 'version'],
+
     post: _(schema.posts)
         .keys()
+        .filter(key => key.indexOf('@@') === -1)
         // by default we only return mobiledoc
         .without('html', 'plaintext')
         .without('visibility')
@@ -27,7 +30,7 @@ const expectedProperties = {
         .without('page')
         .without('author_id', 'author')
         // emails are not supported in API v2
-        .without('send_email_when_published')
+        .without('email_recipient_filter')
         // always returns computed properties
         .concat('url', 'primary_tag', 'primary_author', 'excerpt')
         .concat('authors', 'tags')

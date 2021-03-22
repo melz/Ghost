@@ -1,10 +1,10 @@
 const should = require('should');
 const sinon = require('sinon');
+const {UnauthorizedError} = require('@tryghost/errors');
 
 const models = require('../../../../core/server/models');
-const {UnauthorizedError} = require('../../../../core/server/lib/common/errors');
 
-const sessionController = require('../../../../core/server/api/canary/session');
+const sessionController = require('../../../../core/server/api/v3/session');
 const sessionServiceMiddleware = require('../../../../core/server/services/auth/session');
 
 describe('v3 Session controller', function () {

@@ -3,7 +3,9 @@ const sinon = require('sinon');
 const mockDb = require('mock-knex');
 const models = require('../../../core/server/models');
 const {knex} = require('../../../core/server/data/db');
-const common = require('../../../core/server/lib/common');
+const {events} = require('../../../core/server/lib/common');
+const defaultSettings = require('../../../core/server/data/schema/default-settings');
+const errors = require('@tryghost/errors');
 
 describe('Unit: models/settings', function () {
     before(function () {
@@ -18,17 +20,12 @@ describe('Unit: models/settings', function () {
             mockDb.mock(knex);
             tracker = mockDb.getTracker();
             tracker.install();
+            eventSpy = sinon.spy(events, 'emit');
         });
 
         afterEach(function () {
+            tracker.uninstall();
             mockDb.unmock(knex);
-        });
-
-        beforeEach(function () {
-            eventSpy = sinon.spy(common.events, 'emit');
-        });
-
-        afterEach(function () {
             sinon.restore();
         });
 
@@ -47,9 +44,10 @@ describe('Unit: models/settings', function () {
                 ][step - 1]();
             });
 
-            return models.Settings.edit({
+            return models.Settings.add({
                 key: 'description',
-                value: 'added value'
+                value: 'added value',
+                type: 'string'
             })
                 .then(() => {
                     eventSpy.calledTwice.should.be.true();
@@ -60,15 +58,15 @@ describe('Unit: models/settings', function () {
 
         it('emits edit events', function () {
             tracker.on('query', (query, step) => {
-                return [
-                    function fetchEditQuery() {
-                        query.response([{
-                            id: 1, // NOTE: `id` imitates existing value for 'edit' event
-                            key: 'description',
-                            value: 'db value'
-                        }]);
-                    }
-                ][step - 1]();
+                if (query.method === 'select') {
+                    return query.response([{
+                        id: 1, // NOTE: `id` imitates existing value for 'edit' event
+                        key: 'description',
+                        value: 'db value'
+                    }]);
+                }
+
+                return query.response([{}]);
             });
 
             return models.Settings.edit({
@@ -99,7 +97,7 @@ describe('Unit: models/settings', function () {
         });
 
         beforeEach(function () {
-            eventSpy = sinon.spy(common.events, 'emit');
+            eventSpy = sinon.spy(events, 'emit');
         });
 
         afterEach(function () {
@@ -107,27 +105,65 @@ describe('Unit: models/settings', function () {
         });
 
         it('populates unset defaults', function () {
+            let insertQueries = [];
+
             tracker.on('query', (query) => {
+                // skip group and flags columns so we can test the insertion column skip
+                if (query.method === 'columnInfo') {
+                    return query.response([
+                        {name: 'id', type: 'varchar'},
+                        // {name: 'group', type: 'varchar'},
+                        {name: 'key', type: 'varchar'},
+                        {name: 'value', type: 'varchar'},
+                        {name: 'type', type: 'varchar'},
+                        // {name: 'flags', type: 'varchar'},
+                        {name: 'created_at', type: 'datetime'},
+                        {name: 'created_by', type: 'varchar'},
+                        {name: 'updated_at', type: 'varchar'},
+                        {name: 'updated_by', type: 'datetime'}
+                    ]);
+                }
+
+                if (query.method === 'insert') {
+                    insertQueries.push(query);
+                }
+
                 return query.response([{}]);
             });
 
             return models.Settings.populateDefaults()
                 .then(() => {
-                    // 2 events per item - settings.added and settings.[name].added
-                    eventSpy.callCount.should.equal(92);
-                    const eventsEmitted = eventSpy.args.map(args => args[0]);
-                    const checkEventEmitted = event => should.ok(eventsEmitted.includes(event), `${event} event should be emitted`);
+                    const numberOfSettings = Object.keys(defaultSettings).reduce((settings, settingGroup) => {
+                        return settings.concat(Object.keys(defaultSettings[settingGroup]));
+                    }, []).length;
 
-                    checkEventEmitted('settings.db_hash.added');
-                    checkEventEmitted('settings.description.added');
+                    insertQueries.length.should.equal(numberOfSettings);
 
-                    checkEventEmitted('settings.default_content_visibility.added');
-                    checkEventEmitted('settings.members_subscription_settings.added');
+                    // non-existent columns should not be populated
+                    insertQueries[0].sql.should.not.match(/group/);
+                    insertQueries[0].sql.should.not.match(/flags/);
+
+                    // no events are emitted because we're not using the model layer
+                    eventSpy.callCount.should.equal(0);
                 });
         });
 
         it('doesn\'t overwrite any existing settings', function () {
+            let insertQueries = [];
+
             tracker.on('query', (query) => {
+                if (query.method === 'columnInfo') {
+                    return query.response([
+                        {name: 'id', type: 'varchar'},
+                        {name: 'key', type: 'varchar'},
+                        {name: 'value', type: 'varchar'}
+                    ]);
+                }
+
+                if (query.method === 'insert') {
+                    insertQueries.push(query);
+                }
+
                 return query.response([{
                     key: 'description',
                     value: 'Adam\'s Blog'
@@ -136,10 +172,36 @@ describe('Unit: models/settings', function () {
 
             return models.Settings.populateDefaults()
                 .then(() => {
-                    const eventsEmitted = eventSpy.args.map(args => args[0]);
-                    const checkEventNotEmitted = event => should.ok(!eventsEmitted.includes(event), `${event} event should be emitted`);
-                    checkEventNotEmitted('settings.description.added');
+                    const numberOfSettings = Object.keys(defaultSettings).reduce((settings, settingGroup) => {
+                        return settings.concat(Object.keys(defaultSettings[settingGroup]));
+                    }, []).length;
+
+                    insertQueries.length.should.equal(numberOfSettings - 1);
                 });
+        });
+    });
+
+    describe('format', function () {
+        it('transforms urls when persisting to db', function () {
+            const setting = models.Settings.forge();
+
+            let returns = setting.format({key: 'cover_image', value: 'http://127.0.0.1:2369/cover_image.png', type: 'string'});
+            should.equal(returns.value, '__GHOST_URL__/cover_image.png');
+
+            returns = setting.format({key: 'logo', value: 'http://127.0.0.1:2369/logo.png', type: 'string'});
+            should.equal(returns.value, '__GHOST_URL__/logo.png');
+
+            returns = setting.format({key: 'icon', value: 'http://127.0.0.1:2369/icon.png', type: 'string'});
+            should.equal(returns.value, '__GHOST_URL__/icon.png');
+
+            returns = setting.format({key: 'portal_button_icon', value: 'http://127.0.0.1:2369/portal_button_icon.png', type: 'string'});
+            should.equal(returns.value, '__GHOST_URL__/portal_button_icon.png');
+
+            returns = setting.format({key: 'og_image', value: 'http://127.0.0.1:2369/og_image.png', type: 'string'});
+            should.equal(returns.value, '__GHOST_URL__/og_image.png');
+
+            returns = setting.format({key: 'twitter_image', value: 'http://127.0.0.1:2369/twitter_image.png', type: 'string'});
+            should.equal(returns.value, '__GHOST_URL__/twitter_image.png');
         });
     });
 
@@ -147,26 +209,233 @@ describe('Unit: models/settings', function () {
         it('ensure correct parsing when fetching from db', function () {
             const setting = models.Settings.forge();
 
-            let returns = setting.parse({key: 'is_private', value: 'false'});
+            let returns = setting.parse({key: 'is_private', value: 'false', type: 'boolean'});
             should.equal(returns.value, false);
 
-            returns = setting.parse({key: 'is_private', value: false});
+            returns = setting.parse({key: 'is_private', value: false, type: 'boolean'});
             should.equal(returns.value, false);
 
-            returns = setting.parse({key: 'is_private', value: true});
+            returns = setting.parse({key: 'is_private', value: true, type: 'boolean'});
             should.equal(returns.value, true);
 
-            returns = setting.parse({key: 'is_private', value: 'true'});
+            returns = setting.parse({key: 'is_private', value: 'true', type: 'boolean'});
             should.equal(returns.value, true);
 
-            returns = setting.parse({key: 'is_private', value: '0'});
+            returns = setting.parse({key: 'is_private', value: '0', type: 'boolean'});
             should.equal(returns.value, false);
 
-            returns = setting.parse({key: 'is_private', value: '1'});
+            returns = setting.parse({key: 'is_private', value: '1', type: 'boolean'});
             should.equal(returns.value, true);
 
             returns = setting.parse({key: 'something', value: 'null'});
             should.equal(returns.value, 'null');
+
+            returns = setting.parse({key: 'cover_image', value: '__GHOST_URL__/cover_image.png', type: 'string'});
+            should.equal(returns.value, 'http://127.0.0.1:2369/cover_image.png');
+
+            returns = setting.parse({key: 'logo', value: '__GHOST_URL__/logo.png', type: 'string'});
+            should.equal(returns.value, 'http://127.0.0.1:2369/logo.png');
+
+            returns = setting.parse({key: 'icon', value: '__GHOST_URL__/icon.png', type: 'string'});
+            should.equal(returns.value, 'http://127.0.0.1:2369/icon.png');
+
+            returns = setting.parse({key: 'portal_button_icon', value: '__GHOST_URL__/portal_button_icon.png', type: 'string'});
+            should.equal(returns.value, 'http://127.0.0.1:2369/portal_button_icon.png');
+
+            returns = setting.parse({key: 'og_image', value: '__GHOST_URL__/og_image.png', type: 'string'});
+            should.equal(returns.value, 'http://127.0.0.1:2369/og_image.png');
+
+            returns = setting.parse({key: 'twitter_image', value: '__GHOST_URL__/twitter_image.png', type: 'string'});
+            should.equal(returns.value, 'http://127.0.0.1:2369/twitter_image.png');
+        });
+    });
+
+    describe('validation', function () {
+        async function testInvalidSetting({key, value, type, group}) {
+            const setting = models.Settings.forge({key, value, type, group});
+
+            let error;
+            try {
+                await setting.save();
+                error = null;
+            } catch (err) {
+                error = err;
+            } finally {
+                should.exist(error, `Setting Model should throw when saving invalid ${key}`);
+                should.ok(error instanceof errors.ValidationError, 'Setting Model should throw ValidationError');
+            }
+        }
+
+        async function testValidSetting({key, value, type, group}) {
+            mockDb.mock(knex);
+            const tracker = mockDb.getTracker();
+            tracker.install();
+
+            tracker.on('query', (query) => {
+                query.response();
+            });
+
+            const setting = models.Settings.forge({key, value, type, group});
+
+            let error;
+            try {
+                await setting.save();
+                error = null;
+            } catch (err) {
+                error = err;
+            } finally {
+                tracker.uninstall();
+                mockDb.unmock(knex);
+                should.not.exist(error, `Setting Model should not throw when saving valid ${key}`);
+            }
+        }
+
+        it('throws when stripe_secret_key is invalid', async function () {
+            await testInvalidSetting({
+                key: 'stripe_secret_key',
+                value: 'INVALID STRIPE SECRET KEY',
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('throws when stripe_publishable_key is invalid', async function () {
+            await testInvalidSetting({
+                key: 'stripe_publishable_key',
+                value: 'INVALID STRIPE PUBLISHABLE KEY',
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('does not throw when stripe_secret_key is valid', async function () {
+            await testValidSetting({
+                key: 'stripe_secret_key',
+                value: 'rk_live_abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                type: 'string',
+                group: 'members'
+            });
+            await testValidSetting({
+                key: 'stripe_secret_key',
+                value: 'sk_live_abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('does not throw when stripe_publishable_key is valid', async function () {
+            await testValidSetting({
+                key: 'stripe_publishable_key',
+                value: 'pk_live_abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('throws when stripe_connect_secret_key is invalid', async function () {
+            await testInvalidSetting({
+                key: 'stripe_connect_secret_key',
+                value: 'INVALID STRIPE CONNECT SECRET KEY',
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('throws when stripe_connect_publishable_key is invalid', async function () {
+            await testInvalidSetting({
+                key: 'stripe_connect_publishable_key',
+                value: 'INVALID STRIPE CONNECT PUBLISHABLE KEY',
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('does not throw when stripe_connect_secret_key is valid', async function () {
+            await testValidSetting({
+                key: 'stripe_connect_secret_key',
+                value: 'sk_live_abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('does not throw when stripe_connect_publishable_key is valid', async function () {
+            await testValidSetting({
+                key: 'stripe_connect_publishable_key',
+                value: 'pk_live_abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('throws when stripe_plans has invalid name', async function () {
+            await testInvalidSetting({
+                key: 'stripe_plans',
+                value: JSON.stringify([{
+                    name: null,
+                    amount: 500,
+                    interval: 'month',
+                    currency: 'usd'
+                }]),
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('throws when stripe_plans has invalid amount', async function () {
+            await testInvalidSetting({
+                key: 'stripe_plans',
+                value: JSON.stringify([{
+                    name: 'Monthly',
+                    amount: 0,
+                    interval: 'month',
+                    currency: 'usd'
+                }]),
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('throws when stripe_plans has invalid interval', async function () {
+            await testInvalidSetting({
+                key: 'stripe_plans',
+                value: JSON.stringify([{
+                    name: 'Monthly',
+                    amount: 500,
+                    interval: 'monthly', // should be 'month'
+                    currency: 'usd'
+                }]),
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('throws when stripe_plans has invalid currency', async function () {
+            await testInvalidSetting({
+                key: 'stripe_plans',
+                value: JSON.stringify([{
+                    name: 'Monthly',
+                    amount: 500,
+                    interval: 'month',
+                    currency: null
+                }]),
+                type: 'string',
+                group: 'members'
+            });
+        });
+
+        it('does not throw when stripe_plans is valid', async function () {
+            await testValidSetting({
+                key: 'stripe_plans',
+                value: JSON.stringify([{
+                    name: 'Monthly',
+                    amount: 500,
+                    interval: 'month',
+                    currency: 'usd'
+                }]),
+                type: 'string',
+                group: 'members'
+            });
         });
     });
 });

@@ -1,11 +1,13 @@
-const should = require('should'),
-    sinon = require('sinon'),
-    common = require('../../../../../core/server/lib/common'),
-    urlUtils = require('../../../../../core/server/lib/url-utils'),
-    middlewares = require('../../../../../core/frontend/services/routing/middlewares');
+const should = require('should');
+const sinon = require('sinon');
+const errors = require('@tryghost/errors');
+const urlUtils = require('../../../../../core/shared/url-utils');
+const middlewares = require('../../../../../core/frontend/services/routing/middlewares');
 
 describe('UNIT: services/routing/middlewares/page-param', function () {
-    let req, res, next;
+    let req;
+    let res;
+    let next;
 
     beforeEach(function () {
         req = sinon.stub();
@@ -50,7 +52,7 @@ describe('UNIT: services/routing/middlewares/page-param', function () {
 
         urlUtils.redirect301.called.should.be.false();
         next.calledOnce.should.be.true();
-        (next.args[0][0] instanceof common.errors.NotFoundError).should.be.true();
+        (next.args[0][0] instanceof errors.NotFoundError).should.be.true();
     });
 
     it('404 for /page/something/', function () {
@@ -61,7 +63,7 @@ describe('UNIT: services/routing/middlewares/page-param', function () {
 
         urlUtils.redirect301.called.should.be.false();
         next.calledOnce.should.be.true();
-        (next.args[0][0] instanceof common.errors.NotFoundError).should.be.true();
+        (next.args[0][0] instanceof errors.NotFoundError).should.be.true();
     });
 
     it('redirect for /rss/page/1/', function () {

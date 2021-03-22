@@ -3,6 +3,7 @@ const hbs = require('../../../core/frontend/services/themes/engine');
 const configUtils = require('../../utils/configUtils');
 const path = require('path');
 const helpers = require('../../../core/frontend/helpers');
+const handlebars = require('../../../core/frontend/services/themes/engine').handlebars;
 
 const runHelper = data => helpers.navigation.call({}, data);
 const runHelperThunk = data => () => runHelper(data);
@@ -61,15 +62,15 @@ describe('{{navigation}} helper', function () {
     });
 
     it('can render empty nav', function () {
-        var rendered = runHelper(optionsData);
+        const rendered = runHelper(optionsData);
 
         should.exist(rendered);
         rendered.string.should.be.equal('');
     });
 
     it('can handle relativeUrl not being set (e.g. for images/assets)', function () {
-        var singleItem = {label: 'Foo', url: '/foo'},
-            rendered;
+        const singleItem = {label: 'Foo', url: '/foo'};
+        let rendered;
         delete optionsData.data.root.relativeUrl;
 
         optionsData.data.site.navigation = [singleItem];
@@ -80,9 +81,9 @@ describe('{{navigation}} helper', function () {
     });
 
     it('can render one item', function () {
-        var singleItem = {label: 'Foo', url: '/foo'},
-            testUrl = 'href="' + configUtils.config.get('url') + '/foo"',
-            rendered;
+        const singleItem = {label: 'Foo', url: '/foo'};
+        const testUrl = 'href="' + configUtils.config.get('url') + '/foo"';
+        let rendered;
 
         optionsData.data.site.navigation = [singleItem];
         rendered = runHelper(optionsData);
@@ -94,11 +95,11 @@ describe('{{navigation}} helper', function () {
     });
 
     it('can render multiple items', function () {
-        var firstItem = {label: 'Foo', url: '/foo'},
-            secondItem = {label: 'Bar Baz Qux', url: '/qux'},
-            testUrl = 'href="' + configUtils.config.get('url') + '/foo"',
-            testUrl2 = 'href="' + configUtils.config.get('url') + '/qux"',
-            rendered;
+        const firstItem = {label: 'Foo', url: '/foo'};
+        const secondItem = {label: 'Bar Baz Qux', url: '/qux'};
+        const testUrl = 'href="' + configUtils.config.get('url') + '/foo"';
+        const testUrl2 = 'href="' + configUtils.config.get('url') + '/qux"';
+        let rendered;
 
         optionsData.data.site.navigation = [firstItem, secondItem];
         rendered = runHelper(optionsData);
@@ -111,9 +112,9 @@ describe('{{navigation}} helper', function () {
     });
 
     it('can annotate the current url', function () {
-        var firstItem = {label: 'Foo', url: '/foo'},
-            secondItem = {label: 'Bar', url: '/qux'},
-            rendered;
+        const firstItem = {label: 'Foo', url: '/foo'};
+        const secondItem = {label: 'Bar', url: '/qux'};
+        let rendered;
 
         optionsData.data.site.navigation = [firstItem, secondItem];
         optionsData.data.root.relativeUrl = '/foo';
@@ -127,9 +128,9 @@ describe('{{navigation}} helper', function () {
     });
 
     it('can annotate current url with trailing slash', function () {
-        var firstItem = {label: 'Foo', url: '/foo'},
-            secondItem = {label: 'Bar', url: '/qux'},
-            rendered;
+        const firstItem = {label: 'Foo', url: '/foo'};
+        const secondItem = {label: 'Bar', url: '/qux'};
+        let rendered;
 
         optionsData.data.site.navigation = [firstItem, secondItem];
         optionsData.data.root.relativeUrl = '/foo/';
@@ -143,8 +144,8 @@ describe('{{navigation}} helper', function () {
     });
 
     it('doesn\'t html-escape URLs', function () {
-        var firstItem = {label: 'Foo', url: '/?foo=bar&baz=qux'},
-            rendered;
+        const firstItem = {label: 'Foo', url: '/?foo=bar&baz=qux'};
+        let rendered;
 
         optionsData.data.site.navigation = [firstItem];
         rendered = runHelper(optionsData);
@@ -156,8 +157,8 @@ describe('{{navigation}} helper', function () {
     });
 
     it('encodes URLs', function () {
-        var firstItem = {label: 'Foo', url: '/?foo=space bar&<script>alert("gotcha")</script>'},
-            rendered;
+        const firstItem = {label: 'Foo', url: '/?foo=space bar&<script>alert("gotcha")</script>'};
+        let rendered;
 
         optionsData.data.site.navigation = [firstItem];
         rendered = runHelper(optionsData);
@@ -169,8 +170,8 @@ describe('{{navigation}} helper', function () {
     });
 
     it('doesn\'t double-encode URLs', function () {
-        var firstItem = {label: 'Foo', url: '/?foo=space%20bar'},
-            rendered;
+        const firstItem = {label: 'Foo', url: '/?foo=space%20bar'};
+        let rendered;
 
         optionsData.data.site.navigation = [firstItem];
         rendered = runHelper(optionsData);
@@ -181,9 +182,9 @@ describe('{{navigation}} helper', function () {
 
     describe('type="secondary"', function () {
         it('can render one item', function () {
-            var singleItem = {label: 'Foo', url: '/foo'},
-                testUrl = 'href="' + configUtils.config.get('url') + '/foo"',
-                rendered;
+            const singleItem = {label: 'Foo', url: '/foo'};
+            const testUrl = 'href="' + configUtils.config.get('url') + '/foo"';
+            let rendered;
 
             optionsData.data.site.secondary_navigation = [singleItem];
             optionsData.hash = {type: 'secondary'};
@@ -196,11 +197,11 @@ describe('{{navigation}} helper', function () {
         });
 
         it('can render multiple items', function () {
-            var firstItem = {label: 'Foo', url: '/foo'},
-                secondItem = {label: 'Bar Baz Qux', url: '/qux'},
-                testUrl = 'href="' + configUtils.config.get('url') + '/foo"',
-                testUrl2 = 'href="' + configUtils.config.get('url') + '/qux"',
-                rendered;
+            const firstItem = {label: 'Foo', url: '/foo'};
+            const secondItem = {label: 'Bar Baz Qux', url: '/qux'};
+            const testUrl = 'href="' + configUtils.config.get('url') + '/foo"';
+            const testUrl2 = 'href="' + configUtils.config.get('url') + '/qux"';
+            let rendered;
 
             optionsData.data.site.secondary_navigation = [firstItem, secondItem];
             optionsData.hash = {type: 'secondary'};
@@ -216,7 +217,7 @@ describe('{{navigation}} helper', function () {
 });
 
 describe('{{navigation}} helper with custom template', function () {
-    var optionsData;
+    let optionsData;
 
     before(function (done) {
         hbs.express4({partialsDir: [path.resolve(__dirname, './test_tpl')]});
@@ -241,8 +242,8 @@ describe('{{navigation}} helper with custom template', function () {
     });
 
     it('can render one item and @site title', function () {
-        var testUrl = 'href="' + configUtils.config.get('url') + '/foo"',
-            rendered;
+        const testUrl = 'href="' + configUtils.config.get('url') + '/foo"';
+        let rendered;
 
         // Set @site.title
         optionsData.data.site.title = 'Chaos is a ladder.';
@@ -258,8 +259,8 @@ describe('{{navigation}} helper with custom template', function () {
     });
 
     it('can pass attributes through', function () {
-        var testUrl = 'href="' + configUtils.config.get('url') + '/foo"',
-            rendered;
+        const testUrl = 'href="' + configUtils.config.get('url') + '/foo"';
+        let rendered;
 
         // Simulate {{navigation isHeader=true}}
         optionsData.hash = {isHeader: true};
@@ -275,8 +276,8 @@ describe('{{navigation}} helper with custom template', function () {
     });
 
     it('sets isSecondary for type=secondary', function () {
-        var testUrl = 'href="' + configUtils.config.get('url') + '/foo"',
-            rendered;
+        const testUrl = 'href="' + configUtils.config.get('url') + '/foo"';
+        let rendered;
 
         // Simulate {{navigation type="secondary"}}
         optionsData.hash = {type: 'secondary'};
@@ -289,5 +290,48 @@ describe('{{navigation}} helper with custom template', function () {
         rendered.string.should.containEql('Jeremy Bearimy baby!');
         rendered.string.should.containEql(testUrl);
         rendered.string.should.containEql('Fighters');
+    });
+
+    describe('using compile', function () {
+        let defaultGlobals;
+        function compile(templateString) {
+            const template = handlebars.compile(templateString);
+            template.with = (locals = {}, globals) => {
+                globals = globals || defaultGlobals;
+
+                return template(locals, globals);
+            };
+
+            return template;
+        }
+
+        before(function () {
+            handlebars.registerHelper('link_class', helpers.link_class);
+            handlebars.registerHelper('concat', helpers.concat);
+            handlebars.registerHelper('url', helpers.concat);
+            handlebars.registerHelper('navigation', helpers.navigation);
+            configUtils.config.set('url', 'https://siteurl.com');
+            defaultGlobals = {
+                data: {
+                    site: {
+                        url: configUtils.config.get('url'),
+                        navigation: [{label: 'Foo', url: '/foo'}],
+                        secondary_navigation: [{label: 'Fighters', url: '/foo'}]
+                    }
+                }
+            };
+        });
+
+        it('can render both primary and secondary nav in order', function () {
+            compile('{{navigation}}{{navigation type="secondary"}}')
+                .with({})
+                .should.eql('\n\n\n\nPrime time!\n\n    <a href="">Foo</a>\n\n\n\n\nJeremy Bearimy baby!\n\n    <a href="">Fighters</a>\n');
+        });
+
+        it('can render both primary and secondary nav in reverse order', function () {
+            compile('{{navigation type="secondary"}}{{navigation}}')
+                .with({})
+                .should.eql('\n\n\n\nJeremy Bearimy baby!\n\n    <a href="">Fighters</a>\n\n\n\n\nPrime time!\n\n    <a href="">Foo</a>\n');
+        });
     });
 });

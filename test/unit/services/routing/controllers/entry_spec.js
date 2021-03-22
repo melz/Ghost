@@ -3,13 +3,19 @@ const sinon = require('sinon');
 const testUtils = require('../../../../utils');
 const configUtils = require('../../../../utils/configUtils');
 const urlService = require('../../../../../core/frontend/services/url');
-const urlUtils = require('../../../../../core/server/lib/url-utils');
+const urlUtils = require('../../../../../core/shared/url-utils');
 const controllers = require('../../../../../core/frontend/services/routing/controllers');
 const helpers = require('../../../../../core/frontend/services/routing/helpers');
-const EDITOR_URL = `/editor/post/`;
+const EDITOR_URL = `/#/editor/post/`;
 
 describe('Unit - services/routing/controllers/entry', function () {
-    let req, res, entryLookUpStub, secureStub, renderStub, post, page;
+    let req;
+    let res;
+    let entryLookUpStub;
+    let secureStub;
+    let renderStub;
+    let post;
+    let page;
 
     beforeEach(function () {
         post = testUtils.DataGenerator.forKnex.createPost();
@@ -117,7 +123,7 @@ describe('Unit - services/routing/controllers/entry', function () {
                     entry: post
                 });
 
-            urlUtils.redirectToAdmin.callsFake(function (statusCode, res, editorUrl) {
+            urlUtils.redirectToAdmin.callsFake(function (statusCode, _res, editorUrl) {
                 statusCode.should.eql(302);
                 editorUrl.should.eql(EDITOR_URL + post.id);
                 done();
@@ -139,7 +145,7 @@ describe('Unit - services/routing/controllers/entry', function () {
                     entry: post
                 });
 
-            urlUtils.redirectToAdmin.callsFake(function (statusCode, res, editorUrl) {
+            urlUtils.redirectToAdmin.callsFake(function (statusCode, _res, editorUrl) {
                 configUtils.restore();
                 done(new Error('redirectToAdmin was called'));
             });
@@ -191,7 +197,7 @@ describe('Unit - services/routing/controllers/entry', function () {
                     entry: post
                 });
 
-            urlUtils.redirect301.callsFake(function (res, postUrl) {
+            urlUtils.redirect301.callsFake(function (_res, postUrl) {
                 postUrl.should.eql(post.url);
                 done();
             });
@@ -220,7 +226,7 @@ describe('Unit - services/routing/controllers/entry', function () {
                     entry: post
                 });
 
-            urlUtils.redirect301.callsFake(function (res, postUrl) {
+            urlUtils.redirect301.callsFake(function (_res, postUrl) {
                 postUrl.should.eql(post.url + '?query=true');
                 done();
             });

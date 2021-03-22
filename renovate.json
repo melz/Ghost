@@ -1,17 +1,18 @@
 {
   "extends": [
-    "@tryghost:base",
+    "@tryghost:quietJS",
     "@tryghost:groupTestLint",
     "@tryghost:groupCSS",
-    "@tryghost:groupBuildTools",
-    "@tryghost:automergeSilentTestLintNonMajor",
-    "@tryghost:automergePatchBranch"
+    "@tryghost:groupBuildTools"
   ],
   "ignoreDeps": [
       "got",
+      "ghost-storage-base",
       "intl-messageformat",
+      "moment",
       "moment-timezone",
       "nodemailer",
+      "tmp",
       "validator",
       "simple-dom"
     ],

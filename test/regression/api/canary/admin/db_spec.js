@@ -6,9 +6,8 @@ const uuid = require('uuid');
 const should = require('should');
 const supertest = require('supertest');
 const sinon = require('sinon');
-const config = require('../../../../../core/server/config');
-const models = require('../../../../../core/server/models');
-const common = require('../../../../../core/server/lib/common');
+const config = require('../../../../../core/shared/config');
+const {events} = require('../../../../../core/server/lib/common');
 const testUtils = require('../../../../utils');
 const localUtils = require('./utils');
 
@@ -37,7 +36,7 @@ describe('DB API', function () {
     beforeEach(function () {
         eventsTriggered = {};
 
-        sinon.stub(common.events, 'emit').callsFake((eventName, eventObj) => {
+        sinon.stub(events, 'emit').callsFake((eventName, eventObj) => {
             if (!eventsTriggered[eventName]) {
                 eventsTriggered[eventName] = [];
             }
@@ -105,6 +104,14 @@ describe('DB API', function () {
                 res.body.problems.length.should.eql(3);
                 fs.removeSync(exportFolder);
             });
+    });
+
+    it('fails when triggering an export from unknown filename ', function () {
+        return request.get(localUtils.API.getApiQuery('db/?filename=this_file_is_not_here.json'))
+            .set('Origin', config.get('url'))
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(404);
     });
 
     it('import should fail without file', function () {

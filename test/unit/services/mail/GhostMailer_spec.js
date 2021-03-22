@@ -1,44 +1,46 @@
-var should = require('should'),
-    sinon = require('sinon'),
-    Promise = require('bluebird'),
-    mail = require('../../../../core/server/services/mail'),
-    settingsCache = require('../../../../core/server/services/settings/cache'),
-    configUtils = require('../../../utils/configUtils'),
-    urlUtils = require('../../../../core/server/lib/url-utils'),
-    common = require('../../../../core/server/lib/common'),
-    mailer,
+const should = require('should');
+const sinon = require('sinon');
+const Promise = require('bluebird');
+const mail = require('../../../../core/server/services/mail');
+const settingsCache = require('../../../../core/server/services/settings/cache');
+const configUtils = require('../../../utils/configUtils');
+const urlUtils = require('../../../../core/shared/url-utils');
+const {i18n} = require('../../../../core/server/lib/common');
+let mailer;
 
-    // Mock SMTP config
-    SMTP = {
-        transport: 'SMTP',
-        options: {
-            service: 'Gmail',
-            auth: {
-                user: 'nil',
-                pass: '123'
-            }
+// Mock SMTP config
+const SMTP = {
+    transport: 'SMTP',
+    options: {
+        service: 'Gmail',
+        auth: {
+            user: 'nil',
+            pass: '123'
         }
-    },
+    }
+};
 
-    // test data
-    mailDataNoDomain = {
-        to: 'joe@doesntexistexample091283zalgo.com',
-        subject: 'testemail',
-        html: '<p>This</p>'
-    },
-    mailDataNoServer = {
-        to: 'joe@example.com',
-        subject: 'testemail',
-        html: '<p>This</p>'
-    },
-    mailDataIncomplete = {
-        subject: 'testemail',
-        html: '<p>This</p>'
-    };
+// test data
+const mailDataNoDomain = {
+    to: 'joe@doesntexistexample091283zalgo.com',
+    subject: 'testemail',
+    html: '<p>This</p>'
+};
+
+const mailDataNoServer = {
+    to: 'joe@example.com',
+    subject: 'testemail',
+    html: '<p>This</p>'
+};
+
+const mailDataIncomplete = {
+    subject: 'testemail',
+    html: '<p>This</p>'
+};
 
 const sandbox = sinon.createSandbox();
 
-common.i18n.init();
+i18n.init();
 
 describe('Mail: Ghostmailer', function () {
     afterEach(function () {
@@ -189,8 +191,6 @@ describe('Mail: Ghostmailer', function () {
         });
 
         describe('should fall back to [blog.title] <noreply@[blog.url]>', function () {
-            let mailer;
-
             beforeEach(async function () {
                 mailer = new mail.GhostMailer();
                 sandbox.stub(mailer, 'sendMail').resolves();

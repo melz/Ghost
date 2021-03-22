@@ -1,6 +1,6 @@
-var _ = require('lodash'),
-    config = require('../../core/server/config'),
-    configUtils = {};
+const _ = require('lodash');
+const config = require('../../core/shared/config');
+const configUtils = {};
 
 configUtils.config = config;
 configUtils.defaultConfig = _.cloneDeep(config.get());
@@ -10,12 +10,12 @@ configUtils.defaultConfig = _.cloneDeep(config.get());
  * configUtils.set('key', 'value');
  */
 configUtils.set = function () {
-    var key = arguments[0],
-        value = arguments[1];
+    const key = arguments[0];
+    const value = arguments[1];
 
     if (_.isObject(key)) {
-        _.each(key, function (value, key) {
-            config.set(key, value);
+        _.each(key, function (settingValue, settingKey) {
+            config.set(settingKey, settingValue);
         });
     } else {
         config.set(key, value);

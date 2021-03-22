@@ -13,6 +13,7 @@ const expectedProperties = {
 
     post: _(schema.posts)
         .keys()
+        .filter(key => key.indexOf('@@') === -1)
         // by default we only return html
         .without('mobiledoc', 'plaintext')
         // v3 doesn't return author_id OR author
@@ -28,11 +29,14 @@ const expectedProperties = {
         .without('type')
         // v3 returns a calculated excerpt field
         .concat('excerpt')
+        // Access is a calculated property in >= v3
+        .concat('access')
         // returns meta fields from `posts_meta` schema
         .concat(
             ..._(schema.posts_meta).keys().without('post_id', 'id')
         )
         .concat('reading_time')
+        .concat('send_email_when_published')
     ,
     author: _(schema.users)
         .keys()

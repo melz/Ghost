@@ -4,7 +4,7 @@ const supertest = require('supertest');
 const sinon = require('sinon');
 const testUtils = require('../../../../utils');
 const localUtils = require('./utils');
-const config = require('../../../../../core/server/config');
+const config = require('../../../../../core/shared/config');
 const labs = require('../../../../../core/server/services/labs');
 
 const ghost = testUtils.startGhost;
@@ -26,13 +26,59 @@ describe('Members API', function () {
                 request = supertest.agent(config.get('url'));
             })
             .then(function () {
-                return localUtils.doAuth(request, 'member');
+                return localUtils.doAuth(request, 'members');
             });
     });
 
-    it('Can browse', function () {
+    it('Can order by email_open_rate', async function () {
+        await request
+            .get(localUtils.API.getApiQuery('members/?order=email_open_rate%20desc'))
+            .set('Origin', config.get('url'))
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(200)
+            .then((res) => {
+                should.not.exist(res.headers['x-cache-invalidate']);
+                const jsonResponse = res.body;
+                should.exist(jsonResponse.members);
+                localUtils.API.checkResponse(jsonResponse, 'members');
+                jsonResponse.members.should.have.length(5);
+
+                jsonResponse.members[0].email.should.equal('paid@test.com');
+                jsonResponse.members[0].email_open_rate.should.equal(80);
+                jsonResponse.members[1].email.should.equal('member2@test.com');
+                jsonResponse.members[1].email_open_rate.should.equal(50);
+                jsonResponse.members[2].email.should.equal('member1@test.com');
+                should.equal(null, jsonResponse.members[2].email_open_rate);
+                jsonResponse.members[3].email.should.equal('trialing@test.com');
+                should.equal(null, jsonResponse.members[3].email_open_rate);
+            });
+
+        await request
+            .get(localUtils.API.getApiQuery('members/?order=email_open_rate%20asc'))
+            .set('Origin', config.get('url'))
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(200)
+            .then((res) => {
+                const jsonResponse = res.body;
+                localUtils.API.checkResponse(jsonResponse, 'members');
+                jsonResponse.members.should.have.length(5);
+
+                jsonResponse.members[0].email.should.equal('member2@test.com');
+                jsonResponse.members[0].email_open_rate.should.equal(50);
+                jsonResponse.members[1].email.should.equal('paid@test.com');
+                jsonResponse.members[1].email_open_rate.should.equal(80);
+                jsonResponse.members[2].email.should.equal('member1@test.com');
+                should.equal(null, jsonResponse.members[2].email_open_rate);
+                jsonResponse.members[3].email.should.equal('trialing@test.com');
+                should.equal(null, jsonResponse.members[3].email_open_rate);
+            });
+    });
+
+    it('Can search by case-insensitive name', function () {
         return request
-            .get(localUtils.API.getApiQuery('members/'))
+            .get(localUtils.API.getApiQuery('members/?search=egg'))
             .set('Origin', config.get('url'))
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
@@ -43,23 +89,16 @@ describe('Members API', function () {
                 should.exist(jsonResponse);
                 should.exist(jsonResponse.members);
                 jsonResponse.members.should.have.length(1);
-                localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'stripe');
-
-                testUtils.API.isISO8601(jsonResponse.members[0].created_at).should.be.true();
-                jsonResponse.members[0].created_at.should.be.an.instanceof(String);
-
-                jsonResponse.meta.pagination.should.have.property('page', 1);
-                jsonResponse.meta.pagination.should.have.property('limit', 15);
-                jsonResponse.meta.pagination.should.have.property('pages', 1);
-                jsonResponse.meta.pagination.should.have.property('total', 1);
-                jsonResponse.meta.pagination.should.have.property('next', null);
-                jsonResponse.meta.pagination.should.have.property('prev', null);
+                jsonResponse.members[0].email.should.equal('member1@test.com');
+                localUtils.API.checkResponse(jsonResponse, 'members');
+                localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'subscriptions');
+                localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
             });
     });
 
-    it('Can read', function () {
+    it('Can search by case-insensitive email', function () {
         return request
-            .get(localUtils.API.getApiQuery(`members/${testUtils.DataGenerator.Content.members[0].id}/`))
+            .get(localUtils.API.getApiQuery('members/?search=MEMBER2'))
             .set('Origin', config.get('url'))
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
@@ -70,45 +109,50 @@ describe('Members API', function () {
                 should.exist(jsonResponse);
                 should.exist(jsonResponse.members);
                 jsonResponse.members.should.have.length(1);
-                localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'stripe');
+                jsonResponse.members[0].email.should.equal('member2@test.com');
+                localUtils.API.checkResponse(jsonResponse, 'members');
+                localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'subscriptions');
+                localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
             });
     });
 
-    it('Can add', function () {
-        const member = {
-            name: 'test',
-            email: 'memberTestAdd@test.com'
-        };
-
+    it('Can search for paid members', function () {
         return request
-            .post(localUtils.API.getApiQuery(`members/`))
-            .send({members: [member]})
+            .get(localUtils.API.getApiQuery('members/?search=egon&paid=true'))
             .set('Origin', config.get('url'))
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(201)
+            .expect(200)
             .then((res) => {
                 should.not.exist(res.headers['x-cache-invalidate']);
                 const jsonResponse = res.body;
                 should.exist(jsonResponse);
                 should.exist(jsonResponse.members);
                 jsonResponse.members.should.have.length(1);
-
-                jsonResponse.members[0].name.should.equal(member.name);
-                jsonResponse.members[0].email.should.equal(member.email);
-            })
-            .then(() => {
-                return request
-                    .post(localUtils.API.getApiQuery(`members/`))
-                    .send({members: [member]})
-                    .set('Origin', config.get('url'))
-                    .expect('Content-Type', /json/)
-                    .expect('Cache-Control', testUtils.cacheRules.private)
-                    .expect(422);
+                jsonResponse.members[0].email.should.equal('paid@test.com');
+                localUtils.API.checkResponse(jsonResponse, 'members');
+                localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'subscriptions');
+                localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
             });
     });
 
-    it('Should fail when passing incorrect email_type query parameter', function () {
+    it('Search for non existing member returns empty result set', function () {
+        return request
+            .get(localUtils.API.getApiQuery('members/?search=do_not_exist'))
+            .set('Origin', config.get('url'))
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(200)
+            .then((res) => {
+                should.not.exist(res.headers['x-cache-invalidate']);
+                const jsonResponse = res.body;
+                should.exist(jsonResponse);
+                should.exist(jsonResponse.members);
+                jsonResponse.members.should.have.length(0);
+            });
+    });
+
+    it('Add should fail when passing incorrect email_type query parameter', function () {
         const member = {
             name: 'test',
             email: 'memberTestAdd@test.com'
@@ -123,54 +167,27 @@ describe('Members API', function () {
             .expect(422);
     });
 
-    it('Can edit by id', function () {
-        const memberToChange = {
-            name: 'change me',
-            email: 'member2Change@test.com'
-        };
-
-        const memberChanged = {
-            name: 'changed',
-            email: 'cantChangeMe@test.com'
+    it('Add should fail when comped flag is passed in but Stripe is not enabled', function () {
+        const member = {
+            email: 'memberTestAdd@test.com',
+            comped: true
         };
 
         return request
             .post(localUtils.API.getApiQuery(`members/`))
-            .send({members: [memberToChange]})
+            .send({members: [member]})
             .set('Origin', config.get('url'))
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(201)
+            .expect(422)
             .then((res) => {
-                should.not.exist(res.headers['x-cache-invalidate']);
                 const jsonResponse = res.body;
+
                 should.exist(jsonResponse);
-                should.exist(jsonResponse.members);
-                jsonResponse.members.should.have.length(1);
+                should.exist(jsonResponse.errors);
 
-                return jsonResponse.members[0];
-            })
-            .then((newMember) => {
-                return request
-                    .put(localUtils.API.getApiQuery(`members/${newMember.id}/`))
-                    .send({members: [memberChanged]})
-                    .set('Origin', config.get('url'))
-                    .expect('Content-Type', /json/)
-                    .expect('Cache-Control', testUtils.cacheRules.private)
-                    .expect(200)
-                    .then((res) => {
-                        should.not.exist(res.headers['x-cache-invalidate']);
-
-                        const jsonResponse = res.body;
-
-                        should.exist(jsonResponse);
-                        should.exist(jsonResponse.members);
-                        jsonResponse.members.should.have.length(1);
-                        localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'stripe');
-                        jsonResponse.members[0].name.should.equal(memberChanged.name);
-                        jsonResponse.members[0].email.should.equal(memberChanged.email);
-                        jsonResponse.members[0].email.should.not.equal(memberToChange.email);
-                    });
+                jsonResponse.errors[0].message.should.eql('Validation error, cannot save member.');
+                jsonResponse.errors[0].context.should.match(/Missing Stripe connection./);
             });
     });
 
@@ -217,7 +234,7 @@ describe('Members API', function () {
                         should.exist(jsonResponse);
                         should.exist(jsonResponse.members);
                         jsonResponse.members.should.have.length(1);
-                        localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'stripe');
+                        localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'subscriptions');
                         jsonResponse.members[0].name.should.equal(memberToChange.name);
                         jsonResponse.members[0].email.should.equal(memberToChange.email);
                         jsonResponse.members[0].comped.should.equal(memberToChange.comped);
@@ -225,14 +242,13 @@ describe('Members API', function () {
             });
     });
 
-    it('Can destroy', function () {
+    it('Can delete a member without cancelling Stripe Subscription', async function () {
         const member = {
-            name: 'test',
-            email: 'memberTestDestroy@test.com'
+            name: 'Member 2 Delete',
+            email: 'Member2Delete@test.com'
         };
 
-        return request
-            .post(localUtils.API.getApiQuery(`members/`))
+        const createdMember = await request.post(localUtils.API.getApiQuery(`members/`))
             .send({members: [member]})
             .set('Origin', config.get('url'))
             .expect('Content-Type', /json/)
@@ -240,52 +256,108 @@ describe('Members API', function () {
             .expect(201)
             .then((res) => {
                 should.not.exist(res.headers['x-cache-invalidate']);
+                const jsonResponse = res.body;
+                should.exist(jsonResponse);
+                should.exist(jsonResponse.members);
+                jsonResponse.members.should.have.length(1);
+
+                return jsonResponse.members[0];
+            });
+
+        await request.delete(localUtils.API.getApiQuery(`members/${createdMember.id}/`))
+            .set('Origin', config.get('url'))
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(204)
+            .then((res) => {
+                should.not.exist(res.headers['x-cache-invalidate']);
 
                 const jsonResponse = res.body;
 
                 should.exist(jsonResponse);
-                should.exist(jsonResponse.members);
-
-                return jsonResponse.members[0];
-            })
-            .then((newMember) => {
-                return request
-                    .delete(localUtils.API.getApiQuery(`members/${newMember.id}`))
-                    .set('Origin', config.get('url'))
-                    .expect('Cache-Control', testUtils.cacheRules.private)
-                    .expect(204)
-                    .then(() => newMember);
-            })
-            .then((newMember) => {
-                return request
-                    .get(localUtils.API.getApiQuery(`members/${newMember.id}/`))
-                    .set('Origin', config.get('url'))
-                    .expect('Content-Type', /json/)
-                    .expect('Cache-Control', testUtils.cacheRules.private)
-                    .expect(404);
             });
     });
 
-    it('Can export CSV', function () {
-        return request
-            .get(localUtils.API.getApiQuery(`members/csv/`))
+    // NOTE: this test should be enabled and expanded once test suite fully supports Stripe mocking
+    it.skip('Can delete a member and cancel Stripe Subscription', async function () {
+        const member = {
+            name: 'Member 2 Delete',
+            email: 'Member2Delete@test.com',
+            comped: true
+        };
+
+        const createdMember = await request.post(localUtils.API.getApiQuery(`members/`))
+            .send({members: [member]})
             .set('Origin', config.get('url'))
-            .expect('Content-Type', /text\/csv/)
+            .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200)
+            .expect(201)
             .then((res) => {
                 should.not.exist(res.headers['x-cache-invalidate']);
-                res.headers['content-disposition'].should.match(/Attachment;\sfilename="members/);
-                res.text.should.match(/id,email,name,note,subscribed_to_emails,complimentary_plan,stripe_customer_id,created_at,deleted_at/);
-                res.text.should.match(/member1@test.com/);
-                res.text.should.match(/Mr Egg/);
+                const jsonResponse = res.body;
+                should.exist(jsonResponse);
+                should.exist(jsonResponse.members);
+                jsonResponse.members.should.have.length(1);
+
+                return jsonResponse.members[0];
+            });
+
+        await request.delete(localUtils.API.getApiQuery(`members/${createdMember.id}/?cancel=true`))
+            .set('Origin', config.get('url'))
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(204)
+            .then((res) => {
+                should.not.exist(res.headers['x-cache-invalidate']);
+
+                const jsonResponse = res.body;
+
+                should.exist(jsonResponse);
             });
     });
 
-    it('Can import CSV', function () {
+    // NOTE: this test should be enabled and expanded once test suite fully supports Stripe mocking
+    it.skip('Does not cancel Stripe Subscription if cancel_subscriptions is not set to "true"', async function () {
+        const member = {
+            name: 'Member 2 Delete',
+            email: 'Member2Delete@test.com',
+            comped: true
+        };
+
+        const createdMember = await request.post(localUtils.API.getApiQuery(`members/`))
+            .send({members: [member]})
+            .set('Origin', config.get('url'))
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(201)
+            .then((res) => {
+                should.not.exist(res.headers['x-cache-invalidate']);
+                const jsonResponse = res.body;
+                should.exist(jsonResponse);
+                should.exist(jsonResponse.members);
+                jsonResponse.members.should.have.length(1);
+
+                return jsonResponse.members[0];
+            });
+
+        await request.delete(localUtils.API.getApiQuery(`members/${createdMember.id}/?cancel=false`))
+            .set('Origin', config.get('url'))
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(204)
+            .then((res) => {
+                should.not.exist(res.headers['x-cache-invalidate']);
+
+                const jsonResponse = res.body;
+
+                should.exist(jsonResponse);
+            });
+    });
+
+    it('Can import CSV with minimum one field and labels', function () {
+        let importLabel;
+
         return request
-            .post(localUtils.API.getApiQuery(`members/csv/`))
-            .attach('membersfile', path.join(__dirname, '/../../../../utils/fixtures/csv/valid-members-import.csv'))
+            .post(localUtils.API.getApiQuery(`members/upload/`))
+            .field('labels', ['global-label-1', 'global-label-1'])
+            .attach('membersfile', path.join(__dirname, '/../../../../utils/fixtures/csv/valid-members-labels.csv'))
             .set('Origin', config.get('url'))
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
@@ -298,15 +370,109 @@ describe('Members API', function () {
                 should.exist(jsonResponse.meta);
                 should.exist(jsonResponse.meta.stats);
 
+                should.exist(jsonResponse.meta.import_label);
+                jsonResponse.meta.import_label.slug.should.match(/^import-/);
                 jsonResponse.meta.stats.imported.should.equal(2);
-                jsonResponse.meta.stats.duplicates.should.equal(0);
-                jsonResponse.meta.stats.invalid.should.equal(0);
+                jsonResponse.meta.stats.invalid.length.should.equal(0);
+
+                importLabel = jsonResponse.meta.import_label.slug;
+                return request
+                    .get(localUtils.API.getApiQuery(`members/?&filter=label:${importLabel}`))
+                    .set('Origin', config.get('url'))
+                    .expect('Content-Type', /json/)
+                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect(200);
+            })
+            .then((res) => {
+                should.not.exist(res.headers['x-cache-invalidate']);
+                const jsonResponse = res.body;
+
+                should.exist(jsonResponse);
+                should.exist(jsonResponse.members);
+                should.equal(jsonResponse.members.length, 2);
+
+                const importedMember1 = jsonResponse.members.find(m => m.email === 'member+labels_1@example.com');
+                should.exist(importedMember1);
+                should(importedMember1.name).equal(null);
+                should(importedMember1.note).equal(null);
+                importedMember1.subscribed.should.equal(true);
+                importedMember1.comped.should.equal(false);
+                importedMember1.subscriptions.should.not.be.undefined();
+                importedMember1.subscriptions.length.should.equal(0);
+
+                // check label order
+                // 1 unique global + 1 record labels + 1 auto generated label
+                importedMember1.labels.length.should.equal(3);
+                should.exist(importedMember1.labels.find(({slug}) => slug === 'label'));
+                should.exist(importedMember1.labels.find(({slug}) => slug === 'global-label-1'));
+                should.exist(importedMember1.labels.find(({slug}) => slug.match(/^import-/)));
+
+                const importedMember2 = jsonResponse.members.find(m => m.email === 'member+labels_2@example.com');
+                should.exist(importedMember2);
+                // 1 unique global + 2 record labels
+                importedMember2.labels.length.should.equal(4);
+                should.exist(importedMember2.labels.find(({slug}) => slug === 'another-label'));
+                should.exist(importedMember2.labels.find(({slug}) => slug === 'and-one-more'));
+                should.exist(importedMember2.labels.find(({slug}) => slug === 'global-label-1'));
+                should.exist(importedMember2.labels.find(({slug}) => slug.match(/^import-/)));
             });
     });
 
-    it('Can import CSV with minimum one field', function () {
+    it('Can import CSV with mapped fields', function () {
         return request
-            .post(localUtils.API.getApiQuery(`members/csv/`))
+            .post(localUtils.API.getApiQuery(`members/upload/`))
+            .field('mapping[correo_electrpnico]', 'email')
+            .field('mapping[nombre]', 'name')
+            .attach('membersfile', path.join(__dirname, '/../../../../utils/fixtures/csv/members-with-mappings.csv'))
+            .set('Origin', config.get('url'))
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(201)
+            .then((res) => {
+                should.not.exist(res.headers['x-cache-invalidate']);
+                const jsonResponse = res.body;
+
+                should.exist(jsonResponse);
+                should.exist(jsonResponse.meta);
+                should.exist(jsonResponse.meta.stats);
+
+                jsonResponse.meta.stats.imported.should.equal(1);
+                jsonResponse.meta.stats.invalid.length.should.equal(0);
+
+                should.exist(jsonResponse.meta.import_label);
+                jsonResponse.meta.import_label.slug.should.match(/^import-/);
+            })
+            .then(() => {
+                return request
+                    .get(localUtils.API.getApiQuery(`members/?search=${encodeURIComponent('member+mapped_1@example.com')}`))
+                    .set('Origin', config.get('url'))
+                    .expect('Content-Type', /json/)
+                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect(200);
+            })
+            .then((res) => {
+                should.not.exist(res.headers['x-cache-invalidate']);
+                const jsonResponse = res.body;
+
+                should.exist(jsonResponse);
+                should.exist(jsonResponse.members);
+                should.exist(jsonResponse.members[0]);
+
+                const importedMember1 = jsonResponse.members[0];
+                should(importedMember1.email).equal('member+mapped_1@example.com');
+                should(importedMember1.name).equal('Hannah');
+                should(importedMember1.note).equal('no need to map me');
+                importedMember1.subscribed.should.equal(true);
+                importedMember1.comped.should.equal(false);
+                importedMember1.subscriptions.should.not.be.undefined();
+                importedMember1.subscriptions.length.should.equal(0);
+                importedMember1.labels.length.should.equal(1); // auto-generated import label
+            });
+    });
+
+    it('Can import CSV with labels and provide additional labels', function () {
+        return request
+            .post(localUtils.API.getApiQuery(`members/upload/`))
             .attach('membersfile', path.join(__dirname, '/../../../../utils/fixtures/csv/valid-members-defaults.csv'))
             .set('Origin', config.get('url'))
             .expect('Content-Type', /json/)
@@ -321,8 +487,7 @@ describe('Members API', function () {
                 should.exist(jsonResponse.meta.stats);
 
                 jsonResponse.meta.stats.imported.should.equal(2);
-                jsonResponse.meta.stats.duplicates.should.equal(0);
-                jsonResponse.meta.stats.invalid.should.equal(0);
+                jsonResponse.meta.stats.invalid.length.should.equal(0);
             })
             .then(() => {
                 return request
@@ -344,19 +509,37 @@ describe('Members API', function () {
                 should(defaultMember1.note).equal(null);
                 defaultMember1.subscribed.should.equal(true);
                 defaultMember1.comped.should.equal(false);
-                defaultMember1.stripe.should.not.be.undefined();
-                defaultMember1.stripe.subscriptions.length.should.equal(0);
-                defaultMember1.labels.length.should.equal(0);
+                defaultMember1.subscriptions.should.not.be.undefined();
+                defaultMember1.subscriptions.length.should.equal(0);
+                defaultMember1.labels.length.should.equal(1); // auto-generated import label
 
                 const defaultMember2 = jsonResponse.members.find(member => (member.email === 'member+defaults_2@example.com'));
                 should(defaultMember2).not.be.undefined();
             });
     });
 
-    it('Can import file with duplicate stripe customer ids', function () {
+    it('Runs imports with stripe_customer_id as background job', function () {
         return request
-            .post(localUtils.API.getApiQuery(`members/csv/`))
-            .attach('membersfile', path.join(__dirname, '/../../../../utils/fixtures/csv/members-with-duplicate-stripe-ids.csv'))
+            .post(localUtils.API.getApiQuery(`members/upload/`))
+            .attach('membersfile', path.join(__dirname, '/../../../../utils/fixtures/csv/members-with-stripe-ids.csv'))
+            .set('Origin', config.get('url'))
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(202)
+            .then((res) => {
+                should.not.exist(res.headers['x-cache-invalidate']);
+                const jsonResponse = res.body;
+
+                should.exist(jsonResponse);
+                should.not.exist(jsonResponse.meta);
+            });
+    });
+
+    it('Fails to import memmber with invalid values', function () {
+        return request
+            .post(localUtils.API.getApiQuery(`members/upload/`))
+            .field('labels', ['new-global-label'])
+            .attach('membersfile', path.join(__dirname, '/../../../../utils/fixtures/csv/members-invalid-values.csv'))
             .set('Origin', config.get('url'))
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
@@ -370,8 +553,93 @@ describe('Members API', function () {
                 should.exist(jsonResponse.meta.stats);
 
                 jsonResponse.meta.stats.imported.should.equal(1);
-                jsonResponse.meta.stats.duplicates.should.equal(0);
-                jsonResponse.meta.stats.invalid.should.equal(2);
+                jsonResponse.meta.stats.invalid.length.should.equal(1);
+
+                jsonResponse.meta.stats.invalid[0].error.should.match(/Validation \(isEmail\) failed for email/);
+
+                should.exist(jsonResponse.meta.import_label);
+                jsonResponse.meta.import_label.slug.should.match(/^import-/);
             });
+    });
+
+    it('Can fetch stats with no ?days param', function () {
+        return request
+            .get(localUtils.API.getApiQuery('members/stats/'))
+            .set('Origin', config.get('url'))
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            // .expect(200) - doesn't surface underlying errors in tests
+            .then((res) => {
+                res.status.should.equal(200, JSON.stringify(res.body));
+
+                should.not.exist(res.headers['x-cache-invalidate']);
+                const jsonResponse = res.body;
+
+                should.exist(jsonResponse);
+                should.exist(jsonResponse.total);
+                should.exist(jsonResponse.total_in_range);
+                should.exist(jsonResponse.total_on_date);
+                should.exist(jsonResponse.new_today);
+
+                // 5 from fixtures and 6 imported in previous tests
+                jsonResponse.total.should.equal(11);
+            });
+    });
+
+    it('Can fetch stats with ?days=90', function () {
+        return request
+            .get(localUtils.API.getApiQuery('members/stats/?days=90'))
+            .set('Origin', config.get('url'))
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            // .expect(200) - doesn't surface underlying errors in tests
+            .then((res) => {
+                res.status.should.equal(200, JSON.stringify(res.body));
+
+                should.not.exist(res.headers['x-cache-invalidate']);
+                const jsonResponse = res.body;
+
+                should.exist(jsonResponse);
+                should.exist(jsonResponse.total);
+                should.exist(jsonResponse.total_in_range);
+                should.exist(jsonResponse.total_on_date);
+                should.exist(jsonResponse.new_today);
+
+                // 5 from fixtures and 6 imported in previous tests
+                jsonResponse.total.should.equal(11);
+            });
+    });
+
+    it('Can fetch stats with ?days=all-time', function () {
+        return request
+            .get(localUtils.API.getApiQuery('members/stats/?days=all-time'))
+            .set('Origin', config.get('url'))
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            // .expect(200) - doesn't surface underlying errors in tests
+            .then((res) => {
+                res.status.should.equal(200, JSON.stringify(res.body));
+
+                should.not.exist(res.headers['x-cache-invalidate']);
+                const jsonResponse = res.body;
+
+                should.exist(jsonResponse);
+                should.exist(jsonResponse.total);
+                should.exist(jsonResponse.total_in_range);
+                should.exist(jsonResponse.total_on_date);
+                should.exist(jsonResponse.new_today);
+
+                // 5 from fixtures and 6 imported in previous tests
+                jsonResponse.total.should.equal(11);
+            });
+    });
+
+    it('Errors when fetching stats with unknown days param value', function () {
+        return request
+            .get(localUtils.API.getApiQuery('members/stats/?days=nope'))
+            .set('Origin', config.get('url'))
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(422);
     });
 });

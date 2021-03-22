@@ -1,16 +1,16 @@
-const should = require('should'),
-    sinon = require('sinon'),
-    configUtils = require('../../../utils/configUtils'),
-    common = require('../../../../core/server/lib/common'),
-    controllers = require('../../../../core/frontend/services/routing/controllers'),
-    RSSRouter = require('../../../../core/frontend/services/routing/RSSRouter'),
-    urlUtils = require('../../../../core/server/lib/url-utils');
+const should = require('should');
+const sinon = require('sinon');
+const configUtils = require('../../../utils/configUtils');
+const {events} = require('../../../../core/server/lib/common');
+const controllers = require('../../../../core/frontend/services/routing/controllers');
+const RSSRouter = require('../../../../core/frontend/services/routing/RSSRouter');
+const urlUtils = require('../../../../core/shared/url-utils');
 
 describe('UNIT - services/routing/RSSRouter', function () {
     describe('instantiate', function () {
         beforeEach(function () {
-            sinon.stub(common.events, 'emit');
-            sinon.stub(common.events, 'on');
+            sinon.stub(events, 'emit');
+            sinon.stub(events, 'on');
 
             sinon.spy(RSSRouter.prototype, 'mountRoute');
             sinon.spy(RSSRouter.prototype, 'mountRouter');
@@ -29,8 +29,8 @@ describe('UNIT - services/routing/RSSRouter', function () {
             should.exist(rssRouter.router);
             rssRouter.route.value.should.eql('/rss/');
 
-            common.events.emit.calledOnce.should.be.false();
-            common.events.on.calledOnce.should.be.false();
+            events.emit.calledOnce.should.be.false();
+            events.on.calledOnce.should.be.false();
 
             rssRouter.mountRoute.callCount.should.eql(2);
 
@@ -47,8 +47,8 @@ describe('UNIT - services/routing/RSSRouter', function () {
             should.exist(rssRouter.router);
             rssRouter.route.value.should.eql('/rss/');
 
-            common.events.emit.calledOnce.should.be.false();
-            common.events.on.calledOnce.should.be.false();
+            events.emit.calledOnce.should.be.false();
+            events.on.calledOnce.should.be.false();
 
             rssRouter.mountRoute.callCount.should.eql(2);
 

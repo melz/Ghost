@@ -1,11 +1,11 @@
-const sinon = require('sinon'),
-    should = require('should'),
-    rewire = require('rewire'),
-    fs = require('fs-extra'),
-    path = require('path'),
-    configUtils = require('../../../utils/configUtils'),
-    common = require('../../../../core/server/lib/common'),
-    loadSettings = rewire('../../../../core/frontend/services/settings/loader');
+const sinon = require('sinon');
+const should = require('should');
+const rewire = require('rewire');
+const fs = require('fs-extra');
+const path = require('path');
+const configUtils = require('../../../utils/configUtils');
+const errors = require('@tryghost/errors');
+const loadSettings = rewire('../../../../core/frontend/services/settings/loader');
 
 describe('UNIT > Settings Service loader:', function () {
     beforeEach(function () {
@@ -57,7 +57,7 @@ describe('UNIT > Settings Service loader:', function () {
         });
 
         it('can handle errors from YAML parser', function (done) {
-            yamlParserStub.throws(new common.errors.GhostError({
+            yamlParserStub.throws(new errors.GhostError({
                 message: 'could not parse yaml file',
                 context: 'bad indentation of a mapping entry at line 5, column 10'
             }));

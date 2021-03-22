@@ -1,9 +1,9 @@
-var should = require('should'),
-    sinon = require('sinon'),
-    testUtils = require('../../utils'),
-    _ = require('lodash'),
-    Promise = require('bluebird'),
-    Models = require('../../../core/server/models');
+const should = require('should');
+const sinon = require('sinon');
+const testUtils = require('../../utils');
+const _ = require('lodash');
+const Promise = require('bluebird');
+const Models = require('../../../core/server/models');
 
 describe('Database Migration (special functions)', function () {
     before(testUtils.teardownDb);
@@ -15,7 +15,7 @@ describe('Database Migration (special functions)', function () {
     describe('Fixtures', function () {
         // Custom assertion for detection that a permissions is assigned to the correct roles
         should.Assertion.add('AssignedToRoles', function (roles) {
-            var roleNames;
+            let roleNames;
             this.params = {operator: 'to have role'};
 
             should.exist(this.obj);
@@ -31,7 +31,7 @@ describe('Database Migration (special functions)', function () {
         // Custom assertion to wrap all permissions
         should.Assertion.add('CompletePermissions', function () {
             this.params = {operator: 'to have a complete set of permissions'};
-            var permissions = this.obj;
+            const permissions = this.obj;
 
             // DB
             permissions[0].name.should.eql('Export database');
@@ -201,19 +201,37 @@ describe('Database Migration (special functions)', function () {
             permissions[65].should.be.AssignedToRoles(['Administrator', 'Editor', 'Author', 'Contributor', 'Admin Integration']);
             permissions[66].name.should.eql('Retry emails');
             permissions[66].should.be.AssignedToRoles(['Administrator', 'Editor', 'Admin Integration']);
+
+            // Labels
             permissions[67].name.should.eql('Browse labels');
             permissions[68].name.should.eql('Read labels');
             permissions[69].name.should.eql('Edit labels');
             permissions[70].name.should.eql('Add labels');
             permissions[71].name.should.eql('Delete labels');
+
+            // Member auth
             permissions[72].name.should.eql('Read member signin urls');
+            permissions[73].name.should.eql('Read identities');
+            permissions[74].name.should.eql('Auth Stripe Connect for Members');
+
+            // Snippets
+            permissions[75].name.should.eql('Browse snippets');
+            permissions[75].should.be.AssignedToRoles(['Administrator', 'Editor', 'Author', 'Contributor', 'Admin Integration']);
+            permissions[76].name.should.eql('Read snippets');
+            permissions[76].should.be.AssignedToRoles(['Administrator', 'Editor', 'Author', 'Contributor', 'Admin Integration']);
+            permissions[77].name.should.eql('Edit snippets');
+            permissions[77].should.be.AssignedToRoles(['Administrator', 'Editor', 'Admin Integration']);
+            permissions[78].name.should.eql('Add snippets');
+            permissions[78].should.be.AssignedToRoles(['Administrator', 'Editor', 'Admin Integration']);
+            permissions[79].name.should.eql('Delete snippets');
+            permissions[79].should.be.AssignedToRoles(['Administrator', 'Editor', 'Admin Integration']);
         });
 
         describe('Populate', function () {
             beforeEach(testUtils.setup('default'));
 
             it('should populate all fixtures correctly', function () {
-                var props = {
+                const props = {
                     posts: Models.Post.findAll({withRelated: ['tags']}),
                     tags: Models.Tag.findAll(),
                     users: Models.User.findAll({
@@ -231,8 +249,8 @@ describe('Database Migration (special functions)', function () {
                     // Post
                     should.exist(result.posts);
                     result.posts.length.should.eql(7);
-                    result.posts.at(0).get('title').should.eql('Welcome to Ghost');
-                    result.posts.at(6).get('title').should.eql('Creating a custom theme');
+                    result.posts.at(0).get('title').should.eql('Start here for a quick overview of everything you need to know');
+                    result.posts.at(6).get('title').should.eql('Setting up apps and custom integrations');
 
                     // Tag
                     should.exist(result.tags);
@@ -264,7 +282,7 @@ describe('Database Migration (special functions)', function () {
                     result.roles.at(7).get('name').should.eql('Scheduler Integration');
 
                     // Permissions
-                    result.permissions.length.should.eql(74);
+                    result.permissions.length.should.eql(80);
                     result.permissions.toJSON().should.be.CompletePermissions();
                 });
             });

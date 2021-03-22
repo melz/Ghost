@@ -1,12 +1,9 @@
-const sinon = require('sinon'),
-    should = require('should'),
-    fs = require('fs-extra'),
-    yaml = require('js-yaml'),
-    path = require('path'),
-    configUtils = require('../../../utils/configUtils'),
-    common = require('../../../../core/server/lib/common'),
-
-    ensureSettings = require('../../../../core/frontend/services/settings/ensure-settings');
+const sinon = require('sinon');
+const should = require('should');
+const fs = require('fs-extra');
+const path = require('path');
+const configUtils = require('../../../utils/configUtils');
+const ensureSettings = require('../../../../core/frontend/services/settings/ensure-settings');
 
 describe('UNIT > Settings Service ensure settings:', function () {
     beforeEach(function () {

@@ -1,16 +1,17 @@
-var should = require('should'),
-    sinon = require('sinon'),
-    _ = require('lodash'),
-    testUtils = require('../../../utils'),
-    urlUtils = require('../../../utils/urlUtils'),
-    urlService = require('../../../../core/frontend/services/url'),
-    generateFeed = require('../../../../core/frontend/services/rss/generate-feed');
+const should = require('should');
+const sinon = require('sinon');
+const _ = require('lodash');
+const testUtils = require('../../../utils');
+const urlUtils = require('../../../utils/urlUtils');
+const urlService = require('../../../../core/frontend/services/url');
+const generateFeed = require('../../../../core/frontend/services/rss/generate-feed');
 
 describe('RSS: Generate Feed', function () {
-    var data = {},
-        baseUrl,
-        // Static set of posts
-        posts;
+    const data = {};
+    let baseUrl;
+
+    // Static set of posts
+    let posts;
 
     before(function () {
         posts = _.cloneDeep(testUtils.DataGenerator.forKnex.posts);
@@ -19,9 +20,20 @@ describe('RSS: Generate Feed', function () {
             return post.status === 'published' && post.type === 'post';
         });
 
+        posts[2].meta_description = 'test stuffs';
+
         _.each(posts, function (post) {
             post.url = '/' + post.slug + '/';
             post.primary_author = {name: 'Joe Bloggs'};
+
+            // data is from fixtures that are inserted directly into the database via knex
+            // that means it has raw __GHOST_URL__ values that would typically be modified by the model layer
+            // we're not using the model layer here so we need to transform manually
+            Object.entries(post).forEach(([key, value]) => {
+                if (value && typeof value === 'string') {
+                    post[key] = value.replace(/__GHOST_URL__/g, 'http://my-ghost-blog.com');
+                }
+            });
         });
     });
 
@@ -105,8 +117,8 @@ describe('RSS: Generate Feed', function () {
                 xmlData.should.not.match(/<author>/);
 
                 // basic structure check
-                var postEnd = '<\/code><\/pre>\]\]><\/content:encoded>',
-                    firstIndex = xmlData.indexOf(postEnd);
+                const postEnd = '<\/code><\/pre>\]\]><\/content:encoded>';
+                const firstIndex = xmlData.indexOf(postEnd);
 
                 // The first title should be before the first content
                 xmlData.indexOf('HTML Ipsum').should.be.below(firstIndex);
@@ -118,7 +130,7 @@ describe('RSS: Generate Feed', function () {
         });
 
         it('should only return visible tags', function (done) {
-            var postWithTags = posts[2];
+            const postWithTags = posts[2];
             postWithTags.tags = [
                 {name: 'public', visibility: 'public'},
                 {name: 'internal', visibility: 'internal'},
@@ -226,39 +238,6 @@ describe('RSS: Generate Feed', function () {
 
                 // protocol relative URL - <a href="//somewhere.com/link#nowhere" title="Protocol Relative URL">
                 xmlData.should.match(/<a href="\/\/somewhere.com\/link#nowhere" title="Protocol Relative URL">/);
-
-                // absolute URL - <a href="http://somewhere.com/link#nowhere" title="Absolute URL">
-                xmlData.should.match(/<a href="http:\/\/somewhere.com\/link#nowhere" title="Absolute URL">/);
-
-                done();
-            }).catch(done);
-        });
-    });
-
-    describe('with subdirectory', function () {
-        let sandbox;
-
-        beforeEach(function () {
-            sandbox = sinon.createSandbox();
-            urlUtils.stubUrlUtils({url: 'http://my-ghost-blog.com/blog/'}, sandbox);
-        });
-
-        afterEach(function () {
-            sandbox.restore();
-        });
-
-        it('should process urls correctly with subdirectory', function (done) {
-            baseUrl = '/blog/rss/';
-            data.results = {posts: [posts[3]], meta: {pagination: {pages: 1}}};
-
-            generateFeed(baseUrl, data).then(function (xmlData) {
-                should.exist(xmlData);
-
-                // anchor URL - <a href="#nowhere" title="Anchor URL">
-                xmlData.should.match(/<a href="#nowhere" title="Anchor URL">/);
-
-                // relative URL - <a href="/about#nowhere" title="Relative URL">
-                xmlData.should.match(/<a href="http:\/\/my-ghost-blog.com\/blog\/about#nowhere" title="Relative URL">/);
 
                 // absolute URL - <a href="http://somewhere.com/link#nowhere" title="Absolute URL">
                 xmlData.should.match(/<a href="http:\/\/somewhere.com\/link#nowhere" title="Absolute URL">/);

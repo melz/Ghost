@@ -3,7 +3,7 @@ const supertest = require('supertest');
 const ObjectId = require('bson-objectid');
 const moment = require('moment-timezone');
 const testUtils = require('../../../../utils');
-const config = require('../../../../../core/server/config');
+const config = require('../../../../../core/shared/config');
 const models = require('../../../../../core/server/models');
 const localUtils = require('./utils');
 const ghost = testUtils.startGhost;
@@ -105,7 +105,7 @@ describe('Posts API (v2)', function () {
                     }
 
                     should.not.exist(res.headers['x-cache-invalidate']);
-                    var jsonResponse = res.body;
+                    const jsonResponse = res.body;
                     should.exist(jsonResponse);
                     should.exist(jsonResponse.errors);
                     testUtils.API.checkResponseValue(jsonResponse.errors[0], [

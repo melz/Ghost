@@ -1,31 +1,35 @@
-var _ = require('lodash'),
-    xml = require('xml'),
-    config = require('../config'),
-    urlService = require('../../frontend/services/url'),
-    common = require('../lib/common'),
-    request = require('../lib/request'),
-    settingsCache = require('./settings/cache'),
+const _ = require('lodash');
+const xml = require('xml');
+const config = require('../../shared/config');
+const urlService = require('../../frontend/services/url');
+const errors = require('@tryghost/errors');
+const {events, i18n} = require('../lib/common');
+const logging = require('../../shared/logging');
+const request = require('../lib/request');
+const settingsCache = require('./settings/cache');
+const sentry = require('../../shared/sentry');
 
-    defaultPostSlugs = [
-        'welcome',
-        'the-editor',
-        'using-tags',
-        'managing-users',
-        'private-sites',
-        'advanced-markdown',
-        'themes'
-    ],
-    // ToDo: Make this configurable
-    pingList = [
-        {
-            url: 'http://rpc.pingomatic.com'
-        }
-    ];
+const defaultPostSlugs = [
+    'welcome',
+    'the-editor',
+    'using-tags',
+    'managing-users',
+    'private-sites',
+    'advanced-markdown',
+    'themes'
+];
+
+// ToDo: Make this configurable
+const pingList = [
+    {
+        url: 'http://rpc.pingomatic.com'
+    }
+];
 
 function ping(post) {
-    var pingXML,
-        title = post.title,
-        url = urlService.getUrlByResourceId(post.id, {absolute: true});
+    let pingXML;
+    const title = post.title;
+    const url = urlService.getUrlByResourceId(post.id, {absolute: true});
 
     if (post.type === 'page' || config.isPrivacyDisabled('useRpcPing') || settingsCache.get('is_private')) {
         return;
@@ -62,7 +66,7 @@ function ping(post) {
 
     // Ping each of the defined services.
     _.each(pingList, function (pingHost) {
-        var options = {
+        const options = {
             body: pingXML,
             timeout: 2 * 1000
         };
@@ -79,12 +83,24 @@ function ping(post) {
                 }
             })
             .catch(function (err) {
-                common.logging.error(new common.errors.GhostError({
-                    err: err,
-                    message: err.message,
-                    context: common.i18n.t('errors.services.ping.requestFailed.error', {service: 'xmlrpc'}),
-                    help: common.i18n.t('errors.services.ping.requestFailed.help', {url: 'https://ghost.org/docs/'})
-                }));
+                let error;
+                if (err.statusCode === 429) {
+                    error = new errors.TooManyRequestsError({
+                        err,
+                        message: err.message,
+                        context: i18n.t('errors.services.ping.requestFailed.error', {service: 'xmlrpc'}),
+                        help: i18n.t('errors.services.ping.requestFailed.help', {url: 'https://ghost.org/docs/'})
+                    });
+                } else {
+                    error = new errors.GhostError({
+                        err: err,
+                        message: err.message,
+                        context: i18n.t('errors.services.ping.requestFailed.error', {service: 'xmlrpc'}),
+                        help: i18n.t('errors.services.ping.requestFailed.help', {url: 'https://ghost.org/docs/'})
+                    });
+                }
+                logging.error(error);
+                sentry.captureException(error);
             });
     });
 }
@@ -100,7 +116,7 @@ function listener(model, options) {
 }
 
 function listen() {
-    common.events.on('post.published', listener);
+    events.on('post.published', listener);
 }
 
 module.exports = {

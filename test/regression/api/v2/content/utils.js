@@ -13,6 +13,7 @@ const expectedProperties = {
 
     post: _(schema.posts)
         .keys()
+        .filter(key => key.indexOf('@@') === -1)
         // by default we only return html
         .without('mobiledoc', 'plaintext')
         // v2 doesn't return author_id OR author
@@ -22,7 +23,7 @@ const expectedProperties = {
         // v2 API doesn't return unused fields
         .without('locale', 'visibility')
         // emails are not supported in API v2
-        .without('send_email_when_published')
+        .without('email_recipient_filter')
         // These fields aren't useful as they always have known values
         .without('status')
         .concat('page')
@@ -59,6 +60,19 @@ const expectedProperties = {
         .without('parent_id', 'parent')
         // v2 Tag API doesn't return date fields
         .without('created_at', 'updated_at')
+        // v2 Tag API doesn't return extended meta fields
+        .without(
+            'og_image',
+            'og_title',
+            'og_description',
+            'twitter_image',
+            'twitter_title',
+            'twitter_description',
+            'codeinjection_head',
+            'codeinjection_foot',
+            'canonical_url',
+            'accent_color'
+        )
 };
 
 _.each(expectedProperties, (value, key) => {

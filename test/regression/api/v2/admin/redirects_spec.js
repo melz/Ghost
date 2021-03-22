@@ -6,7 +6,7 @@ const path = require('path');
 const testUtils = require('../../../../utils');
 const localUtils = require('./utils');
 const configUtils = require('../../../../utils/configUtils');
-const config = require('../../../../../core/server/config');
+const config = require('../../../../../core/shared/config');
 
 const ghost = testUtils.startGhost;
 let request;
@@ -45,8 +45,7 @@ describe('Redirects API', function () {
                     res.headers['content-type'].should.eql('application/json; charset=utf-8');
                     should.not.exist(res.headers['x-cache-invalidate']);
 
-                    // API returns an empty file with the correct file structure (empty [])
-                    res.headers['content-length'].should.eql('2');
+                    should.deepEqual(res.body, []);
                 });
         });
 
@@ -60,10 +59,8 @@ describe('Redirects API', function () {
                 .then((res) => {
                     res.headers['content-disposition'].should.eql('Attachment; filename="redirects.json"');
                     res.headers['content-type'].should.eql('application/json; charset=utf-8');
-                    res.headers['content-length'].should.eql('698');
 
-                    res.body.should.not.be.empty();
-                    res.body.length.should.equal(12);
+                    should.deepEqual(res.body, require('../../../../utils/fixtures/data/redirects.json'));
                 });
         });
     });

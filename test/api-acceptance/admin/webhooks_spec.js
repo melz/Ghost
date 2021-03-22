@@ -1,162 +1,139 @@
 const should = require('should');
 const supertest = require('supertest');
 const testUtils = require('../../utils');
-const config = require('../../../core/server/config');
+const config = require('../../../core/shared/config');
 const localUtils = require('./utils');
 
-const ghost = testUtils.startGhost;
-let request;
-
 describe('Webhooks API', function () {
-    var ghostServer;
+    let request;
+    const API_VERSION = 'canary';
 
-    before(function () {
-        return ghost()
-            .then(function (_ghostServer) {
-                ghostServer = _ghostServer;
-                request = supertest.agent(config.get('url'));
-            })
-            .then(function () {
-                return localUtils.doAuth(request);
-            });
+    before(async function () {
+        await testUtils.startGhost();
+        request = supertest.agent(config.get('url'));
+        await localUtils.doAuth(request, 'integrations');
     });
 
-    it('Can creates a webhook', function (done) {
-        let webhookData = {
+    it('Can create a webhook', async function () {
+        const webhookData = {
             event: 'test.create',
             target_url: 'http://example.com/webhooks/test/extra/1',
             name: 'test',
             secret: 'thisissecret',
-            api_version: 'v2'
+            api_version: API_VERSION,
+            integration_id: testUtils.DataGenerator.Content.integrations[0].id
         };
 
-        request.post(localUtils.API.getApiQuery('webhooks/'))
+        const res = await request.post(localUtils.API.getApiQuery('webhooks/'))
             .set('Origin', config.get('url'))
             .send({webhooks: [webhookData]})
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(201)
-            .end(function (err, res) {
-                if (err) {
-                    return done(err);
-                }
+            .expect(201);
 
-                var jsonResponse = res.body;
+        const jsonResponse = res.body;
 
-                should.exist(jsonResponse.webhooks);
+        should.exist(jsonResponse.webhooks);
 
-                localUtils.API.checkResponse(jsonResponse.webhooks[0], 'webhook');
+        localUtils.API.checkResponse(jsonResponse.webhooks[0], 'webhook');
 
-                jsonResponse.webhooks[0].event.should.equal(webhookData.event);
-                jsonResponse.webhooks[0].target_url.should.equal(webhookData.target_url);
-                jsonResponse.webhooks[0].secret.should.equal(webhookData.secret);
-                jsonResponse.webhooks[0].name.should.equal(webhookData.name);
-                jsonResponse.webhooks[0].api_version.should.equal(webhookData.api_version);
+        jsonResponse.webhooks[0].event.should.equal(webhookData.event);
+        jsonResponse.webhooks[0].target_url.should.equal(webhookData.target_url);
+        jsonResponse.webhooks[0].secret.should.equal(webhookData.secret);
+        jsonResponse.webhooks[0].name.should.equal(webhookData.name);
+        jsonResponse.webhooks[0].api_version.should.equal(webhookData.api_version);
+        jsonResponse.webhooks[0].integration_id.should.equal(webhookData.integration_id);
 
-                done();
-            });
+        should.not.exist(res.headers.location);
+
+        await request.post(localUtils.API.getApiQuery('webhooks/'))
+            .set('Origin', config.get('url'))
+            .send({webhooks: [webhookData]})
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(422);
     });
 
-    it('Can edit a webhook', function (done) {
-        request.post(localUtils.API.getApiQuery('integrations/'))
+    it('Can edit a webhook', async function () {
+        let createdIntegration;
+        let createdWebhook;
+
+        const res = await request.post(localUtils.API.getApiQuery('integrations/'))
             .set('Origin', config.get('url'))
             .send({
                 integrations: [{
                     name: 'Rubbish Integration Name'
                 }]
             })
-            .expect(201)
-            .end(function (err, {body}) {
-                if (err) {
-                    return done(err);
-                }
+            .expect(201);
 
-                const [createdIntegration] = body.integrations;
+        [createdIntegration] = res.body.integrations;
 
-                request.post(localUtils.API.getApiQuery('webhooks/'))
-                    .set('Origin', config.get('url'))
-                    .send({
-                        webhooks: [{
-                            name: 'Testing',
-                            event: 'site.changed',
-                            target_url: 'https://example.com/rebuild',
-                            integration_id: createdIntegration.id
-                        }]
-                    })
-                    .expect(201)
-                    .end(function (err, {body}) {
-                        if (err) {
-                            return done(err);
-                        }
+        const res2 = await request.post(localUtils.API.getApiQuery('webhooks/'))
+            .set('Origin', config.get('url'))
+            .send({
+                webhooks: [{
+                    name: 'Testing',
+                    event: 'site.changed',
+                    target_url: 'https://example.com/rebuild',
+                    integration_id: createdIntegration.id
+                }]
+            })
+            .expect(201);
 
-                        const [createdWebhook] = body.webhooks;
+        [createdWebhook] = res2.body.webhooks;
 
-                        request.put(localUtils.API.getApiQuery(`webhooks/${createdWebhook.id}/`))
-                            .set('Origin', config.get('url'))
-                            .send({
-                                webhooks: [{
-                                    name: 'Edit Test',
-                                    event: 'subscriber.added',
-                                    target_url: 'https://example.com/new-subscriber'
-                                }]
-                            })
-                            .expect(200)
-                            .expect('Content-Type', /json/)
-                            .expect('Cache-Control', testUtils.cacheRules.private)
-                            .then(({body}) => {
-                                const [updatedWebhook] = body.webhooks;
+        const res3 = await request.put(localUtils.API.getApiQuery(`webhooks/${createdWebhook.id}/`))
+            .set('Origin', config.get('url'))
+            .send({
+                webhooks: [{
+                    name: 'Edit Test',
+                    event: 'subscriber.added',
+                    target_url: 'https://example.com/new-subscriber',
+                    integration_id: 'ignore_me'
+                }]
+            })
+            .expect(200)
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private);
 
-                                should.equal(updatedWebhook.id, createdWebhook.id);
-                                should.equal(updatedWebhook.name, 'Edit Test');
-                                should.equal(updatedWebhook.event, 'subscriber.added');
-                                should.equal(updatedWebhook.target_url, 'https://example.com/new-subscriber');
-                                should.equal(updatedWebhook.integration_id, createdIntegration.id);
-                                done();
-                            });
-                    });
-            });
+        const [updatedWebhook] = res3.body.webhooks;
+
+        should.equal(updatedWebhook.id, createdWebhook.id);
+        should.equal(updatedWebhook.name, 'Edit Test');
+        should.equal(updatedWebhook.event, 'subscriber.added');
+        should.equal(updatedWebhook.target_url, 'https://example.com/new-subscriber');
+        should.equal(updatedWebhook.integration_id, createdIntegration.id);
     });
 
-    it('Can delete a webhook', function (done) {
-        var newWebhook = {
+    it('Can delete a webhook', async function () {
+        const newWebhook = {
             event: 'test.create',
             // a different target_url from above is needed to avoid an "already exists" error
-            target_url: 'http://example.com/webhooks/test/2'
+            target_url: 'http://example.com/webhooks/test/2',
+            integration_id: testUtils.DataGenerator.Content.integrations[0].id
         };
 
         // create the webhook that is to be deleted
-        request.post(localUtils.API.getApiQuery('webhooks/'))
+        const res = await request.post(localUtils.API.getApiQuery('webhooks/'))
             .set('Origin', config.get('url'))
             .send({webhooks: [newWebhook]})
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(201)
-            .end(function (err, res) {
-                if (err) {
-                    return done(err);
-                }
+            .expect(201);
 
-                var location = res.headers.location;
-                var jsonResponse = res.body;
+        const jsonResponse = res.body;
 
-                should.exist(jsonResponse.webhooks);
-                localUtils.API.checkResponse(jsonResponse.webhooks[0], 'webhook');
-                jsonResponse.webhooks[0].event.should.equal(newWebhook.event);
-                jsonResponse.webhooks[0].target_url.should.equal(newWebhook.target_url);
+        should.exist(jsonResponse.webhooks);
+        localUtils.API.checkResponse(jsonResponse.webhooks[0], 'webhook');
+        jsonResponse.webhooks[0].event.should.equal(newWebhook.event);
+        jsonResponse.webhooks[0].target_url.should.equal(newWebhook.target_url);
 
-                // begin delete test
-                request.del(localUtils.API.getApiQuery('webhooks/' + jsonResponse.webhooks[0].id + '/'))
-                    .set('Origin', config.get('url'))
-                    .expect(204)
-                    .end(function (err, res) {
-                        if (err) {
-                            return done(err);
-                        }
+        // begin delete test
+        const res2 = await request.del(localUtils.API.getApiQuery('webhooks/' + jsonResponse.webhooks[0].id + '/'))
+            .set('Origin', config.get('url'))
+            .expect(204);
 
-                        res.body.should.be.empty();
-
-                        done();
-                    });
-            });
+        res2.body.should.be.empty();
     });
 });

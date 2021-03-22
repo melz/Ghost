@@ -1,21 +1,19 @@
-var should = require('should'),
-    sinon = require('sinon'),
-    Promise = require('bluebird'),
-    markdownToMobiledoc = require('../../utils/fixtures/data-generator').markdownToMobiledoc,
-
-    helpers = require('../../../core/frontend/helpers'),
-    api = require('../../../core/server/api'),
-    common = require('../../../core/server/lib/common');
+const errors = require('@tryghost/errors');
+const sinon = require('sinon');
+const Promise = require('bluebird');
+const markdownToMobiledoc = require('../../utils/fixtures/data-generator').markdownToMobiledoc;
+const helpers = require('../../../core/frontend/helpers');
+const api = require('../../../core/server/api');
 
 describe('{{prev_post}} helper', function () {
-    var browsePostsStub;
+    let browsePostsStub;
     let locals;
 
     beforeEach(function () {
         locals = {
             root: {
                 _locals: {
-                    apiVersion: 'v2'
+                    apiVersion: 'v3'
                 },
                 context: ['post']
             }
@@ -44,9 +42,9 @@ describe('{{prev_post}} helper', function () {
         });
 
         it('shows \'if\' template with previous post data', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
 
             helpers.prev_post
                 .call({
@@ -84,9 +82,9 @@ describe('{{prev_post}} helper', function () {
         });
 
         it('shows \'else\' template', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
 
             helpers.prev_post
                 .call({
@@ -122,9 +120,9 @@ describe('{{prev_post}} helper', function () {
         });
 
         it('shows \'else\' template', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
 
             helpers.prev_post
                 .call({}, optionsData)
@@ -158,9 +156,9 @@ describe('{{prev_post}} helper', function () {
         });
 
         it('shows \'else\' template', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
 
             helpers.prev_post
                 .call({
@@ -202,9 +200,9 @@ describe('{{prev_post}} helper', function () {
         });
 
         it('shows \'else\' template', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
 
             helpers.prev_post
                 .call({
@@ -238,9 +236,9 @@ describe('{{prev_post}} helper', function () {
         });
 
         it('shows \'if\' template with prev post data with primary_tag set', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse, hash: {in: 'primary_tag'}};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse, hash: {in: 'primary_tag'}};
 
             helpers.prev_post
                 .call({
@@ -270,9 +268,9 @@ describe('{{prev_post}} helper', function () {
         });
 
         it('shows \'if\' template with prev post data with primary_author set', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse, hash: {in: 'primary_author'}};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse, hash: {in: 'primary_author'}};
 
             helpers.prev_post
                 .call({
@@ -302,9 +300,9 @@ describe('{{prev_post}} helper', function () {
         });
 
         it('shows \'if\' template with prev post data with author set', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse, hash: {in: 'author'}};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse, hash: {in: 'author'}};
 
             helpers.prev_post
                 .call({
@@ -334,9 +332,9 @@ describe('{{prev_post}} helper', function () {
         });
 
         it('shows \'if\' template with prev post data & ignores in author if author isnt present', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse, hash: {in: 'author'}};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse, hash: {in: 'author'}};
 
             helpers.prev_post
                 .call({
@@ -365,9 +363,9 @@ describe('{{prev_post}} helper', function () {
         });
 
         it('shows \'if\' template with prev post data & ignores unknown in value', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse, hash: {in: 'magic'}};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse, hash: {in: 'magic'}};
 
             helpers.prev_post
                 .call({
@@ -400,14 +398,14 @@ describe('{{prev_post}} helper', function () {
     describe('general error handling', function () {
         beforeEach(function () {
             browsePostsStub = sinon.stub().callsFake(function (options) {
-                return Promise.reject(new common.errors.NotFoundError({message: 'Something wasn\'t found'}));
+                return Promise.reject(new errors.NotFoundError({message: 'Something wasn\'t found'}));
             });
         });
 
         it('should handle error from the API', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: locals, fn: fn, inverse: inverse};
 
             helpers.prev_post
                 .call({
@@ -433,9 +431,9 @@ describe('{{prev_post}} helper', function () {
         });
 
         it('should show warning for call without any options', function (done) {
-            var fn = sinon.spy(),
-                inverse = sinon.spy(),
-                optionsData = {name: 'prev_post', data: {root: {}}};
+            const fn = sinon.spy();
+            const inverse = sinon.spy();
+            const optionsData = {name: 'prev_post', data: {root: {}}};
 
             helpers.prev_post
                 .call(

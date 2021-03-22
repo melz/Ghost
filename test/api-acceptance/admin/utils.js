@@ -19,18 +19,21 @@ const expectedProperties = {
     invites: ['invites', 'meta'],
     themes: ['themes'],
     actions: ['actions', 'meta'],
+    members: ['members', 'meta'],
+    snippets: ['snippets', 'meta'],
 
     action: ['id', 'resource_type', 'actor_type', 'event', 'created_at', 'actor'],
 
-    config: ['version', 'environment', 'database', 'mail', 'labs', 'clientExtensions', 'enableDeveloperExperiments', 'useGravatar'],
+    config: ['version', 'environment', 'database', 'mail', 'labs', 'clientExtensions', 'enableDeveloperExperiments', 'useGravatar', 'stripeDirect', 'emailAnalytics'],
 
     post: _(schema.posts)
         .keys()
+        .filter(key => key.indexOf('@@') === -1)
         // by default we only return mobildoc
         .without('html', 'plaintext')
         .without('locale')
         .without('page')
-        // v2 API doesn't return new type field
+        // API should not return type field
         .without('type')
         // deprecated
         .without('author_id', 'author')
@@ -46,6 +49,7 @@ const expectedProperties = {
 
     page: _(schema.posts)
         .keys()
+        .filter(key => key.indexOf('@@') === -1)
         // by default we only return mobildoc
         .without('html', 'plaintext')
         .without('locale')
@@ -55,7 +59,7 @@ const expectedProperties = {
         // deprecated
         .without('author_id', 'author')
         // pages are not sent as emails
-        .without('send_email_when_published')
+        .without('email_recipient_filter')
         // always returns computed properties
         .concat('url', 'primary_tag', 'primary_author', 'excerpt')
         // returned by default
@@ -87,6 +91,13 @@ const expectedProperties = {
     subscriber: _(schema.subscribers)
         .keys()
     ,
+    member: _(schema.members)
+        .keys()
+        .concat('avatar_image')
+        .concat('comped')
+        .concat('labels')
+    ,
+    member_signin_url: ['member_id', 'url'],
     role: _(schema.roles)
         .keys()
     ,
@@ -104,7 +115,11 @@ const expectedProperties = {
     ,
     email: _(schema.emails)
         .keys(),
-    email_preview: ['html', 'subject', 'plaintext']
+    email_preview: ['html', 'subject', 'plaintext'],
+    email_recipient: _(schema.email_recipients)
+        .keys()
+        .filter(key => key.indexOf('@@') === -1),
+    snippet: _(schema.snippets).keys()
 };
 
 _.each(expectedProperties, (value, key) => {

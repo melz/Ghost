@@ -5,7 +5,10 @@ const validator = require('validator');
 const requestId = require('../../../../../core/server/web/parent/middleware/request-id');
 
 describe('Request ID middleware', function () {
-    var res, req, next;
+    let res;
+    let req;
+    let next;
+
     beforeEach(function () {
         req = {
             get: sinon.stub()

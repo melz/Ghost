@@ -2,86 +2,109 @@ const should = require('should');
 const supertest = require('supertest');
 const _ = require('lodash');
 const testUtils = require('../../utils');
-const config = require('../../../core/server/config');
+const config = require('../../../core/shared/config');
 const localUtils = require('./utils');
 
 // Values to test against
 const publicSettings = require('../../../core/server/services/settings/public');
-const defaultSettings = require('../../../core/server/data/schema').defaultSettings.blog;
+const defaultSettings = require('../../../core/server/data/schema').defaultSettings;
 
-const ghost = testUtils.startGhost;
-let request;
+const defaultSettingsKeys = [
+    'title',
+    'description',
+    'logo',
+    'icon',
+    'accent_color',
+    'cover_image',
+    'facebook',
+    'twitter',
+    'lang',
+    'locale',
+    'timezone',
+    'codeinjection_head',
+    'codeinjection_foot',
+    'navigation',
+    'secondary_navigation',
+    'meta_title',
+    'meta_description',
+    'og_image',
+    'og_title',
+    'og_description',
+    'twitter_image',
+    'twitter_title',
+    'twitter_description',
+    'members_support_address',
+    'url'
+];
 
 describe('Settings Content API', function () {
-    before(function () {
-        return ghost()
-            .then(function () {
-                request = supertest.agent(config.get('url'));
-            }).then(function () {
-                return testUtils.initFixtures('api_keys');
-            });
+    let request;
+
+    before(async function () {
+        await testUtils.startGhost();
+        request = supertest.agent(config.get('url'));
+        await testUtils.initFixtures('api_keys');
     });
 
-    it('Can request settings', function () {
+    it('Can request settings', async function () {
         const key = localUtils.getValidKey();
-        return request.get(localUtils.API.getApiQuery(`settings/?key=${key}`))
+        const res = await request.get(localUtils.API.getApiQuery(`settings/?key=${key}`))
             .set('Origin', testUtils.API.getURL())
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200)
-            .then((res) => {
-                res.headers.vary.should.eql('Accept-Encoding');
-                should.exist(res.headers['access-control-allow-origin']);
-                should.not.exist(res.headers['x-cache-invalidate']);
+            .expect(200);
 
-                const jsonResponse = res.body;
-                should.exist(jsonResponse.settings);
-                should.exist(jsonResponse.meta);
+        res.headers.vary.should.eql('Accept-Encoding');
+        should.exist(res.headers['access-control-allow-origin']);
+        should.not.exist(res.headers['x-cache-invalidate']);
 
-                jsonResponse.settings.should.be.an.Object();
-                const settings = jsonResponse.settings;
+        const jsonResponse = res.body;
+        should.exist(jsonResponse.settings);
+        should.exist(jsonResponse.meta);
 
-                // Verify we have the right keys for settings
-                const publicProperties = _.filter(_.values(publicSettings), (o) => {
-                    return (o !== 'ghost_head' && o !== 'ghost_foot' && o !== 'brand');
-                });
-                publicProperties.push('codeinjection_head', 'codeinjection_foot');
-                settings.should.have.properties(publicProperties);
-                Object.keys(settings).length.should.equal(22);
+        jsonResponse.settings.should.be.an.Object();
+        const settings = jsonResponse.settings;
 
-                // Verify that we are returning the defaults for each value
-                _.forEach(settings, (value, key) => {
-                    /**
-                     * @TODO:
-                     * This test is coupled with the settings cache and the model schema.
-                     * This test should compare against the API result using the test utility.
-                     * The settings cache should only cache model responses and should not know about
-                     * API or theme formats.
-                     *
-                     * This is just a hack to be able to alias ghost_head & ghost_foot quickly.
-                     */
-                    if (['codeinjection_head', 'codeinjection_foot'].includes(key)) {
-                        return;
-                    }
+        // Verify we have the right keys for settings
+        const publicProperties = _.filter(_.values(publicSettings), (o) => {
+            return (o !== 'brand');
+        });
 
-                    // `url` does not come from the settings cache
-                    if (key === 'url') {
-                        should(value).eql(`${config.get('url')}/`);
-                        return;
-                    }
-
-                    let defaultKey = _.findKey(publicSettings, v => v === key);
-                    let defaultValue = _.find(defaultSettings, setting => setting.key === defaultKey).defaultValue;
-
-                    // Convert empty strings to null
-                    defaultValue = defaultValue || null;
-
-                    if (defaultKey === 'navigation' || defaultKey === 'secondary_navigation') {
-                        defaultValue = JSON.parse(defaultValue);
-                    }
-
-                    should(value).eql(defaultValue);
-                });
+        const flattenedPublicSettings = [];
+        _.each(defaultSettings, function each(_settings) {
+            _.each(_settings, function eachSetting(setting) {
+                const flags = setting.flags || '';
+                if (setting.group === 'site' || (flags.includes('PUBLIC'))) {
+                    flattenedPublicSettings.push(setting);
+                }
             });
+        });
+
+        settings.should.have.properties(publicProperties);
+
+        // The length below should only change when public settings have been removed or added
+        Object.keys(settings).length.should.equal(25);
+        Object.keys(settings).should.deepEqual(defaultSettingsKeys);
+
+        // Verify that we are returning the defaults for each value
+        _.forEach(settings, (value, settingsKey) => {
+            // `url` does not come from the settings cache
+            if (settingsKey === 'url') {
+                should(value).eql(`${config.get('url')}/`);
+                return;
+            }
+
+            let defaultKey = publicSettings[settingsKey];
+            let defaultValue = _.find(flattenedPublicSettings, setting => setting.key === defaultKey).defaultValue;
+
+            // Convert empty strings to null
+            defaultValue = defaultValue || null;
+
+            if (defaultKey === 'navigation' || defaultKey === 'secondary_navigation') {
+                defaultValue = JSON.parse(defaultValue);
+            }
+
+            should(value).eql(defaultValue);
+        });
     });
 });

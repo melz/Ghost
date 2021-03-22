@@ -2,9 +2,7 @@
  * Dependencies
  */
 
-var _ = require('lodash'),
-    exports,
-    models;
+const _ = require('lodash');
 
 // enable event listeners
 require('./base/listeners');
@@ -14,7 +12,7 @@ require('./base/listeners');
  */
 exports = module.exports;
 
-models = [
+const models = [
     'permission',
     'post',
     'role',
@@ -30,12 +28,24 @@ models = [
     'api-key',
     'mobiledoc-revision',
     'member',
-    'action',
+    'member-subscribe-event',
+    'member-paid-subscription-event',
+    'member-login-event',
+    'member-email-change-event',
+    'member-payment-event',
+    'member-status-event',
     'posts-meta',
     'member-stripe-customer',
     'stripe-customer-subscription',
     'email',
-    'label'
+    'email-batch',
+    'email-recipient',
+    'label',
+    'single-use-token',
+    'snippet',
+    // Action model MUST be loaded last as it loops through all of the registered models
+    // Please do not append items to this array.
+    'action'
 ];
 
 function init() {

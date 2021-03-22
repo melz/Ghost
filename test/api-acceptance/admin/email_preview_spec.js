@@ -3,74 +3,61 @@ const supertest = require('supertest');
 const ObjectId = require('bson-objectid');
 const testUtils = require('../../utils');
 const localUtils = require('./utils');
-const config = require('../../../core/server/config');
+const config = require('../../../core/shared/config');
 const models = require('../../../core/server/models/index');
-
-const ghost = testUtils.startGhost;
 
 describe('Email Preview API', function () {
     let request;
 
-    before(function () {
-        return ghost()
-            .then(function (_ghostServer) {
-                request = supertest.agent(config.get('url'));
-            })
-            .then(function () {
-                return localUtils.doAuth(request, 'users:extra', 'posts');
-            });
+    before(async function () {
+        await testUtils.startGhost();
+        request = supertest.agent(config.get('url'));
+        await localUtils.doAuth(request, 'users:extra', 'posts');
     });
 
     describe('Read', function () {
-        it('can\'t retrieve for non existent post', function (done) {
-            request.get(localUtils.API.getApiQuery(`posts/${ObjectId.generate()}/`))
+        it('can\'t retrieve for non existent post', async function () {
+            const res = await request.get(localUtils.API.getApiQuery(`posts/${ObjectId.generate()}/`))
                 .set('Origin', config.get('url'))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect('Cache-Control', testUtils.cacheRules.private)
-                .expect(404)
-                .end(function (err, res) {
-                    if (err) {
-                        return done(err);
-                    }
+                .expect(404);
 
-                    should.not.exist(res.headers['x-cache-invalidate']);
-                    var jsonResponse = res.body;
-                    should.exist(jsonResponse);
-                    should.exist(jsonResponse.errors);
-                    testUtils.API.checkResponseValue(jsonResponse.errors[0], [
-                        'message',
-                        'context',
-                        'type',
-                        'details',
-                        'property',
-                        'help',
-                        'code',
-                        'id'
-                    ]);
-                    done();
-                });
+            should.not.exist(res.headers['x-cache-invalidate']);
+            const jsonResponse = res.body;
+            should.exist(jsonResponse);
+            should.exist(jsonResponse.errors);
+            testUtils.API.checkResponseValue(jsonResponse.errors[0], [
+                'message',
+                'context',
+                'type',
+                'details',
+                'property',
+                'help',
+                'code',
+                'id'
+            ]);
         });
 
-        it('can read post email preview with fields', function () {
-            return request
+        it('can read post email preview with fields', async function () {
+            const res = await request
                 .get(localUtils.API.getApiQuery(`email_preview/posts/${testUtils.DataGenerator.Content.posts[0].id}/`))
                 .set('Origin', config.get('url'))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect('Cache-Control', testUtils.cacheRules.private)
-                .expect(200)
-                .then((res) => {
-                    should.not.exist(res.headers['x-cache-invalidate']);
-                    const jsonResponse = res.body;
-                    should.exist(jsonResponse);
-                    should.exist(jsonResponse.email_previews);
+                .expect(200);
 
-                    localUtils.API.checkResponse(jsonResponse.email_previews[0], 'email_preview', null, null);
-                });
+            should.not.exist(res.headers['x-cache-invalidate']);
+            const jsonResponse = res.body;
+            should.exist(jsonResponse);
+            should.exist(jsonResponse.email_previews);
+
+            localUtils.API.checkResponse(jsonResponse.email_previews[0], 'email_preview', null, null);
         });
 
-        it('can read post email preview with email card and replacements', function () {
+        it('can read post email preview with email card and replacements', async function () {
             const post = testUtils.DataGenerator.forKnex.createPost({
                 id: ObjectId.generate(),
                 title: 'Post with email-only card',
@@ -82,31 +69,162 @@ describe('Email Preview API', function () {
                 uuid: 'd52c42ae-2755-455c-80ec-70b2ec55c904'
             });
 
-            return models.Post.add(post, {context: {internal: true}}).then(() => {
-                return request
-                    .get(localUtils.API.getApiQuery(`email_preview/posts/${post.id}/`))
-                    .set('Origin', config.get('url'))
-                    .set('Accept', 'application/json')
-                    .expect('Content-Type', /json/)
-                    .expect('Cache-Control', testUtils.cacheRules.private)
-                    .expect(200)
-                    .then((res) => {
-                        should.not.exist(res.headers['x-cache-invalidate']);
-                        const jsonResponse = res.body;
-                        should.exist(jsonResponse);
-                        should.exist(jsonResponse.email_previews);
+            await models.Post.add(post, {context: {internal: true}});
+            const res = await request
+                .get(localUtils.API.getApiQuery(`email_preview/posts/${post.id}/`))
+                .set('Origin', config.get('url'))
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(200);
 
-                        jsonResponse.email_previews[0].html.should.match(/Hey there {unknown}/);
-                        jsonResponse.email_previews[0].html.should.match(/Welcome to your first Ghost email!/);
-                        jsonResponse.email_previews[0].html.should.match(/This is the actual post content\.\.\./);
-                        jsonResponse.email_previews[0].html.should.match(/Another email card with a similar replacement, see\?/);
+            should.not.exist(res.headers['x-cache-invalidate']);
+            const jsonResponse = res.body;
+            should.exist(jsonResponse);
+            should.exist(jsonResponse.email_previews);
 
-                        jsonResponse.email_previews[0].plaintext.should.match(/Hey there {unknown}/);
-                        jsonResponse.email_previews[0].plaintext.should.match(/Welcome to your first Ghost email!/);
-                        jsonResponse.email_previews[0].plaintext.should.match(/This is the actual post content\.\.\./);
-                        jsonResponse.email_previews[0].plaintext.should.match(/Another email card with a similar replacement, see\?/);
-                    });
+            jsonResponse.email_previews[0].html.should.match(/Hey there {unknown}/);
+            jsonResponse.email_previews[0].html.should.match(/Welcome to your first Ghost email!/);
+            jsonResponse.email_previews[0].html.should.match(/This is the actual post content\.\.\./);
+            jsonResponse.email_previews[0].html.should.match(/Another email card with a similar replacement, see\?/);
+
+            jsonResponse.email_previews[0].plaintext.should.match(/Hey there {unknown}/);
+            jsonResponse.email_previews[0].plaintext.should.match(/Welcome to your first Ghost email!/);
+            jsonResponse.email_previews[0].plaintext.should.match(/This is the actual post content\.\.\./);
+            jsonResponse.email_previews[0].plaintext.should.match(/Another email card with a similar replacement, see\?/);
+        });
+
+        it('has custom content transformations for email compatibility', async function () {
+            const post = testUtils.DataGenerator.forKnex.createPost({
+                id: ObjectId.generate(),
+                title: 'Post with email-only card',
+                slug: 'email-only-card',
+                mobiledoc: '{"version":"0.3.1","atoms":[],"cards":[],"markups":[["a",["href","https://ghost.org"]]],"sections":[[1,"p",[[0,[],0,"Testing "],[0,[0],1,"links"],[0,[],0," in email excerpt and apostrophes \'"]]]]}',
+                html: '<p>This is the actual post content...</p>',
+                plaintext: 'This is the actual post content...',
+                status: 'draft',
+                uuid: 'd52c42ae-2755-455c-80ec-70b2ec55c904'
             });
+
+            await models.Post.add(post, {context: {internal: true}});
+
+            const res = await request
+                .get(localUtils.API.getApiQuery(`email_preview/posts/${post.id}/`))
+                .set('Origin', config.get('url'))
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(200);
+
+            should.not.exist(res.headers['x-cache-invalidate']);
+            const jsonResponse = res.body;
+            should.exist(jsonResponse);
+            should.exist(jsonResponse.email_previews);
+
+            const [preview] = jsonResponse.email_previews;
+
+            preview.html.should.containEql('Testing links in email excerpt');
+
+            preview.html.should.match(/&#39;/);
+            preview.html.should.not.match(/&apos;/);
+        });
+    });
+
+    describe('As Owner', function () {
+        it('can send test email', async function () {
+            const url = localUtils.API.getApiQuery(`email_preview/posts/${testUtils.DataGenerator.Content.posts[0].id}/`);
+            await request
+                .post(url)
+                .set('Origin', config.get('url'))
+                .send({
+                    emails: ['test@ghost.org']
+                })
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(200);
+        });
+    });
+
+    describe('As Admin', function () {
+        before(async function () {
+            const user = await testUtils.createUser({
+                user: testUtils.DataGenerator.forKnex.createUser({email: 'admin+1@ghost.org'}),
+                role: testUtils.DataGenerator.Content.roles[0].name
+            });
+
+            request.user = user;
+            await localUtils.doAuth(request);
+        });
+
+        it('can send test email', async function () {
+            const url = localUtils.API.getApiQuery(`email_preview/posts/${testUtils.DataGenerator.Content.posts[0].id}/`);
+            await request
+                .post(url)
+                .set('Origin', config.get('url'))
+                .send({
+                    emails: ['test@ghost.org']
+                })
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(200);
+        });
+    });
+
+    describe('As Editor', function () {
+        before(async function () {
+            const user = await testUtils.createUser({
+                user: testUtils.DataGenerator.forKnex.createUser({
+                    email: 'test+editor@ghost.org'
+                }),
+                role: testUtils.DataGenerator.Content.roles[1].name
+            });
+
+            request.user = user;
+            await localUtils.doAuth(request);
+        });
+
+        it('can send test email', async function () {
+            const url = localUtils.API.getApiQuery(`email_preview/posts/${testUtils.DataGenerator.Content.posts[0].id}/`);
+            await request
+                .post(url)
+                .set('Origin', config.get('url'))
+                .send({
+                    emails: ['test@ghost.org']
+                })
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(200);
+        });
+    });
+
+    describe('As Author', function () {
+        before(async function () {
+            const user = await testUtils.createUser({
+                user: testUtils.DataGenerator.forKnex.createUser({
+                    email: 'test+author@ghost.org'
+                }),
+                role: testUtils.DataGenerator.Content.roles[2].name
+            });
+
+            request.user = user;
+            await localUtils.doAuth(request);
+        });
+
+        it('cannot send test email', async function () {
+            const url = localUtils.API.getApiQuery(`email_preview/posts/${testUtils.DataGenerator.Content.posts[0].id}/`);
+            await request
+                .post(url)
+                .set('Origin', config.get('url'))
+                .send({
+                    emails: ['test@ghost.org']
+                })
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(403);
         });
     });
 });

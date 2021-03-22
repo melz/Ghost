@@ -1,7 +1,7 @@
+const errors = require('@tryghost/errors');
 const should = require('should');
 const sinon = require('sinon');
 const Promise = require('bluebird');
-const common = require('../../../../core/server/lib/common');
 const shared = require('../../../../core/server/api/shared');
 
 describe('Unit: api/shared/pipeline', function () {
@@ -100,7 +100,7 @@ describe('Unit: api/shared/pipeline', function () {
                 return shared.pipeline.STAGES.permissions(apiUtils, apiConfig, apiImpl, frame)
                     .then(Promise.reject)
                     .catch((err) => {
-                        (err instanceof common.errors.IncorrectUsageError).should.be.true();
+                        (err instanceof errors.IncorrectUsageError).should.be.true();
                         apiUtils.permissions.handle.called.should.be.false();
                     });
             });
@@ -213,7 +213,7 @@ describe('Unit: api/shared/pipeline', function () {
             shared.pipeline.STAGES.serialisation.input.resolves();
             shared.pipeline.STAGES.permissions.resolves();
             shared.pipeline.STAGES.query.resolves('response');
-            shared.pipeline.STAGES.serialisation.output.callsFake(function (response, apiUtils, apiConfig, apiImpl, frame) {
+            shared.pipeline.STAGES.serialisation.output.callsFake(function (response, _apiUtils, apiConfig, apiImpl, frame) {
                 frame.response = response;
             });
 

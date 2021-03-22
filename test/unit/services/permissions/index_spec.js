@@ -1,16 +1,16 @@
-var should = require('should'),
-    sinon = require('sinon'),
-    testUtils = require('../../../utils'),
-    Promise = require('bluebird'),
-    _ = require('lodash'),
-    models = require('../../../../core/server/models'),
-    actionsMap = require('../../../../core/server/services/permissions/actions-map-cache'),
-    permissions = require('../../../../core/server/services/permissions');
+const should = require('should');
+const sinon = require('sinon');
+const testUtils = require('../../../utils');
+const Promise = require('bluebird');
+const _ = require('lodash');
+const models = require('../../../../core/server/models');
+const actionsMap = require('../../../../core/server/services/permissions/actions-map-cache');
+const permissions = require('../../../../core/server/services/permissions');
 
 describe('Permissions', function () {
-    var fakePermissions = [],
-        findPostSpy,
-        findTagSpy;
+    let fakePermissions = [];
+    let findPostSpy;
+    let findTagSpy;
 
     before(function () {
         models.init();
@@ -49,12 +49,13 @@ describe('Permissions', function () {
     function loadFakePermissions(options) {
         options = options || {};
 
-        var fixturePermissions = _.cloneDeep(testUtils.DataGenerator.Content.permissions),
-            extraPerm = {
-                name: 'test',
-                action_type: 'edit',
-                object_type: 'post'
-            };
+        const fixturePermissions = _.cloneDeep(testUtils.DataGenerator.Content.permissions);
+
+        const extraPerm = {
+            name: 'test',
+            action_type: 'edit',
+            object_type: 'post'
+        };
 
         if (options.extra) {
             fixturePermissions.push(extraPerm);
@@ -77,17 +78,17 @@ describe('Permissions', function () {
         it('can load an actions map from existing permissions', function (done) {
             fakePermissions = loadFakePermissions();
 
-            permissions.init().then(function (actionsMap) {
-                should.exist(actionsMap);
+            permissions.init().then(function (actions) {
+                should.exist(actions);
 
                 permissions.canThis.should.not.throwError();
 
-                _.keys(actionsMap).should.eql(['browse', 'edit', 'add', 'destroy']);
+                _.keys(actions).should.eql(['browse', 'edit', 'add', 'destroy']);
 
-                actionsMap.browse.should.eql(['post']);
-                actionsMap.edit.should.eql(['post', 'tag', 'user', 'page']);
-                actionsMap.add.should.eql(['post', 'user', 'page']);
-                actionsMap.destroy.should.eql(['post', 'user']);
+                actions.browse.should.eql(['post']);
+                actions.edit.should.eql(['post', 'tag', 'user', 'page']);
+                actions.add.should.eql(['post', 'user', 'page']);
+                actions.destroy.should.eql(['post', 'user']);
 
                 done();
             }).catch(done);
@@ -96,17 +97,17 @@ describe('Permissions', function () {
         it('can load an actions map from existing permissions, and deduplicate', function (done) {
             fakePermissions = loadFakePermissions({extra: true});
 
-            permissions.init().then(function (actionsMap) {
-                should.exist(actionsMap);
+            permissions.init().then(function (actions) {
+                should.exist(actions);
 
                 permissions.canThis.should.not.throwError();
 
-                _.keys(actionsMap).should.eql(['browse', 'edit', 'add', 'destroy']);
+                _.keys(actions).should.eql(['browse', 'edit', 'add', 'destroy']);
 
-                actionsMap.browse.should.eql(['post']);
-                actionsMap.edit.should.eql(['post', 'tag', 'user', 'page']);
-                actionsMap.add.should.eql(['post', 'user', 'page']);
-                actionsMap.destroy.should.eql(['post', 'user']);
+                actions.browse.should.eql(['post']);
+                actions.edit.should.eql(['post', 'tag', 'user', 'page']);
+                actions.add.should.eql(['post', 'user', 'page']);
+                actions.destroy.should.eql(['post', 'user']);
 
                 done();
             }).catch(done);

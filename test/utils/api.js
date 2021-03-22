@@ -1,10 +1,10 @@
+const errors = require('@tryghost/errors');
 const _ = require('lodash');
 const url = require('url');
 const moment = require('moment');
 const DataGenerator = require('./fixtures/data-generator');
-const config = require('../../core/server/config');
-const common = require('../../core/server/lib/common');
-const sequence = require('../../core/server/lib/promise/sequence');
+const config = require('../../core/shared/config');
+const {sequence} = require('@tryghost/promise');
 const host = config.get('server').host;
 const port = config.get('server').port;
 const protocol = 'http://';
@@ -27,9 +27,9 @@ function isISO8601(date) {
 
 // make sure the API only returns expected properties only
 function checkResponseValue(jsonResponse, expectedProperties) {
-    var providedProperties = _.keys(jsonResponse),
-        missing = _.difference(expectedProperties, providedProperties),
-        unexpected = _.difference(providedProperties, expectedProperties);
+    const providedProperties = _.keys(jsonResponse);
+    const missing = _.difference(expectedProperties, providedProperties);
+    const unexpected = _.difference(providedProperties, expectedProperties);
 
     _.each(missing, function (prop) {
         jsonResponse.should.have.property(prop);
@@ -100,11 +100,11 @@ const login = (request, API_URL) => {
             .then(function then(res) {
                 if (res.statusCode === 302) {
                     // This can happen if you already have an instance running e.g. if you've been using Ghost CLI recently
-                    return reject(new common.errors.GhostError({
+                    return reject(new errors.GhostError({
                         message: 'Ghost is redirecting, do you have an instance already running on port 2369?'
                     }));
                 } else if (res.statusCode !== 200 && res.statusCode !== 201) {
-                    return reject(new common.errors.GhostError({
+                    return reject(new errors.GhostError({
                         message: res.body.errors[0].message
                     }));
                 }

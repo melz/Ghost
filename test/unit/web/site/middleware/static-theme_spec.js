@@ -1,12 +1,15 @@
-var should = require('should'),
-    sinon = require('sinon'),
+const should = require('should');
+const sinon = require('sinon');
 
-    express = require('express'),
-    themeUtils = require('../../../../../core/frontend/services/themes'),
-    staticTheme = require('../../../../../core/server/web/site/middleware/static-theme');
+const express = require('../../../../../core/shared/express');
+const themeUtils = require('../../../../../core/frontend/services/themes');
+const staticTheme = require('../../../../../core/server/web/site/middleware/static-theme');
 
 describe('staticTheme', function () {
-    var expressStaticStub, activeThemeStub, req, res;
+    let expressStaticStub;
+    let activeThemeStub;
+    let req;
+    let res;
 
     beforeEach(function () {
         req = {};

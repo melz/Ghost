@@ -1,19 +1,20 @@
-var should = require('should'),
-    sinon = require('sinon'),
-    testUtils = require('../../utils'),
-    moment = require('moment'),
-    _ = require('lodash'),
-    Promise = require('bluebird'),
-    sequence = require('../../../core/server/lib/promise/sequence'),
-    urlService = require('../../../core/frontend/services/url'),
-    ghostBookshelf = require('../../../core/server/models/base'),
-    models = require('../../../core/server/models'),
-    settingsCache = require('../../../core/server/services/settings/cache'),
-    common = require('../../../core/server/lib/common'),
-    configUtils = require('../../utils/configUtils'),
-    DataGenerator = testUtils.DataGenerator,
-    context = testUtils.context.owner,
-    markdownToMobiledoc = testUtils.DataGenerator.markdownToMobiledoc;
+const errors = require('@tryghost/errors');
+const should = require('should');
+const sinon = require('sinon');
+const testUtils = require('../../utils');
+const moment = require('moment');
+const _ = require('lodash');
+const Promise = require('bluebird');
+const {sequence} = require('@tryghost/promise');
+const urlService = require('../../../core/frontend/services/url');
+const ghostBookshelf = require('../../../core/server/models/base');
+const models = require('../../../core/server/models');
+const db = require('../../../core/server/data/db');
+const settingsCache = require('../../../core/server/services/settings/cache');
+const {events} = require('../../../core/server/lib/common');
+const configUtils = require('../../utils/configUtils');
+const context = testUtils.context.owner;
+const markdownToMobiledoc = testUtils.DataGenerator.markdownToMobiledoc;
 
 /**
  * IMPORTANT:
@@ -23,7 +24,7 @@ var should = require('should'),
  * - rewire would add 1 registry, a file who requires the models, tries to register the model another time
  */
 describe('Post Model', function () {
-    var eventsTriggered = {};
+    let eventsTriggered = {};
 
     before(testUtils.teardownDb);
     before(testUtils.stopGhost);
@@ -53,6 +54,9 @@ describe('Post Model', function () {
                     })
                     .then(function () {
                         return testUtils.truncate('posts');
+                    })
+                    .then(function () {
+                        return testUtils.truncate('posts_meta');
                     });
             });
 
@@ -179,13 +183,16 @@ describe('Post Model', function () {
                     })
                     .then(function () {
                         return testUtils.truncate('posts');
+                    })
+                    .then(function () {
+                        return testUtils.truncate('posts_meta');
                     });
             });
 
             beforeEach(function () {
                 eventsTriggered = {};
 
-                sinon.stub(common.events, 'emit').callsFake(function (eventName, eventObj) {
+                sinon.stub(events, 'emit').callsFake(function (eventName, eventObj) {
                     if (!eventsTriggered[eventName]) {
                         eventsTriggered[eventName] = [];
                     }
@@ -195,10 +202,11 @@ describe('Post Model', function () {
             });
 
             it('[failure] multiple edits in one transaction', function () {
-                const options = _.cloneDeep(context),
-                    data = {
-                        status: 'published'
-                    };
+                const options = _.cloneDeep(context);
+
+                const data = {
+                    status: 'published'
+                };
 
                 return models.Base.transaction(function (txn) {
                     options.transacting = txn;
@@ -218,10 +226,11 @@ describe('Post Model', function () {
             });
 
             it('multiple edits in one transaction', function () {
-                const options = _.cloneDeep(context),
-                    data = {
-                        status: 'published'
-                    };
+                const options = _.cloneDeep(context);
+
+                const data = {
+                    status: 'published'
+                };
 
                 return models.Base.transaction(function (txn) {
                     options.transacting = txn;
@@ -237,10 +246,10 @@ describe('Post Model', function () {
             });
 
             it('can change title', function (done) {
-                var postId = testUtils.DataGenerator.Content.posts[0].id;
+                const postId = testUtils.DataGenerator.Content.posts[0].id;
 
                 models.Post.findOne({id: postId}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.id.should.equal(postId);
@@ -260,10 +269,10 @@ describe('Post Model', function () {
             });
 
             it('[failure] custom excerpt soft limit reached', function (done) {
-                var postId = testUtils.DataGenerator.Content.posts[0].id;
+                const postId = testUtils.DataGenerator.Content.posts[0].id;
 
                 models.Post.findOne({id: postId}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.id.should.equal(postId);
@@ -274,16 +283,16 @@ describe('Post Model', function () {
                 }).then(function () {
                     done(new Error('expected validation error'));
                 }).catch(function (err) {
-                    (err[0] instanceof common.errors.ValidationError).should.eql(true);
+                    (err[0] instanceof errors.ValidationError).should.eql(true);
                     done();
                 });
             });
 
             it('can publish draft post', function (done) {
-                var postId = testUtils.DataGenerator.Content.posts[3].id;
+                const postId = testUtils.DataGenerator.Content.posts[3].id;
 
                 models.Post.findOne({id: postId, status: 'draft'}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.id.should.equal(postId);
@@ -305,10 +314,10 @@ describe('Post Model', function () {
             });
 
             it('can unpublish published post', function (done) {
-                var postId = testUtils.DataGenerator.Content.posts[0].id;
+                const postId = testUtils.DataGenerator.Content.posts[0].id;
 
                 models.Post.findOne({id: postId}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.id.should.equal(postId);
@@ -328,7 +337,7 @@ describe('Post Model', function () {
             });
 
             it('draft -> scheduled without published_at update', function (done) {
-                var post;
+                let post;
 
                 models.Post.findOne({status: 'draft'}).then(function (results) {
                     should.exist(results);
@@ -345,16 +354,16 @@ describe('Post Model', function () {
                     done(new Error('expected error'));
                 }).catch(function (err) {
                     should.exist(err);
-                    (err instanceof common.errors.ValidationError).should.eql(true);
+                    (err instanceof errors.ValidationError).should.eql(true);
                     done();
                 });
             });
 
             it('draft -> scheduled: expect update of published_at', function (done) {
-                var newPublishedAt = moment().add(1, 'day').toDate();
+                const newPublishedAt = moment().add(1, 'day').toDate();
 
                 models.Post.findOne({status: 'draft'}).then(function (results) {
-                    var post;
+                    let post;
 
                     should.exist(results);
                     post = results.toJSON();
@@ -381,7 +390,7 @@ describe('Post Model', function () {
 
             it('scheduled -> draft: expect unschedule', function (done) {
                 models.Post.findOne({status: 'scheduled'}).then(function (results) {
-                    var post;
+                    let post;
 
                     should.exist(results);
                     post = results.toJSON();
@@ -404,7 +413,7 @@ describe('Post Model', function () {
 
             it('scheduled -> scheduled with updated published_at', function (done) {
                 models.Post.findOne({status: 'scheduled'}).then(function (results) {
-                    var post;
+                    let post;
 
                     should.exist(results);
                     post = results.toJSON();
@@ -428,7 +437,7 @@ describe('Post Model', function () {
 
             it('scheduled -> scheduled with unchanged published_at', function (done) {
                 models.Post.findOne({status: 'scheduled'}).then(function (results) {
-                    var post;
+                    let post;
 
                     should.exist(results);
                     post = results.toJSON();
@@ -449,7 +458,7 @@ describe('Post Model', function () {
             });
 
             it('scheduled -> scheduled with unchanged published_at (within the 2 minutes window)', function (done) {
-                var post;
+                let post;
 
                 models.Post.findOne({status: 'scheduled'}).then(function (results) {
                     should.exist(results);
@@ -481,10 +490,10 @@ describe('Post Model', function () {
             });
 
             it('published -> scheduled and expect update of published_at', function (done) {
-                var postId = testUtils.DataGenerator.Content.posts[0].id;
+                const postId = testUtils.DataGenerator.Content.posts[0].id;
 
                 models.Post.findOne({id: postId}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.id.should.equal(postId);
@@ -498,16 +507,16 @@ describe('Post Model', function () {
                     done(new Error('change status from published to scheduled is not allowed right now!'));
                 }).catch(function (err) {
                     should.exist(err);
-                    (err instanceof common.errors.ValidationError).should.eql(true);
+                    (err instanceof errors.ValidationError).should.eql(true);
                     done();
                 });
             });
 
             it('can convert draft post to page and back', function (done) {
-                var postId = testUtils.DataGenerator.Content.posts[3].id;
+                const postId = testUtils.DataGenerator.Content.posts[3].id;
 
                 models.Post.findOne({id: postId, status: 'draft'}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.id.should.equal(postId);
@@ -541,7 +550,7 @@ describe('Post Model', function () {
 
             it('can convert draft to schedule AND post to page and back', function (done) {
                 models.Post.findOne({status: 'draft'}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.status.should.equal('draft');
@@ -578,10 +587,10 @@ describe('Post Model', function () {
             });
 
             it('can convert published post to page and back', function (done) {
-                var postId = testUtils.DataGenerator.Content.posts[0].id;
+                const postId = testUtils.DataGenerator.Content.posts[0].id;
 
                 models.Post.findOne({id: postId}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.id.should.equal(postId);
@@ -616,10 +625,10 @@ describe('Post Model', function () {
             });
 
             it('can change type and status at the same time', function (done) {
-                var postId = testUtils.DataGenerator.Content.posts[3].id;
+                const postId = testUtils.DataGenerator.Content.posts[3].id;
 
                 models.Post.findOne({id: postId, status: 'draft'}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.id.should.equal(postId);
@@ -654,10 +663,10 @@ describe('Post Model', function () {
             });
 
             it('cannot override the published_by setting', function (done) {
-                var postId = testUtils.DataGenerator.Content.posts[3].id;
+                const postId = testUtils.DataGenerator.Content.posts[3].id;
 
                 models.Post.findOne({id: postId, status: 'draft'}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.id.should.equal(postId);
@@ -695,13 +704,16 @@ describe('Post Model', function () {
                     })
                     .then(function () {
                         return testUtils.truncate('posts');
+                    })
+                    .then(function () {
+                        return testUtils.truncate('posts_meta');
                     });
             });
 
             beforeEach(function () {
                 eventsTriggered = {};
 
-                sinon.stub(common.events, 'emit').callsFake(function (eventName, eventObj) {
+                sinon.stub(events, 'emit').callsFake(function (eventName, eventObj) {
                     if (!eventsTriggered[eventName]) {
                         eventsTriggered[eventName] = [];
                     }
@@ -711,9 +723,9 @@ describe('Post Model', function () {
             });
 
             it('can add, defaults are all correct', function (done) {
-                var createdPostUpdatedDate,
-                    newPost = testUtils.DataGenerator.forModel.posts[2],
-                    newPostDB = testUtils.DataGenerator.Content.posts[2];
+                let createdPostUpdatedDate;
+                const newPost = testUtils.DataGenerator.forModel.posts[2];
+                const newPostDB = testUtils.DataGenerator.Content.posts[2];
 
                 models.Post.add(newPost, _.merge({withRelated: ['author']}, context)).then(function (createdPost) {
                     return models.Post.findOne({id: createdPost.id, status: 'all'});
@@ -771,7 +783,7 @@ describe('Post Model', function () {
             });
 
             it('can add, default visibility is taken from settings cache', function (done) {
-                var originalSettingsCacheGetFn = settingsCache.get;
+                const originalSettingsCacheGetFn = settingsCache.get;
                 sinon.stub(settingsCache, 'get')
                     .callsFake(function (key, options) {
                         if (key === 'labs') {
@@ -785,9 +797,9 @@ describe('Post Model', function () {
                         return originalSettingsCacheGetFn(key, options);
                     });
 
-                var createdPostUpdatedDate,
-                    newPost = testUtils.DataGenerator.forModel.posts[2],
-                    newPostDB = testUtils.DataGenerator.Content.posts[2];
+                let createdPostUpdatedDate;
+                const newPost = testUtils.DataGenerator.forModel.posts[2];
+                const newPostDB = testUtils.DataGenerator.Content.posts[2];
 
                 models.Post.add(newPost, _.merge({withRelated: ['author']}, context)).then(function (createdPost) {
                     return models.Post.findOne({id: createdPost.id, status: 'all'});
@@ -845,7 +857,7 @@ describe('Post Model', function () {
             });
 
             it('can add, with previous published_at date', function (done) {
-                var previousPublishedAtDate = new Date(2013, 8, 21, 12);
+                const previousPublishedAtDate = new Date(2013, 8, 21, 12);
 
                 models.Post.add({
                     status: 'published',
@@ -925,7 +937,7 @@ describe('Post Model', function () {
                     mobiledoc: markdownToMobiledoc('This is some content')
                 }, context).catch(function (err) {
                     should.exist(err);
-                    (err instanceof common.errors.ValidationError).should.eql(true);
+                    (err instanceof errors.ValidationError).should.eql(true);
                     Object.keys(eventsTriggered).length.should.eql(0);
                     done();
                 });
@@ -939,7 +951,7 @@ describe('Post Model', function () {
                     mobiledoc: markdownToMobiledoc('This is some content')
                 }, context).catch(function (err) {
                     should.exist(err);
-                    (err instanceof common.errors.ValidationError).should.eql(true);
+                    (err instanceof errors.ValidationError).should.eql(true);
                     Object.keys(eventsTriggered).length.should.eql(0);
                     done();
                 });
@@ -952,7 +964,7 @@ describe('Post Model', function () {
                     title: 'scheduled 1',
                     mobiledoc: markdownToMobiledoc('This is some content')
                 }, context).catch(function (err) {
-                    (err instanceof common.errors.ValidationError).should.eql(true);
+                    (err instanceof errors.ValidationError).should.eql(true);
                     Object.keys(eventsTriggered).length.should.eql(0);
                     done();
                 });
@@ -991,7 +1003,7 @@ describe('Post Model', function () {
 
                     // Should have unique slugs and contents
                     _(createdPosts).each(function (post, i) {
-                        var num = i + 1;
+                        const num = i + 1;
 
                         // First one has normal title
                         if (num === 1) {
@@ -1013,7 +1025,7 @@ describe('Post Model', function () {
             });
 
             it('can generate slugs without duplicate hyphens', function (done) {
-                var newPost = {
+                const newPost = {
                     title: 'apprehensive  titles  have  too  many  spaces—and m-dashes  —  –  and also n-dashes  ',
                     mobiledoc: markdownToMobiledoc('Test Content 1')
                 };
@@ -1030,7 +1042,7 @@ describe('Post Model', function () {
             });
 
             it('can generate a safe slug when a protected keyword is used', function (done) {
-                var newPost = {
+                const newPost = {
                     title: 'rss',
                     mobiledoc: markdownToMobiledoc('Test Content 1')
                 };
@@ -1047,7 +1059,7 @@ describe('Post Model', function () {
             });
 
             it('can generate slugs without non-ascii characters', function (done) {
-                var newPost = {
+                const newPost = {
                     title: 'भुते धडकी भरवणारा आहेत',
                     mobiledoc: markdownToMobiledoc('Test Content 1')
                 };
@@ -1059,14 +1071,15 @@ describe('Post Model', function () {
             });
 
             it('detects duplicate slugs before saving', function (done) {
-                var firstPost = {
-                        title: 'First post',
-                        mobiledoc: markdownToMobiledoc('First content 1')
-                    },
-                    secondPost = {
-                        title: 'Second post',
-                        mobiledoc: markdownToMobiledoc('Second content 1')
-                    };
+                const firstPost = {
+                    title: 'First post',
+                    mobiledoc: markdownToMobiledoc('First content 1')
+                };
+
+                const secondPost = {
+                    title: 'Second post',
+                    mobiledoc: markdownToMobiledoc('Second content 1')
+                };
 
                 // Create the first post
                 models.Post.add(firstPost, context)
@@ -1115,9 +1128,9 @@ describe('Post Model', function () {
                     }).catch(done);
             });
 
-            it('transforms absolute urls to relative', function (done) {
+            it('uses parse/transform to store urls as transform-ready and read as absolute ', function (done) {
                 const post = {
-                    title: 'Absolute->Relative URL Transform Test',
+                    title: 'Absolute->Transform-ready URL Transform Test',
                     mobiledoc: '{"version":"0.3.1","atoms":[],"cards":[["image",{"src":"http://127.0.0.1:2369/content/images/card.jpg"}]],"markups":[["a",["href","http://127.0.0.1:2369/test"]]],"sections":[[1,"p",[[0,[0],1,"Testing"]]],[10,0]]}',
                     custom_excerpt: 'Testing <a href="http://127.0.0.1:2369/internal">links</a> in custom excerpts',
                     codeinjection_head: '<script src="http://127.0.0.1:2369/assets/head.js"></script>',
@@ -1131,18 +1144,18 @@ describe('Post Model', function () {
                 };
 
                 models.Post.add(post, context).then((createdPost) => {
-                    createdPost.get('mobiledoc').should.equal('{"version":"0.3.1","atoms":[],"cards":[["image",{"src":"/content/images/card.jpg"}]],"markups":[["a",["href","/test"]]],"sections":[[1,"p",[[0,[0],1,"Testing"]]],[10,0]]}');
-                    createdPost.get('html').should.equal('<p><a href="/test">Testing</a></p><figure class="kg-card kg-image-card"><img src="/content/images/card.jpg" class="kg-image"></figure>');
-                    createdPost.get('custom_excerpt').should.equal('Testing <a href="/internal">links</a> in custom excerpts');
-                    createdPost.get('codeinjection_head').should.equal('<script src="/assets/head.js"></script>');
-                    createdPost.get('codeinjection_foot').should.equal('<script src="/assets/foot.js"></script>');
-                    createdPost.get('feature_image').should.equal('/content/images/feature.png');
-                    createdPost.get('canonical_url').should.equal('/canonical');
+                    createdPost.get('mobiledoc').should.equal('{"version":"0.3.1","atoms":[],"cards":[["image",{"src":"http://127.0.0.1:2369/content/images/card.jpg"}]],"markups":[["a",["href","http://127.0.0.1:2369/test"]]],"sections":[[1,"p",[[0,[0],1,"Testing"]]],[10,0]]}');
+                    createdPost.get('html').should.equal('<p><a href="http://127.0.0.1:2369/test">Testing</a></p><figure class="kg-card kg-image-card"><img src="http://127.0.0.1:2369/content/images/card.jpg" class="kg-image" alt loading="lazy"></figure>');
+                    createdPost.get('custom_excerpt').should.equal('Testing <a href="http://127.0.0.1:2369/internal">links</a> in custom excerpts');
+                    createdPost.get('codeinjection_head').should.equal('<script src="http://127.0.0.1:2369/assets/head.js"></script>');
+                    createdPost.get('codeinjection_foot').should.equal('<script src="http://127.0.0.1:2369/assets/foot.js"></script>');
+                    createdPost.get('feature_image').should.equal('http://127.0.0.1:2369/content/images/feature.png');
+                    createdPost.get('canonical_url').should.equal('http://127.0.0.1:2369/canonical');
 
                     const postMeta = createdPost.relations.posts_meta;
 
-                    postMeta.get('og_image').should.equal('/content/images/og.png');
-                    postMeta.get('twitter_image').should.equal('/content/images/twitter.png');
+                    postMeta.get('og_image').should.equal('http://127.0.0.1:2369/content/images/og.png');
+                    postMeta.get('twitter_image').should.equal('http://127.0.0.1:2369/content/images/twitter.png');
 
                     // ensure canonical_url is not transformed when protocol does not match
                     return createdPost.save({
@@ -1152,7 +1165,20 @@ describe('Post Model', function () {
                     });
                 }).then((updatedPost) => {
                     updatedPost.get('canonical_url').should.equal('https://127.0.0.1:2369/https-internal');
-                    updatedPost.get('feature_image').should.equal('/content/images/updated_feature.png');
+                    updatedPost.get('feature_image').should.equal('http://127.0.0.1:2369/content/images/updated_feature.png');
+
+                    return updatedPost;
+                }).then((updatedPost) => {
+                    return db.knex('posts').where({id: updatedPost.id});
+                }).then((knexResult) => {
+                    const [knexPost] = knexResult;
+                    knexPost.mobiledoc.should.equal('{"version":"0.3.1","atoms":[],"cards":[["image",{"src":"__GHOST_URL__/content/images/card.jpg"}]],"markups":[["a",["href","__GHOST_URL__/test"]]],"sections":[[1,"p",[[0,[0],1,"Testing"]]],[10,0]]}');
+                    knexPost.html.should.equal('<p><a href="__GHOST_URL__/test">Testing</a></p><figure class="kg-card kg-image-card"><img src="__GHOST_URL__/content/images/card.jpg" class="kg-image" alt loading="lazy"></figure>');
+                    knexPost.custom_excerpt.should.equal('Testing <a href="__GHOST_URL__/internal">links</a> in custom excerpts');
+                    knexPost.codeinjection_head.should.equal('<script src="__GHOST_URL__/assets/head.js"></script>');
+                    knexPost.codeinjection_foot.should.equal('<script src="__GHOST_URL__/assets/foot.js"></script>');
+                    knexPost.feature_image.should.equal('__GHOST_URL__/content/images/updated_feature.png');
+                    knexPost.canonical_url.should.equal('https://127.0.0.1:2369/https-internal');
 
                     done();
                 }).catch(done);
@@ -1169,12 +1195,15 @@ describe('Post Model', function () {
                     })
                     .then(function () {
                         return testUtils.truncate('posts');
+                    })
+                    .then(function () {
+                        return testUtils.truncate('posts_meta');
                     });
             });
 
             beforeEach(function () {
                 eventsTriggered = {};
-                sinon.stub(common.events, 'emit').callsFake(function (eventName, eventObj) {
+                sinon.stub(events, 'emit').callsFake(function (eventName, eventObj) {
                     if (!eventsTriggered[eventName]) {
                         eventsTriggered[eventName] = [];
                     }
@@ -1185,11 +1214,11 @@ describe('Post Model', function () {
 
             it('published post', function (done) {
                 // We're going to try deleting post id 1 which has tag id 1
-                var firstItemData = {id: testUtils.DataGenerator.Content.posts[0].id};
+                const firstItemData = {id: testUtils.DataGenerator.Content.posts[0].id};
 
                 // Test that we have the post we expect, with exactly one tag
                 models.Post.findOne(firstItemData, {withRelated: ['tags']}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.id.should.equal(firstItemData.id);
@@ -1200,7 +1229,7 @@ describe('Post Model', function () {
                     // Destroy the post
                     return results.destroy();
                 }).then(function (response) {
-                    var deleted = response.toJSON();
+                    const deleted = response.toJSON();
 
                     should.equal(deleted.author, undefined);
 
@@ -1227,11 +1256,11 @@ describe('Post Model', function () {
 
             it('draft post', function (done) {
                 // We're going to try deleting post 4 which also has tag 4
-                var firstItemData = {id: testUtils.DataGenerator.Content.posts[3].id, status: 'draft'};
+                const firstItemData = {id: testUtils.DataGenerator.Content.posts[3].id, status: 'draft'};
 
                 // Test that we have the post we expect, with exactly one tag
                 models.Post.findOne(firstItemData, {withRelated: ['tags']}).then(function (results) {
-                    var post;
+                    let post;
                     should.exist(results);
                     post = results.toJSON();
                     post.id.should.equal(firstItemData.id);
@@ -1241,7 +1270,7 @@ describe('Post Model', function () {
                     // Destroy the post
                     return results.destroy(firstItemData);
                 }).then(function (response) {
-                    var deleted = response.toJSON();
+                    const deleted = response.toJSON();
 
                     should.equal(deleted.author, undefined);
 
@@ -1267,11 +1296,11 @@ describe('Post Model', function () {
 
             it('published page', function (done) {
                 // We're going to try deleting page 6 which has tag 1
-                var firstItemData = {id: testUtils.DataGenerator.Content.posts[5].id};
+                const firstItemData = {id: testUtils.DataGenerator.Content.posts[5].id};
 
                 // Test that we have the post we expect, with exactly one tag
                 models.Post.findOne(firstItemData, {withRelated: ['tags']}).then(function (results) {
-                    var page;
+                    let page;
                     should.exist(results);
                     page = results.toJSON();
                     page.id.should.equal(firstItemData.id);
@@ -1281,7 +1310,7 @@ describe('Post Model', function () {
                     // Destroy the page
                     return results.destroy(firstItemData);
                 }).then(function (response) {
-                    var deleted = response.toJSON();
+                    const deleted = response.toJSON();
 
                     should.equal(deleted.author, undefined);
 
@@ -1306,11 +1335,11 @@ describe('Post Model', function () {
 
             it('draft page', function (done) {
                 // We're going to try deleting post 7 which has tag 4
-                var firstItemData = {id: testUtils.DataGenerator.Content.posts[6].id, status: 'draft'};
+                const firstItemData = {id: testUtils.DataGenerator.Content.posts[6].id, status: 'draft'};
 
                 // Test that we have the post we expect, with exactly one tag
                 models.Post.findOne(firstItemData, {withRelated: ['tags']}).then(function (results) {
-                    var page;
+                    let page;
                     should.exist(results);
                     page = results.toJSON();
                     page.id.should.equal(firstItemData.id);
@@ -1318,7 +1347,7 @@ describe('Post Model', function () {
                     // Destroy the page
                     return results.destroy(firstItemData);
                 }).then(function (response) {
-                    var deleted = response.toJSON();
+                    const deleted = response.toJSON();
 
                     should.equal(deleted.author, undefined);
 
@@ -1351,11 +1380,14 @@ describe('Post Model', function () {
                     })
                     .then(function () {
                         return testUtils.truncate('posts');
+                    })
+                    .then(function () {
+                        return testUtils.truncate('posts_meta');
                     });
             });
 
             it('update post title, but updated_at is out of sync', function () {
-                var postToUpdate = {id: testUtils.DataGenerator.Content.posts[1].id};
+                const postToUpdate = {id: testUtils.DataGenerator.Content.posts[1].id};
 
                 return models.Post.edit({
                     title: 'New Post Title',
@@ -1370,7 +1402,7 @@ describe('Post Model', function () {
             });
 
             it('update post tags and updated_at is out of sync', function () {
-                var postToUpdate = {id: testUtils.DataGenerator.Content.posts[1].id};
+                const postToUpdate = {id: testUtils.DataGenerator.Content.posts[1].id};
 
                 return models.Post.edit({
                     tags: [{name: 'new-tag-1'}],
@@ -1385,7 +1417,7 @@ describe('Post Model', function () {
             });
 
             it('update post authors and updated_at is out of sync', function () {
-                var postToUpdate = {id: testUtils.DataGenerator.Content.posts[1].id};
+                const postToUpdate = {id: testUtils.DataGenerator.Content.posts[1].id};
 
                 return models.Post.edit({
                     authors: [testUtils.DataGenerator.Content.users[3]],
@@ -1400,7 +1432,7 @@ describe('Post Model', function () {
             });
 
             it('update post tags and updated_at is NOT out of sync', function () {
-                var postToUpdate = {id: testUtils.DataGenerator.Content.posts[1].id};
+                const postToUpdate = {id: testUtils.DataGenerator.Content.posts[1].id};
 
                 return models.Post.edit({
                     tags: [{name: 'new-tag-1'}]
@@ -1408,7 +1440,7 @@ describe('Post Model', function () {
             });
 
             it('update post with no changes, but updated_at is out of sync', function () {
-                var postToUpdate = {id: testUtils.DataGenerator.Content.posts[1].id};
+                const postToUpdate = {id: testUtils.DataGenerator.Content.posts[1].id};
 
                 return models.Post.edit({
                     updated_at: moment().subtract(1, 'day').format()
@@ -1416,7 +1448,7 @@ describe('Post Model', function () {
             });
 
             it('update post with old post title, but updated_at is out of sync', function () {
-                var postToUpdate = {
+                const postToUpdate = {
                     id: testUtils.DataGenerator.Content.posts[1].id,
                     title: testUtils.DataGenerator.forModel.posts[1].title
                 };
@@ -1556,7 +1588,7 @@ describe('Post Model', function () {
 
         it('can destroy multiple posts by author', function (done) {
             // We're going to delete all posts by user 1
-            var authorData = {id: testUtils.DataGenerator.Content.users[0].id};
+            const authorData = {id: testUtils.DataGenerator.Content.users[0].id};
 
             models.Post.findAll({context: {internal: true}}).then(function (found) {
                 // There are 10 posts created by posts:mu fixture
@@ -1577,10 +1609,10 @@ describe('Post Model', function () {
     });
 
     describe('Post tag handling edge cases', function () {
-        var postJSON,
-            tagJSON,
-            editOptions,
-            createTag = testUtils.DataGenerator.forKnex.createTag;
+        let postJSON;
+        let tagJSON;
+        let editOptions;
+        const createTag = testUtils.DataGenerator.forKnex.createTag;
 
         beforeEach(function () {
             return testUtils.truncate('posts_tags')
@@ -1589,23 +1621,28 @@ describe('Post Model', function () {
                 })
                 .then(function () {
                     return testUtils.truncate('posts');
+                })
+                .then(function () {
+                    return testUtils.truncate('posts_meta');
                 });
         });
 
         beforeEach(function () {
             tagJSON = [];
 
-            var post = _.cloneDeep(testUtils.DataGenerator.forModel.posts[0]),
-                postTags = [
-                    createTag({name: 'tag1', slug: 'tag1'}),
-                    createTag({name: 'tag2', slug: 'tag2'}),
-                    createTag({name: 'tag3', slug: 'tag3'})
-                ],
-                extraTags = [
-                    createTag({name: 'existing tag a', slug: 'existing-tag-a'}),
-                    createTag({name: 'existing-tag-b', slug: 'existing-tag-b'}),
-                    createTag({name: 'existing_tag_c', slug: 'existing_tag_c'})
-                ];
+            const post = _.cloneDeep(testUtils.DataGenerator.forModel.posts[0]);
+
+            const postTags = [
+                createTag({name: 'tag1', slug: 'tag1'}),
+                createTag({name: 'tag2', slug: 'tag2'}),
+                createTag({name: 'tag3', slug: 'tag3'})
+            ];
+
+            const extraTags = [
+                createTag({name: 'existing tag a', slug: 'existing-tag-a'}),
+                createTag({name: 'existing-tag-b', slug: 'existing-tag-b'}),
+                createTag({name: 'existing_tag_c', slug: 'existing_tag_c'})
+            ];
 
             post.tags = postTags;
             post.status = 'published';
@@ -1650,7 +1687,7 @@ describe('Post Model', function () {
         });
 
         it('can edit slug of existing tag', function () {
-            var newJSON = _.cloneDeep(postJSON);
+            const newJSON = _.cloneDeep(postJSON);
 
             // Add an existing tag to the beginning of the array
             newJSON.tags = [{id: postJSON.tags[0].id, slug: 'eins'}];
@@ -1667,7 +1704,9 @@ describe('Post Model', function () {
         });
 
         it('can\'t edit dates and authors of existing tag', function () {
-            var newJSON = _.cloneDeep(postJSON), updatedAtFormat, createdAtFormat;
+            const newJSON = _.cloneDeep(postJSON);
+            let updatedAtFormat;
+            let createdAtFormat;
 
             // Add an existing tag to the beginning of the array
             newJSON.tags = [_.cloneDeep(postJSON.tags[0])];
@@ -1706,8 +1745,8 @@ describe('Post Model', function () {
         });
 
         it('can reorder existing, added and deleted tags', function () {
-            var newJSON = _.cloneDeep(postJSON),
-                lastTag = [postJSON.tags[2]];
+            const newJSON = _.cloneDeep(postJSON);
+            const lastTag = [postJSON.tags[2]];
 
             // remove tag in the middle (tag1, tag2, tag3 -> tag1, tag3)
             newJSON.tags.splice(1, 1);
@@ -1737,7 +1776,7 @@ describe('Post Model', function () {
         });
 
         it('can add multiple tags with conflicting slugs', function () {
-            var newJSON = _.cloneDeep(postJSON);
+            const newJSON = _.cloneDeep(postJSON);
 
             // Add conflicting tags to the end of the array
             newJSON.tags = [];
@@ -1758,7 +1797,7 @@ describe('Post Model', function () {
         });
 
         it('can handle lowercase/uppercase tags', function () {
-            var newJSON = _.cloneDeep(postJSON);
+            const newJSON = _.cloneDeep(postJSON);
 
             // Add conflicting tags to the end of the array
             newJSON.tags = [];

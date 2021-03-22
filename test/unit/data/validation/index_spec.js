@@ -1,9 +1,9 @@
-var should = require('should'),
-    _ = require('lodash'),
-    ObjectId = require('bson-objectid'),
-    testUtils = require('../../../utils'),
-    models = require('../../../../core/server/models'),
-    validation = require('../../../../core/server/data/validation');
+const should = require('should');
+const _ = require('lodash');
+const ObjectId = require('bson-objectid');
+const testUtils = require('../../../utils');
+const models = require('../../../../core/server/models');
+const validation = require('../../../../core/server/data/validation');
 
 // Validate our customisations
 describe('Validation', function () {
@@ -15,13 +15,12 @@ describe('Validation', function () {
         should.exist(validation);
 
         validation.should.have.properties(
-            ['validate', 'validator', 'validateSchema', 'validateSettings']
+            ['validate', 'validator', 'validateSchema']
         );
 
         validation.validate.should.be.a.Function();
         validation.validatePassword.should.be.a.Function();
         validation.validateSchema.should.be.a.Function();
-        validation.validateSettings.should.be.a.Function();
 
         validation.validator.should.have.properties(['empty', 'notContains', 'isTimezone', 'isEmptyOrURL', 'isSlug']);
     });
@@ -103,7 +102,10 @@ describe('Validation', function () {
 
         describe('webhooks.add', function () {
             it('event name is not lowercase', function () {
-                const webhook = models.Webhook.forge(testUtils.DataGenerator.forKnex.createWebhook({event: 'Test'}));
+                const webhook = models.Webhook.forge(testUtils.DataGenerator.forKnex.createWebhook({
+                    event: 'Test',
+                    integration_id: testUtils.DataGenerator.Content.integrations[0].id
+                }));
 
                 // NOTE: Fields with `defaultTo` are getting ignored. This is handled on the DB level.
                 return validation.validateSchema('webhooks', webhook, {method: 'insert'})
@@ -117,6 +119,7 @@ describe('Validation', function () {
 
                         err.length.should.eql(1);
                         err[0].errorType.should.eql('ValidationError');
+                        err[0].message.should.match(/isLowercase/);
                     });
             });
         });
@@ -163,7 +166,7 @@ describe('Validation', function () {
     });
 
     describe('Assert the Validator dependency', function () {
-        var validator = validation.validator;
+        const validator = validation.validator;
 
         it('isEmptyOrUrl filters javascript urls', function () {
             validator.isEmptyOrURL('javascript:alert(0)').should.be.false();

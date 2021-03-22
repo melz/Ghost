@@ -21,9 +21,9 @@ const mapTag = (model, frame) => {
     const jsonModel = model.toJSON ? model.toJSON(frame.options) : model;
 
     url.forTag(model.id, jsonModel, frame.options);
-    clean.tag(jsonModel, frame);
+    const cleanedAttrs = clean.tag(jsonModel, frame);
 
-    return jsonModel;
+    return cleanedAttrs;
 };
 
 const mapPost = (model, frame) => {
@@ -34,6 +34,8 @@ const mapPost = (model, frame) => {
     const jsonModel = model.toJSON(extendedOptions);
 
     url.forPost(model.id, jsonModel, frame);
+
+    extraAttrs.forPost(frame, model, jsonModel);
 
     if (utils.isContentAPI(frame)) {
         // Content api v2 still expects page prop
@@ -48,7 +50,6 @@ const mapPost = (model, frame) => {
         gating.forPost(jsonModel, frame);
     }
 
-    extraAttrs.forPost(frame, model, jsonModel);
     clean.post(jsonModel, frame);
 
     if (frame.options && frame.options.withRelated) {
@@ -76,6 +77,7 @@ const mapPost = (model, frame) => {
 
     delete jsonModel.posts_meta;
     delete jsonModel.send_email_when_published;
+    delete jsonModel.email_recipient_filter;
     delete jsonModel.email_subject;
 
     return jsonModel;
@@ -84,6 +86,20 @@ const mapPost = (model, frame) => {
 const mapSettings = (attrs, frame) => {
     url.forSettings(attrs);
     extraAttrs.forSettings(attrs, frame);
+
+    if (_.isArray(attrs)) {
+        const DEPRECATED_KEYS = ['lang', 'timezone', 'accent_color', 'slack_url', 'slack_username'];
+        attrs = _.filter(attrs, (o) => {
+            return !DEPRECATED_KEYS.includes(o.key);
+        });
+    } else {
+        delete attrs.lang;
+        delete attrs.timezone;
+        delete attrs.codeinjection_head;
+        delete attrs.codeinjection_foot;
+        delete attrs.accent_color;
+    }
+
     return attrs;
 };
 

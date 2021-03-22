@@ -2,10 +2,10 @@ const hbs = require('express-hbs');
 const _ = require('lodash');
 const debug = require('ghost-ignition').debug('error-handler');
 const errors = require('@tryghost/errors');
-const config = require('../../../config');
+const config = require('../../../../shared/config');
 const {i18n} = require('../../../lib/common');
 const helpers = require('../../../../frontend/services/routing/helpers');
-const sentry = require('../../../sentry');
+const sentry = require('../../../../shared/sentry');
 
 const escapeExpression = hbs.Utils.escapeExpression;
 const _private = {};
@@ -41,12 +41,12 @@ _private.prepareError = (err, req, res, next) => {
             err = new errors.NotFoundError({
                 err: err
             });
-        } else if (err instanceof TypeError && err.stack.match(/node_modules\/handlebars\//)) {
+        } else if (err.stack.match(/node_modules\/handlebars\//)) {
             // Temporary handling of theme errors from handlebars
             // @TODO remove this when #10496 is solved properly
             err = new errors.IncorrectUsageError({
                 err: err,
-                message: '{{#if}} or {{#unless}} helper is malformed',
+                message: err.message,
                 statusCode: err.statusCode
             });
         } else {
@@ -187,17 +187,17 @@ _private.ThemeErrorRenderer = (err, req, res, next) => {
 
     // @TODO use renderer here?!
     // Render Call - featuring an error handler for what happens if rendering fails
-    res.render(res._template, data, (err, html) => {
-        if (!err) {
+    res.render(res._template, data, (_err, html) => {
+        if (!_err) {
             return res.send(html);
         }
 
         // re-attach new error e.g. error template has syntax error or misusage
-        req.err = err;
+        req.err = _err;
 
         // And then try to explain things to the user...
         // Cheat and output the error using handlebars escapeExpression
-        return res.status(500).send(_private.ErrorFallbackMessage(err));
+        return res.status(500).send(_private.ErrorFallbackMessage(_err));
     });
 };
 
@@ -218,17 +218,17 @@ _private.HTMLErrorRenderer = (err, req, res, next) => { // eslint-disable-line n
         req.app.set('views', config.get('paths').defaultViews);
     }
 
-    res.render('error', data, (err, html) => {
-        if (!err) {
+    res.render('error', data, (_err, html) => {
+        if (!_err) {
             return res.send(html);
         }
 
         // re-attach new error e.g. error template has syntax error or misusage
-        req.err = err;
+        req.err = _err;
 
         // And then try to explain things to the user...
         // Cheat and output the error using handlebars escapeExpression
-        return res.status(500).send(_private.ErrorFallbackMessage(err));
+        return res.status(500).send(_private.ErrorFallbackMessage(_err));
     });
 };
 

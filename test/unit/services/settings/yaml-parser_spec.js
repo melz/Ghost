@@ -1,16 +1,15 @@
-const sinon = require('sinon'),
-    should = require('should'),
-    fs = require('fs-extra'),
-    yaml = require('js-yaml'),
-    path = require('path'),
-
-    yamlParser = require('../../../../core/frontend/services/settings/yaml-parser');
+const sinon = require('sinon');
+const should = require('should');
+const fs = require('fs-extra');
+const yaml = require('js-yaml');
+const path = require('path');
+const yamlParser = require('../../../../core/frontend/services/settings/yaml-parser');
 
 describe('UNIT > Settings Service yaml parser:', function () {
     let yamlSpy;
 
     beforeEach(function () {
-        yamlSpy = sinon.spy(yaml, 'safeLoad');
+        yamlSpy = sinon.spy(yaml, 'load');
     });
 
     afterEach(function () {
@@ -36,7 +35,7 @@ describe('UNIT > Settings Service yaml parser:', function () {
             } catch (error) {
                 should.exist(error);
                 error.message.should.eql('Could not parse badroutes.yaml: bad indentation of a mapping entry.');
-                error.context.should.containEql('bad indentation of a mapping entry at line 5, column 14');
+                error.context.should.containEql('bad indentation of a mapping entry (5:14)');
                 error.help.should.eql('Check your badroutes.yaml file for typos and fix the named issues.');
                 yamlSpy.calledOnce.should.be.true();
             }

@@ -2,8 +2,8 @@ const crypto = require('crypto');
 const fs = require('fs-extra');
 const path = require('path');
 const errors = require('@tryghost/errors');
-const config = require('../../../config');
-const urlUtils = require('../../../lib/url-utils');
+const config = require('../../../../shared/config');
+const urlUtils = require('../../../../shared/url-utils');
 const {i18n} = require('../../../lib/common');
 
 function createPublicFileMiddleware(file, type, maxAge) {
@@ -11,9 +11,8 @@ function createPublicFileMiddleware(file, type, maxAge) {
     const publicFilePath = config.get('paths').publicFilePath;
     const filePath = file.match(/^public/) ? path.join(publicFilePath, file.replace(/^public/, '')) : path.join(publicFilePath, file);
     const blogRegex = /(\{\{blog-url\}\})/g;
-    const adminRegex = /(\{\{admin-url\}\})/g;
 
-    return function servePublicFile(req, res, next) {
+    return function servePublicFileMiddleware(req, res, next) {
         if (content) {
             res.writeHead(200, content.headers);
             return res.end(content.body);
@@ -47,7 +46,6 @@ function createPublicFileMiddleware(file, type, maxAge) {
 
             if (type === 'text/xsl' || type === 'text/plain' || type === 'application/javascript') {
                 str = str.replace(blogRegex, urlUtils.urlFor('home', true).replace(/\/$/, ''));
-                str = str.replace(adminRegex, urlUtils.urlFor('admin', true).replace(/\/$/, ''));
             }
 
             content = {
@@ -70,7 +68,7 @@ function createPublicFileMiddleware(file, type, maxAge) {
 function servePublicFile(file, type, maxAge) {
     const publicFileMiddleware = createPublicFileMiddleware(file, type, maxAge);
 
-    return function servePublicFile(req, res, next) {
+    return function servePublicFileMiddleware(req, res, next) {
         if (req.path === '/' + file) {
             return publicFileMiddleware(req, res, next);
         } else {

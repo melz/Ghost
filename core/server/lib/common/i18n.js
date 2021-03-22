@@ -8,7 +8,8 @@ const isEqual = require('lodash/isEqual');
 const isNil = require('lodash/isNil');
 const merge = require('lodash/merge');
 const get = require('lodash/get');
-const {errors, logging} = require('./');
+const errors = require('@tryghost/errors');
+const logging = require('../../../shared/logging');
 
 class I18n {
     constructor(locale) {
@@ -38,14 +39,15 @@ class I18n {
     /**
      * Helper method to find and compile the given data context with a proper string resource.
      *
-     * @param {string} path Path with in the JSON language file to desired string (ie: "errors.init.jsNotBuilt")
+     * @param {string} translationPath Path within the JSON language file to desired string (ie: "errors.init.jsNotBuilt")
      * @param {object} [bindings]
      * @returns {string}
      */
-    t(path, bindings) {
-        let string, msg;
+    t(translationPath, bindings) {
+        let string;
+        let msg;
 
-        string = this._findString(path);
+        string = this._findString(translationPath);
 
         // If the path returns an array (as in the case with anything that has multiple paragraphs such as emails), then
         // loop through them and return an array of translated/formatted strings. Otherwise, just return the normal
@@ -99,8 +101,8 @@ class I18n {
         // While bracket-notation allows any Unicode characters in keys for themes,
         // dot-notation allows only word characters in keys for backend messages
         // (that is \w or [A-Za-z0-9_] in RegExp)
-        let path = `$.${msgPath}`;
-        return jp.value(this._strings, path);
+        let jsonPath = `$.${msgPath}`;
+        return jp.value(this._strings, jsonPath);
     }
 
     /**
@@ -111,7 +113,8 @@ class I18n {
      */
     _findString(msgPath, opts) {
         const options = merge({log: true}, opts || {});
-        let candidateString, matchingString;
+        let candidateString;
+        let matchingString;
 
         // no path? no string
         if (msgPath.length === 0 || !isString(msgPath)) {
@@ -179,7 +182,8 @@ class I18n {
      *  - Polyfill node.js if it does not have Intl support or support for a particular locale
      */
     _initializeIntl() {
-        let hasBuiltInLocaleData, IntlPolyfill;
+        let hasBuiltInLocaleData;
+        let IntlPolyfill;
 
         if (global.Intl) {
             // Determine if the built-in `Intl` has the locale data we need.

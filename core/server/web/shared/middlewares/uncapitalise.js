@@ -13,7 +13,7 @@
 //  req.path =  /ghost/signin/
 
 const errors = require('@tryghost/errors');
-const urlUtils = require('../../../lib/url-utils');
+const urlUtils = require('../../../../shared/url-utils');
 const {i18n} = require('../../../lib/common');
 const localUtils = require('../utils');
 
@@ -22,8 +22,8 @@ const uncapitalise = (req, res, next) => {
     let redirectPath;
     let decodedURI;
 
-    const isSignupOrReset = pathToTest.match(/^(.*\/ghost\/(signup|reset)\/)/i),
-        isAPI = pathToTest.match(/^(.*\/ghost\/api\/(v[\d.]+|canary)\/.*?\/)/i);
+    const isSignupOrReset = pathToTest.match(/^(.*\/ghost\/(signup|reset)\/)/i);
+    const isAPI = pathToTest.match(/^(.*\/ghost\/api\/(v[\d.]+|canary)\/.*?\/)/i);
 
     if (isSignupOrReset) {
         pathToTest = isSignupOrReset[1];

@@ -1,15 +1,16 @@
+const _ = require('lodash');
 const should = require('should');
 const supertest = require('supertest');
 const ObjectId = require('bson-objectid');
 const moment = require('moment-timezone');
 const testUtils = require('../../../../utils');
-const config = require('../../../../../core/server/config');
+const config = require('../../../../../core/shared/config');
 const models = require('../../../../../core/server/models');
 const localUtils = require('./utils');
 const ghost = testUtils.startGhost;
 let request;
 
-describe('Posts API', function () {
+describe('Posts API (canary)', function () {
     let ghostServer;
     let ownerCookie;
 
@@ -89,6 +90,167 @@ describe('Posts API', function () {
                     done();
                 });
         });
+
+        it('can filter by fields coming from posts_meta table non null meta_description', function (done) {
+            request.get(localUtils.API.getApiQuery(`posts/?filter=meta_description:-null`))
+                .set('Origin', config.get('url'))
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    should.not.exist(res.headers['x-cache-invalidate']);
+                    const jsonResponse = res.body;
+                    should.exist(jsonResponse.posts);
+                    localUtils.API.checkResponse(jsonResponse, 'posts');
+                    jsonResponse.posts.should.have.length(2);
+                    jsonResponse.posts.forEach((post) => {
+                        should.notEqual(post.meta_description, null);
+                    });
+
+                    localUtils.API.checkResponse(
+                        jsonResponse.posts[0],
+                        'post'
+                    );
+
+                    localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
+
+                    done();
+                });
+        });
+
+        it('can filter by fields coming from posts_meta table by value', function (done) {
+            request.get(localUtils.API.getApiQuery(`posts/?filter=meta_description:'meta description for short and sweet'`))
+                .set('Origin', config.get('url'))
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    should.not.exist(res.headers['x-cache-invalidate']);
+                    const jsonResponse = res.body;
+                    should.exist(jsonResponse.posts);
+                    localUtils.API.checkResponse(jsonResponse, 'posts');
+                    jsonResponse.posts.should.have.length(1);
+                    jsonResponse.posts[0].id.should.equal(testUtils.DataGenerator.Content.posts[2].id);
+                    jsonResponse.posts[0].meta_description.should.equal('meta description for short and sweet');
+
+                    localUtils.API.checkResponse(
+                        jsonResponse.posts[0],
+                        'post'
+                    );
+
+                    localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
+
+                    done();
+                });
+        });
+
+        it('can order by fields coming from posts_meta table', function (done) {
+            request.get(localUtils.API.getApiQuery('posts/?order=meta_description%20ASC'))
+                .set('Origin', config.get('url'))
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    should.not.exist(res.headers['x-cache-invalidate']);
+                    const jsonResponse = res.body;
+                    should.exist(jsonResponse.posts);
+                    localUtils.API.checkResponse(jsonResponse, 'posts');
+                    jsonResponse.posts.should.have.length(13);
+
+                    should.equal(jsonResponse.posts[0].meta_description, null);
+                    jsonResponse.posts[12].slug.should.equal('short-and-sweet');
+                    jsonResponse.posts[12].meta_description.should.equal('meta description for short and sweet');
+
+                    localUtils.API.checkResponse(
+                        jsonResponse.posts[0],
+                        'post'
+                    );
+
+                    localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
+
+                    done();
+                });
+        });
+
+        it('can order by email open rate', async function () {
+            try {
+                await testUtils.createEmailedPost({
+                    postOptions: {
+                        post: {
+                            slug: '80-open-rate'
+                        }
+                    },
+                    emailOptions: {
+                        email: {
+                            email_count: 100,
+                            opened_count: 80,
+                            track_opens: true
+                        }
+                    }
+                });
+
+                await testUtils.createEmailedPost({
+                    postOptions: {
+                        post: {
+                            slug: '60-open-rate'
+                        }
+                    },
+                    emailOptions: {
+                        email: {
+                            email_count: 100,
+                            opened_count: 60,
+                            track_opens: true
+                        }
+                    }
+                });
+            } catch (err) {
+                if (_.isArray(err)) {
+                    throw err[0];
+                }
+                throw err;
+            }
+
+            await request.get(localUtils.API.getApiQuery('posts/?order=email.open_rate%20DESC'))
+                .set('Origin', config.get('url'))
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(200)
+                .then((res) => {
+                    should.not.exist(res.headers['x-cache-invalidate']);
+                    const jsonResponse = res.body;
+                    should.exist(jsonResponse.posts);
+                    localUtils.API.checkResponse(jsonResponse, 'posts');
+                    jsonResponse.posts.should.have.length(15);
+
+                    jsonResponse.posts[0].slug.should.equal('80-open-rate', 'DESC 1st');
+                    jsonResponse.posts[1].slug.should.equal('60-open-rate', 'DESC 2nd');
+
+                    localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
+                });
+
+            await request.get(localUtils.API.getApiQuery('posts/?order=email.open_rate%20ASC'))
+                .set('Origin', config.get('url'))
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(200)
+                .then((res) => {
+                    const jsonResponse = res.body;
+                    jsonResponse.posts[0].slug.should.equal('60-open-rate', 'ASC 1st');
+                    jsonResponse.posts[1].slug.should.equal('80-open-rate', 'ASC 2nd');
+                });
+        });
     });
 
     describe('Read', function () {
@@ -105,7 +267,7 @@ describe('Posts API', function () {
                     }
 
                     should.not.exist(res.headers['x-cache-invalidate']);
-                    var jsonResponse = res.body;
+                    const jsonResponse = res.body;
                     should.exist(jsonResponse);
                     should.exist(jsonResponse.errors);
                     testUtils.API.checkResponseValue(jsonResponse.errors[0], [
@@ -140,6 +302,9 @@ describe('Posts API', function () {
                     should.exist(res.body.posts);
                     should.exist(res.body.posts[0].title);
                     res.body.posts[0].title.should.equal('(Untitled)');
+
+                    should.exist(res.headers.location);
+                    res.headers.location.should.equal(`http://127.0.0.1:2369${localUtils.API.getApiQuery('posts/')}${res.body.posts[0].id}/`);
                 });
         });
     });
@@ -366,6 +531,77 @@ describe('Posts API', function () {
                     should.exist(res.body.posts);
                     should.exist(res.body.posts[0].visibility);
                     res.body.posts[0].visibility.should.equal('members');
+                });
+        });
+
+        it('changes to post_meta fields triggers a cache invalidation', function () {
+            return request
+                .get(localUtils.API.getApiQuery(`posts/${testUtils.DataGenerator.Content.posts[0].id}/`))
+                .set('Origin', config.get('url'))
+                .expect(200)
+                .then((res) => {
+                    return request
+                        .put(localUtils.API.getApiQuery('posts/' + testUtils.DataGenerator.Content.posts[0].id + '/'))
+                        .set('Origin', config.get('url'))
+                        .send({
+                            posts: [{
+                                meta_title: 'changed meta title',
+                                updated_at: res.body.posts[0].updated_at
+                            }]
+                        })
+                        .expect('Content-Type', /json/)
+                        .expect('Cache-Control', testUtils.cacheRules.private)
+                        .expect(200);
+                })
+                .then((res) => {
+                    should.exist(res.headers['x-cache-invalidate']);
+
+                    should.exist(res.body.posts);
+                    should.equal(res.body.posts[0].meta_title, 'changed meta title');
+                });
+        });
+
+        it('saving post with no modbiledoc content doesn\t trigger cache invalidation', function () {
+            return request
+                .post(localUtils.API.getApiQuery('posts/'))
+                .set('Origin', config.get('url'))
+                .send({
+                    posts: [{
+                        title: 'Has a title by no other content',
+                        status: 'published'
+                    }]
+                })
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(201)
+                .then((res) => {
+                    should.exist(res.body.posts);
+                    should.exist(res.body.posts[0].title);
+                    res.body.posts[0].title.should.equal('Has a title by no other content');
+                    should.equal(res.body.posts[0].html, undefined);
+                    should.equal(res.body.posts[0].plaintext, undefined);
+
+                    return request
+                        .put(localUtils.API.getApiQuery(`posts/${res.body.posts[0].id}/`))
+                        .set('Origin', config.get('url'))
+                        .send({
+                            posts: [{
+                                title: res.body.posts[0].title,
+                                mobilecdoc: res.body.posts[0].mobilecdoc,
+                                updated_at: res.body.posts[0].updated_at
+                            }]
+                        })
+                        .expect('Content-Type', /json/)
+                        .expect('Cache-Control', testUtils.cacheRules.private)
+                        .expect(200);
+                })
+                .then((res) => {
+                    should.not.exist(res.headers['x-cache-invalidate']);
+
+                    should.exist(res.body.posts);
+                    res.body.posts[0].title.should.equal('Has a title by no other content');
+                    should.equal(res.body.posts[0].html, undefined);
+                    should.equal(res.body.posts[0].plaintext, undefined);
                 });
         });
     });

@@ -4,9 +4,9 @@ const supertest = require('supertest');
 const localUtils = require('./utils');
 const testUtils = require('../../../../utils/index');
 const models = require('../../../../../core/server/models/index');
-const security = require('../../../../../core/server/lib/security/index');
+const security = require('@tryghost/security');
 const settingsCache = require('../../../../../core/server/services/settings/cache');
-const config = require('../../../../../core/server/config/index');
+const config = require('../../../../../core/shared/config/index');
 const mailService = require('../../../../../core/server/services/mail/index');
 
 let ghost = testUtils.startGhost;
@@ -193,6 +193,22 @@ describe('Authentication API v3', function () {
                 .expect(404);
         });
 
+        it('try to accept with invite and existing email address', function () {
+            return request
+                .post(localUtils.API.getApiQuery('authentication/invitation'))
+                .set('Origin', config.get('url'))
+                .send({
+                    invitation: [{
+                        token: testUtils.DataGenerator.forKnex.invites[0].token,
+                        password: '12345678910',
+                        email: testUtils.DataGenerator.forKnex.users[0].email,
+                        name: 'invited'
+                    }]
+                })
+                .expect('Content-Type', /json/)
+                .expect(422);
+        });
+
         it('try to accept with invite', function () {
             return request
                 .post(localUtils.API.getApiQuery('authentication/invitation'))
@@ -237,7 +253,7 @@ describe('Authentication API v3', function () {
         it('reset password', function (done) {
             models.User.getOwnerUser(testUtils.context.internal)
                 .then(function (ownerUser) {
-                    var token = security.tokens.resetToken.generateHash({
+                    const token = security.tokens.resetToken.generateHash({
                         expires: Date.now() + (1000 * 60),
                         email: user.email,
                         dbHash: settingsCache.get('db_hash'),
@@ -285,7 +301,77 @@ describe('Authentication API v3', function () {
                 })
                 .expect('Content-Type', /json/)
                 .expect('Cache-Control', testUtils.cacheRules.private)
-                .expect(401);
+                .expect(401)
+                .then((res) => {
+                    should.exist(res.body.errors);
+                    res.body.errors[0].type.should.eql('UnauthorizedError');
+                    res.body.errors[0].message.should.eql('Cannot reset password.');
+                    res.body.errors[0].context.should.eql('Invalid password reset link.');
+                });
+        });
+
+        it('reset password: expired token', function () {
+            return models.User.getOwnerUser(testUtils.context.internal)
+                .then(function (ownerUser) {
+                    const dateInThePast = Date.now() - (1000 * 60);
+                    const token = security.tokens.resetToken.generateHash({
+                        expires: dateInThePast,
+                        email: user.email,
+                        dbHash: settingsCache.get('db_hash'),
+                        password: ownerUser.get('password')
+                    });
+
+                    return request
+                        .put(localUtils.API.getApiQuery('authentication/passwordreset'))
+                        .set('Origin', config.get('url'))
+                        .set('Accept', 'application/json')
+                        .send({
+                            passwordreset: [{
+                                token: token,
+                                newPassword: 'thisissupersafe',
+                                ne2Password: 'thisissupersafe'
+                            }]
+                        })
+                        .expect('Content-Type', /json/)
+                        .expect('Cache-Control', testUtils.cacheRules.private)
+                        .expect(400);
+                })
+                .then((res) => {
+                    should.exist(res.body.errors);
+                    res.body.errors[0].type.should.eql('BadRequestError');
+                    res.body.errors[0].message.should.eql('Cannot reset password.');
+                    res.body.errors[0].context.should.eql('Password reset link expired.');
+                });
+        });
+
+        it('reset password: unmatched token', function () {
+            const token = security.tokens.resetToken.generateHash({
+                expires: Date.now() + (1000 * 60),
+                email: user.email,
+                dbHash: settingsCache.get('db_hash'),
+                password: 'invalid_password'
+            });
+
+            return request
+                .put(localUtils.API.getApiQuery('authentication/passwordreset'))
+                .set('Origin', config.get('url'))
+                .set('Accept', 'application/json')
+                .send({
+                    passwordreset: [{
+                        token: token,
+                        newPassword: 'thisissupersafe',
+                        ne2Password: 'thisissupersafe'
+                    }]
+                })
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(400)
+                .then((res) => {
+                    should.exist(res.body.errors);
+                    res.body.errors[0].type.should.eql('BadRequestError');
+                    res.body.errors[0].message.should.eql('Cannot reset password.');
+                    res.body.errors[0].context.should.eql('Password reset link has already been used.');
+                });
         });
 
         it('reset password: generate reset token', function () {

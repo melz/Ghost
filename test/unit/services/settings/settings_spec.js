@@ -1,8 +1,8 @@
-const sinon = require('sinon'),
-    should = require('should'),
-    rewire = require('rewire'),
-    common = require('../../../../core/server/lib/common'),
-    settings = rewire('../../../../core/frontend/services/settings');
+const sinon = require('sinon');
+const should = require('should');
+const rewire = require('rewire');
+const errors = require('@tryghost/errors');
+const settings = rewire('../../../../core/frontend/services/settings');
 
 describe('UNIT > Settings Service:', function () {
     afterEach(function () {
@@ -62,7 +62,7 @@ describe('UNIT > Settings Service:', function () {
         });
 
         it('passes SettingsLoader error through', function (done) {
-            settingsLoaderStub.throws(new common.errors.GhostError({message: 'oops'}));
+            settingsLoaderStub.throws(new errors.GhostError({message: 'oops'}));
             settings.__set__('SettingsLoader', settingsLoaderStub);
 
             try {
@@ -78,24 +78,25 @@ describe('UNIT > Settings Service:', function () {
     });
 
     describe('getAll', function () {
-        let settingsLoaderStub,
-            knownSettingsStub;
+        let settingsLoaderStub;
+        let knownSettingsStub;
 
         const settingsStubFile1 = {
-                routes: null,
-                collections: {
-                    '/': {
-                        permalink: '/{slug}/',
-                        template: ['home', 'index']
-                    }
-                },
-                resources: {tag: '/tag/{slug}/', author: '/author/{slug}/'}
-            },
-            settingsStubFile2 = {
-                config: {
-                    url: 'https://testblog.com'
+            routes: null,
+            collections: {
+                '/': {
+                    permalink: '/{slug}/',
+                    template: ['home', 'index']
                 }
-            };
+            },
+            resources: {tag: '/tag/{slug}/', author: '/author/{slug}/'}
+        };
+
+        const settingsStubFile2 = {
+            config: {
+                url: 'https://testblog.com'
+            }
+        };
 
         beforeEach(function () {
             knownSettingsStub = sinon.stub().returns(['routes', 'globals']);
@@ -119,7 +120,7 @@ describe('UNIT > Settings Service:', function () {
 
         it('passes SettinsLoader error through', function (done) {
             settingsLoaderStub.onFirstCall().returns(settingsStubFile1);
-            settingsLoaderStub.onSecondCall().throws(new common.errors.GhostError({message: 'oops'}));
+            settingsLoaderStub.onSecondCall().throws(new errors.GhostError({message: 'oops'}));
             settings.__set__('SettingsLoader', settingsLoaderStub);
 
             try {

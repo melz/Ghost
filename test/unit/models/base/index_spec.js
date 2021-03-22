@@ -1,12 +1,12 @@
-var should = require('should'),
-    sinon = require('sinon'),
-    _ = require('lodash'),
-    Promise = require('bluebird'),
-    security = require('../../../../core/server/lib/security'),
-    models = require('../../../../core/server/models'),
-    common = require('../../../../core/server/lib/common'),
-    urlUtils = require('../../../../core/server/lib/url-utils'),
-    testUtils = require('../../../utils');
+const errors = require('@tryghost/errors');
+const should = require('should');
+const sinon = require('sinon');
+const _ = require('lodash');
+const Promise = require('bluebird');
+const security = require('@tryghost/security');
+const models = require('../../../../core/server/models');
+const urlUtils = require('../../../../core/shared/url-utils');
+const testUtils = require('../../../utils');
 
 describe('Models: base', function () {
     before(function () {
@@ -67,8 +67,8 @@ describe('Models: base', function () {
             security.string.safe.withArgs(slug).returns(slug);
 
             return models.Base.Model.generateSlug(Model, slug, options)
-                .then((slug) => {
-                    slug.should.eql(new Array(186).join('a'));
+                .then((generatedSlug) => {
+                    generatedSlug.should.eql(new Array(186).join('a'));
                 });
         });
 
@@ -79,8 +79,8 @@ describe('Models: base', function () {
             security.string.safe.withArgs(slug).returns(slug);
 
             return models.Base.Model.generateSlug(Model, slug, options)
-                .then((slug) => {
-                    slug.should.eql('upsi-tableName');
+                .then((generatedSlug) => {
+                    generatedSlug.should.eql('upsi-tableName');
                 });
         });
 
@@ -95,8 +95,8 @@ describe('Models: base', function () {
             security.string.safe.withArgs(slug).returns(slug);
 
             return models.Base.Model.generateSlug(Model, slug, options)
-                .then((slug) => {
-                    slug.should.eql('hash-#lul');
+                .then((generatedSlug) => {
+                    generatedSlug.should.eql('hash-#lul');
                 });
         });
 
@@ -356,7 +356,7 @@ describe('Models: base', function () {
             return models.Base.Model.edit(data, unfilteredOptions).then(() => {
                 throw new Error('That should not happen');
             }).catch((err) => {
-                (err instanceof common.errors.NotFoundError).should.be.true();
+                (err instanceof errors.NotFoundError).should.be.true();
             });
         });
     });
