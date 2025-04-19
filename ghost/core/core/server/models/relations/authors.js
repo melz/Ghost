@@ -1,8 +1,8 @@
 const _ = require('lodash');
-const Promise = require('bluebird');
 const tpl = require('@tryghost/tpl');
 const errors = require('@tryghost/errors');
 const {sequence} = require('@tryghost/promise');
+const {setIsRoles} = require('../role-utils');
 
 const messages = {
     noUserFound: 'No user found',
@@ -72,7 +72,7 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
                 model._originalOptions = collection._originalOptions;
             }));
 
-            return proto.onFetchingCollection.call(this, collection, attrs, options);
+            return proto.onFetchedCollection.call(this, collection, attrs, options);
         },
 
         onCreating: function onCreating(model, attrs, options) {
@@ -179,7 +179,7 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
                 const authors = model.get('authors');
                 const authorsToSet = [];
 
-                return Promise.each(authors, (author, index) => {
+                return Promise.all(authors.map((author, index) => {
                     const query = {};
 
                     if (author.id) {
@@ -205,7 +205,7 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
                                 authorsToSet[index].id = userId;
                             }
                         });
-                }).then(() => {
+                })).then(() => {
                     model.set('authors', authorsToSet);
                 });
             });
@@ -306,8 +306,7 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
             const self = this;
             const postModel = postModelOrId;
             let origArgs;
-            let isContributor;
-            let isAuthor;
+            const {isContributor, isAuthor} = setIsRoles(loadedPermissions);
             let isEdit;
             let isAdd;
             let isDestroy;
@@ -333,8 +332,6 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
                     });
             }
 
-            isContributor = loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Contributor'});
-            isAuthor = loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Author'});
             isEdit = (action === 'edit');
             isAdd = (action === 'add');
             isDestroy = (action === 'destroy');

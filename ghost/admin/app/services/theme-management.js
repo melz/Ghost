@@ -1,6 +1,7 @@
 import Service, {inject as service} from '@ember/service';
 import config from 'ghost-admin/config/environment';
 import {action} from '@ember/object';
+import {inject} from 'ghost-admin/decorators/inject';
 import {isEmpty} from '@ember/utils';
 import {isThemeValidationError} from 'ghost-admin/services/ajax';
 import {task} from 'ember-concurrency';
@@ -8,32 +9,66 @@ import {tracked} from '@glimmer/tracking';
 
 export default class ThemeManagementService extends Service {
     @service ajax;
-    @service config;
     @service customThemeSettings;
     @service limit;
     @service modals;
     @service settings;
     @service store;
     @service frontend;
+    @service session;
+
+    @inject config;
 
     @tracked isUploading;
     @tracked previewType = 'homepage';
     @tracked previewHtml;
 
+    /**
+     * Contains the active theme object (includes warnings and errors)
+     */
+    @tracked activeTheme;
+
     allPosts = this.store.peekAll('post');
 
-    availablePreviewTypes = [{
-        name: 'homepage',
-        label: 'Homepage'
-    }, {
-        name: 'post',
-        label: 'Post'
-    }];
+    get availablePreviewTypes() {
+        const previewTypes = [{
+            name: 'homepage',
+            label: 'Homepage'
+        }];
+
+        // in case we haven't loaded any posts so far
+        if (!this.latestPublishedPost) {
+            this.loadLastPostTask.perform();
+        }
+
+        if (this.latestPublishedPost) {
+            previewTypes.push({
+                name: 'post',
+                label: 'Post'
+            });
+        }
+
+        return previewTypes;
+    }
 
     get latestPublishedPost() {
         return this.allPosts.toArray().filterBy('status', 'published').sort((a, b) => {
             return b.publishedAtUTC.valueOf() - a.publishedAtUTC.valueOf();
         }).lastObject;
+    }
+
+    async fetch() {
+        // contributors don't have permissions to fetch active theme
+        if (this.session.user && !this.session.user.isContributor) {
+            try {
+                const adapter = this.store.adapterFor('theme');
+                const activeTheme = await adapter.active();
+                this.activeTheme = activeTheme;
+            } catch (e) {
+                // We ignore these errors and log them because we don't want to block loading the app for this
+                console.error('Failed to fetch active theme', e); // eslint-disable-line no-console
+            }
+        }
     }
 
     @action
@@ -88,6 +123,7 @@ export default class ThemeManagementService extends Service {
 
             try {
                 const activatedTheme = yield theme.activate();
+                this.activeTheme = activatedTheme;
 
                 yield this.customThemeSettings.reload();
 
@@ -99,7 +135,7 @@ export default class ThemeManagementService extends Service {
 
                     if (!isEmpty(warnings) || !isEmpty(errors)) {
                         resultModal = this.modals.open('modals/design/theme-errors', {
-                            title: 'Activation successful',
+                            title: 'Activation <span class="green">successful</span>',
                             canActivate: true,
                             warnings,
                             errors
@@ -148,6 +184,11 @@ export default class ThemeManagementService extends Service {
     }
 
     @task
+    *loadLastPostTask() {
+        yield this.store.query('post', {filter: 'status:published', order: 'published_at DESC', limit: 1});
+    }
+
+    @task
     *updatePreviewHtmlTask() {
         // skip during testing because we don't have mocks for the front-end
         if (config.environment === 'test') {
@@ -159,10 +200,10 @@ export default class ThemeManagementService extends Service {
         if (this.previewType === 'post') {
             // in case we haven't loaded any posts so far
             if (!this.latestPublishedPost) {
-                yield this.store.query('post', {filter: 'status:published', order: 'published_at DESC', limit: 1});
+                this.loadLastPostTask.perform();
             }
 
-            frontendUrl = this.latestPublishedPost.url;
+            frontendUrl = this.latestPublishedPost?.url || '';
         }
 
         const previewResponse = yield this.frontend.fetch(frontendUrl, {
@@ -193,11 +234,21 @@ export default class ThemeManagementService extends Service {
     get previewData() {
         const params = new URLSearchParams();
 
-        params.append('c', this.settings.get('accentColor') || '#ffffff');
-        params.append('d', this.settings.get('description'));
-        params.append('icon', this.settings.get('icon'));
-        params.append('logo', this.settings.get('logo'));
-        params.append('cover', this.settings.get('coverImage'));
+        params.append('c', this.settings.accentColor || '#ffffff');
+        params.append('d', this.settings.description);
+        params.append('icon', this.settings.icon);
+        params.append('logo', this.settings.logo);
+        params.append('cover', this.settings.coverImage);
+        params.append('bf', this.settings.bodyFont);
+        params.append('hf', this.settings.headingFont);
+
+        if (this.settings.announcementContent) {
+            params.append('announcement', this.settings.announcementContent);
+        }
+        params.append('announcement_bg', this.settings.announcementBackground);
+        if (this.settings.announcementVisibility.length) {
+            params.append('announcement_vis', this.settings.announcementVisibility);
+        }
 
         params.append('custom', JSON.stringify(this.customThemeSettings.keyValueObject));
 

@@ -1,45 +1,52 @@
 import Controller, {inject as controller} from '@ember/controller';
-import classic from 'ember-classic-decorator';
-import {readOnly} from '@ember/object/computed';
+import {inject} from 'ghost-admin/decorators/inject';
 import {inject as service} from '@ember/service';
 
-/* eslint-disable ghost/ember/alias-model-in-controller */
-@classic
 export default class PostsLoadingController extends Controller {
-    @controller('posts')
-        postsController;
+    @controller('posts') postsController;
 
     @service session;
     @service ui;
-    @service config;
 
-    @readOnly('postsController.availableTypes')
-        availableTypes;
+    @inject config;
 
-    @readOnly('postsController.selectedType')
-        selectedType;
+    get availableTypes() {
+        return this.postsController.availableTypes;
+    }
 
-    @readOnly('postsController.selectedVisibility')
-        selectedVisibility;
+    get selectedType() {
+        return this.postsController.selectedType;
+    }
 
-    @readOnly('postsController.availableVisibilities')
-        availableVisibilities;
+    get selectedVisibility() {
+        return this.postsController.selectedVisibility;
+    }
 
-    @readOnly('postsController.availableTags')
-        availableTags;
+    get availableVisibilities() {
+        return this.postsController.availableVisibilities;
+    }
 
-    @readOnly('postsController.selectedTag')
-        selectedTag;
+    get availableTags() {
+        return this.postsController.availableTags;
+    }
 
-    @readOnly('postsController.availableAuthors')
-        availableAuthors;
+    get selectedTag() {
+        return this.postsController.selectedTag;
+    }
 
-    @readOnly('postsController.selectedAuthor')
-        selectedAuthor;
+    get availableAuthors() {
+        return this.postsController.availableAuthors;
+    }
 
-    @readOnly('postsController.availableOrders')
-        availableOrders;
+    get selectedAuthor() {
+        return this.postsController.selectedAuthor;
+    }
 
-    @readOnly('postsController.selectedOrder')
-        selectedOrder;
+    get availableOrders() {
+        return this.postsController.availableOrders;
+    }
+
+    get selectedOrder() {
+        return this.postsController.selectedOrder;
+    }
 }

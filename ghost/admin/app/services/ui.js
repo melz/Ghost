@@ -5,7 +5,7 @@ import {
     lightenToContrastThreshold
 } from '@tryghost/color-utils';
 import {action, get} from '@ember/object';
-import {isEmpty} from '@ember/utils';
+import {inject} from 'ghost-admin/decorators/inject';
 import {tracked} from '@glimmer/tracking';
 
 function collectMetadataClasses(transition, prop) {
@@ -39,14 +39,14 @@ function updateBodyClasses(transition) {
 }
 
 export default class UiService extends Service {
-    @service config;
     @service dropdown;
     @service feature;
     @service mediaQueries;
     @service router;
     @service settings;
 
-    @tracked contextualNavMenu = null;
+    @inject config;
+
     @tracked isFullScreen = false;
     @tracked mainClass = '';
     @tracked showMobileMenu = false;
@@ -70,7 +70,7 @@ export default class UiService extends Service {
     }
 
     get adjustedAccentColor() {
-        const accentColor = Color(this.settings.get('accentColor'));
+        const accentColor = Color(this.settings.accentColor);
         const backgroundColor = Color(this.backgroundColor);
 
         // WCAG contrast. 1 = lowest contrast, 21 = highest contrast
@@ -144,13 +144,9 @@ export default class UiService extends Service {
             currentRoute = currentRoute.parent;
         }
 
-        let blogTitle = this.config.get('blogTitle');
+        let blogTitle = this.config.blogTitle;
 
-        if (!isEmpty(tokens)) {
-            window.document.title = `${tokens.join(' - ')} - ${blogTitle}`;
-        } else {
-            window.document.title = blogTitle;
-        }
+        window.document.title = `Ghost Admin - ${blogTitle}`;
     }
 
     @action
@@ -195,5 +191,10 @@ export default class UiService extends Service {
         document.body.removeEventListener('dragleave', this.bodyDragLeaveHandler, {capture: true});
         document.body.removeEventListener('dragend', this.cancelDrag, {capture: true});
         document.body.removeEventListener('drop', this.cancelDrag, {capture: true});
+    }
+
+    @action
+    toggleMobileMenu() {
+        this.showMobileMenu = !this.showMobileMenu;
     }
 }

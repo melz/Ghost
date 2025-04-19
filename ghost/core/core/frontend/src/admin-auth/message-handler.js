@@ -1,4 +1,4 @@
-const adminUrl = window.location.href.replace('auth-frame/', '');
+const adminUrl = window.location.href.replace('auth-frame/', '') + 'api/admin';
 
 // At compile time, we'll replace the value with the actual origin.
 const siteOrigin = '{{SITE_ORIGIN}}';
@@ -23,10 +23,47 @@ window.addEventListener('message', async function (event) {
         }), siteOrigin);
     }
 
+    if (data.action === 'browseComments') {
+        try {
+            const {postId, params} = data;
+            const res = await fetch(
+                adminUrl + `/comments/post/${postId}/?${new URLSearchParams(params).toString()}`
+            );
+            const json = await res.json();
+            respond(null, json);
+        } catch (err) {
+            respond(err, null);
+        }
+    }
+
+    if (data.action === 'getReplies') {
+        try {
+            const {commentId, params} = data;
+            const res = await fetch(
+                adminUrl + `/comments/${commentId}/replies/?${new URLSearchParams(params).toString()}`
+            );
+            const json = await res.json();
+            respond(null, json);
+        } catch (err) {
+            respond(err, null);
+        }
+    }
+
+    if (data.action === 'readComment') {
+        try {
+            const {commentId, params} = data;
+            const res = await fetch(adminUrl + '/comments/' + commentId + '/' + '?' + new URLSearchParams(params).toString());
+            const json = await res.json();
+            respond(null, json);
+        } catch (err) {
+            respond(err, null);
+        }
+    }
+ 
     if (data.action === 'getUser') {
         try {
             const res = await fetch(
-                adminUrl + 'api/canary/admin/users/me/'
+                adminUrl + '/users/me/?include=roles'
             );
             const json = await res.json();
             respond(null, json);
@@ -37,7 +74,7 @@ window.addEventListener('message', async function (event) {
 
     if (data.action === 'hideComment') {
         try {
-            const res = await fetch(adminUrl + 'api/canary/admin/comments/' + data.id + '/', {
+            const res = await fetch(adminUrl + '/comments/' + data.id + '/', {
                 method: 'PUT',
                 body: JSON.stringify({
                     comments: [{
@@ -58,7 +95,7 @@ window.addEventListener('message', async function (event) {
 
     if (data.action === 'showComment') {
         try {
-            const res = await fetch(adminUrl + 'api/canary/admin/comments/' + data.id + '/', {
+            const res = await fetch(adminUrl + '/comments/' + data.id + '/', {
                 method: 'PUT',
                 body: JSON.stringify({
                     comments: [{

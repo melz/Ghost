@@ -1,5 +1,4 @@
 const debug = require('@tryghost/debug')('api:endpoints:utils:permissions');
-const Promise = require('bluebird');
 const _ = require('lodash');
 const permissions = require('../../../services/permissions');
 const tpl = require('@tryghost/tpl');
@@ -13,7 +12,7 @@ const messages = {
  * @description Handle requests, which need authentication.
  *
  * @param {Object} apiConfig - Docname & method of API ctrl
- * @param {Object} frame
+ * @param {import('@tryghost/api-framework').Frame} frame
  * @return {Promise}
  */
 const nonePublicAuth = (apiConfig, frame) => {
@@ -82,7 +81,7 @@ module.exports = {
      * @description Handle permission stage for API.
      *
      * @param {Object} apiConfig - Docname & method of target ctrl.
-     * @param {Object} frame
+     * @param {import('@tryghost/api-framework').Frame} frame
      * @return {Promise}
      */
     handle(apiConfig, frame) {
@@ -93,22 +92,8 @@ module.exports = {
 
         // CASE: Content API access
         if (frame.options.context.public && frame.apiType !== 'comments') {
-            debug('check content permissions');
-
-            // @TODO: Remove when we drop v0.1
-            // @TODO: https://github.com/TryGhost/Ghost/issues/10733
-            return permissions.applyPublicRules(apiConfig.docName, apiConfig.method, {
-                status: frame.options.status,
-                id: frame.options.id,
-                uuid: frame.options.uuid,
-                slug: frame.options.slug,
-                data: {
-                    status: frame.data.status,
-                    id: frame.data.id,
-                    uuid: frame.data.uuid,
-                    slug: frame.data.slug
-                }
-            });
+            debug('content api permissions pass-through');
+            return Promise.resolve(frame.options);
         }
 
         return nonePublicAuth(apiConfig, frame);

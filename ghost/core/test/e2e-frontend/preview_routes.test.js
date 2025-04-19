@@ -9,6 +9,7 @@ const supertest = require('supertest');
 const cheerio = require('cheerio');
 const testUtils = require('../utils');
 const config = require('../../core/shared/config');
+const {DateTime} = require('luxon');
 let request;
 
 function assertCorrectFrontendHeaders(res) {
@@ -20,9 +21,10 @@ function assertCorrectFrontendHeaders(res) {
 
 describe('Frontend Routing: Preview Routes', function () {
     async function addPosts() {
-        await testUtils.clearData();
+        await testUtils.teardownDb();
         await testUtils.initData();
         await testUtils.fixtures.insertPostsAndTags();
+        await testUtils.fixtures.insertGatedPosts();
     }
 
     afterEach(function () {
@@ -32,6 +34,10 @@ describe('Frontend Routing: Preview Routes', function () {
     before(async function () {
         await testUtils.startGhost();
         request = supertest.agent(config.get('url'));
+    });
+
+    after(async function () {
+        await testUtils.stopGhost();
     });
 
     before(addPosts);
@@ -60,6 +66,28 @@ describe('Frontend Routing: Preview Routes', function () {
             });
     });
 
+    it('should render draft as free member with ?member_status=free', async function () {
+        await request.get('/p/d52c42ae-2755-455c-80ec-70b2ec55c905/?member_status=free')
+            .expect('Content-Type', /html/)
+            .expect(200)
+            .expect(assertCorrectFrontendHeaders)
+            .expect((res) => {
+                res.text.should.match(/Before paywall/);
+                res.text.should.not.match(/After paywall/);
+            });
+    });
+
+    it('should render draft as paid member with ?member_status=paid', async function () {
+        await request.get('/p/d52c42ae-2755-455c-80ec-70b2ec55c905/?member_status=paid')
+            .expect('Content-Type', /html/)
+            .expect(200)
+            .expect(assertCorrectFrontendHeaders)
+            .expect((res) => {
+                res.text.should.match(/Before paywall/);
+                res.text.should.match(/After paywall/);
+            });
+    });
+
     it('should redirect draft posts accessed via uuid and edit to admin post edit screen', async function () {
         await request.get('/p/d52c42ae-2755-455c-80ec-70b2ec55c903/edit/')
             .expect('Content-Type', /text\/plain/)
@@ -82,6 +110,38 @@ describe('Frontend Routing: Preview Routes', function () {
         await request.get('/p/2ac6b4f6-e1f3-406c-9247-c94a0496d39d/')
             .expect(301)
             .expect('Location', '/short-and-sweet/')
+            .expect('Cache-Control', testUtils.cacheRules.year)
+            .expect(assertCorrectFrontendHeaders);
+    });
+
+    it('should render scheduled email-only posts', async function () {
+        const scheduledEmail = await testUtils.fixtures.insertPosts([{
+            title: 'test newsletter',
+            status: 'scheduled',
+            published_at: DateTime.now().plus({days: 1}).toISODate(),
+            posts_meta: {
+                email_only: true
+            }
+        }]);
+
+        await request.get(`/p/${scheduledEmail[0].get('uuid')}/`)
+            .expect('Content-Type', /html/)
+            .expect(200)
+            .expect(assertCorrectFrontendHeaders);
+    });
+
+    it('should redirect sent email-only posts to /email/:uuid from /p/:uuid', async function () {
+        const emailedPost = await testUtils.fixtures.insertPosts([{
+            title: 'test newsletter',
+            status: 'sent',
+            posts_meta: {
+                email_only: true
+            }
+        }]);
+
+        await request.get(`/p/${emailedPost[0].get('uuid')}/`)
+            .expect(301)
+            .expect('Location', `/email/${emailedPost[0].get('uuid')}/`)
             .expect('Cache-Control', testUtils.cacheRules.year)
             .expect(assertCorrectFrontendHeaders);
     });

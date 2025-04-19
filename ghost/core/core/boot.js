@@ -64,7 +64,7 @@ function notifyServerReady(error) {
   * @param {object} options.config
   */
 async function initDatabase({config}) {
-    const DatabaseStateManager = require('./server/data/db/state-manager');
+    const DatabaseStateManager = require('./server/data/db/DatabaseStateManager');
     const dbStateManager = new DatabaseStateManager({knexMigratorFilePath: config.get('paths:appRoot')});
     await dbStateManager.makeReady();
 
@@ -78,10 +78,9 @@ async function initDatabase({config}) {
  * @param {object} options
  * @param {object} options.ghostServer
  * @param {object} options.config
- * @param {object} options.bootLogger
  * @param {boolean} options.frontend
  */
-async function initCore({ghostServer, config, bootLogger, frontend}) {
+async function initCore({ghostServer, config, frontend}) {
     debug('Begin: initCore');
 
     // URL Utils is a bit slow, put it here so the timing is visible separate from models
@@ -102,18 +101,18 @@ async function initCore({ghostServer, config, bootLogger, frontend}) {
     await settings.syncEmailSettings(config.get('hostSettings:emailVerification:verified'));
     debug('End: settings');
 
+    debug('Begin: i18n');
+    const i18n = require('./server/services/i18n');
+    await i18n.init();
+    debug('End: i18n');
+
     // The URLService is a core part of Ghost, which depends on models.
     debug('Begin: Url Service');
     const urlService = require('./server/services/url');
-    const urlServiceStart = Date.now();
     // Note: there is no await here, we do not wait for the url service to finish
     // We can return, but the site will remain in maintenance mode until this finishes
     // This is managed on request: https://github.com/TryGhost/Ghost/blob/main/core/app.js#L10
     urlService.init({
-        onFinished: () => {
-            bootLogger.metric('url-service', urlServiceStart);
-            bootLogger.log('URL Service Ready');
-        },
         urlCache: !frontend // hacky parameter to make the cache initialization kick in as we can't initialize labs before the boot
     });
     debug('End: Url Service');
@@ -131,6 +130,19 @@ async function initCore({ghostServer, config, bootLogger, frontend}) {
             await jobService.shutdown();
         });
         debug('End: Job Service');
+
+        // Mentions Job Service allows mentions to be processed in the background
+        debug('Begin: Mentions Job Service');
+        const mentionsJobService = require('./server/services/mentions-jobs');
+
+        if (config.get('server:testmode')) {
+            mentionsJobService.initTestMode();
+        }
+
+        ghostServer.registerCleanupTask(async () => {
+            await mentionsJobService.shutdown();
+        });
+        debug('End: Mentions Job Service');
 
         ghostServer.registerCleanupTask(async () => {
             await urlService.shutdown();
@@ -155,12 +167,17 @@ async function initServicesForFrontend({bootLogger}) {
     debug('End: Routing Settings');
 
     debug('Begin: Redirects');
-    const customRedirects = require('./server/services/redirects');
-    await customRedirects.init(),
+    const customRedirects = require('./server/services/custom-redirects');
+    await customRedirects.init();
     debug('End: Redirects');
 
+    debug('Begin: Link Redirects');
+    const linkRedirects = require('./server/services/link-redirection');
+    await linkRedirects.init();
+    debug('End: Link Redirects');
+
     debug('Begin: Themes');
-    // customThemSettingsService.api must be initialized before any theme activation occurs
+    // customThemeSettingsService.api must be initialized before any theme activation occurs
     const customThemeSettingsService = require('./server/services/custom-theme-settings');
     customThemeSettingsService.init();
 
@@ -231,6 +248,19 @@ async function initExpressApps({frontend, backend, config}) {
 }
 
 /**
+ * Initialize prometheus client
+ */
+function initPrometheusClient({config}) {
+    if (config.get('prometheus:enabled')) {
+        debug('Begin: initPrometheusClient');
+        const prometheusClient = require('./shared/prometheus-client');
+        debug('End: initPrometheusClient');
+        return prometheusClient;
+    }
+    return null;
+}
+
+/**
  * Dynamic routing is generated from the routes.yaml file
  * When Ghost's DB and core are loaded, we can access this file and call routing.routingManager.start
  * However this _must_ happen after the express Apps are loaded, hence why this is here and not in initFrontend
@@ -256,31 +286,56 @@ async function initDynamicRouting() {
 }
 
 /**
+ * The app service cannot be loaded unless the frontend is enabled
+ * In future, the logic to determine whether this should be loaded should be in the service loader
+ */
+async function initAppService() {
+    debug('Begin: App Service');
+    const appService = require('./frontend/services/apps');
+    await appService.init();
+}
+
+/**
  * Services are components that make up part of Ghost and need initializing on boot
  * These services should all be part of core, frontend services should be loaded with the frontend
  * We are working towards this being a service loader, with the ability to make certain services optional
- *
- * @param {object} options
- * @param {object} options.config
  */
-async function initServices({config}) {
+async function initServices() {
     debug('Begin: initServices');
 
     debug('Begin: Services');
+    const identityTokens = require('./server/services/identity-tokens');
     const stripe = require('./server/services/stripe');
     const members = require('./server/services/members');
+    const tiers = require('./server/services/tiers');
     const permissions = require('./server/services/permissions');
     const xmlrpc = require('./server/services/xmlrpc');
     const slack = require('./server/services/slack');
-    const {mega} = require('./server/services/mega');
     const webhooks = require('./server/services/webhooks');
-    const appService = require('./frontend/services/apps');
     const limits = require('./server/services/limits');
     const apiVersionCompatibility = require('./server/services/api-version-compatibility');
     const scheduling = require('./server/adapters/scheduling');
     const comments = require('./server/services/comments');
     const staffService = require('./server/services/staff');
     const memberAttribution = require('./server/services/member-attribution');
+    const membersEvents = require('./server/services/members-events');
+    const linkTracking = require('./server/services/link-tracking');
+    const audienceFeedback = require('./server/services/audience-feedback');
+    const emailSuppressionList = require('./server/services/email-suppression-list');
+    const emailService = require('./server/services/email-service');
+    const emailAnalytics = require('./server/services/email-analytics');
+    const mentionsService = require('./server/services/mentions');
+    const mentionsEmailReport = require('./server/services/mentions-email-report');
+    const tagsPublic = require('./server/services/tags-public');
+    const postsPublic = require('./server/services/posts-public');
+    const slackNotifications = require('./server/services/slack-notifications');
+    const mediaInliner = require('./server/services/media-inliner');
+    const mailEvents = require('./server/services/mail-events');
+    const donationService = require('./server/services/donations');
+    const recommendationsService = require('./server/services/recommendations');
+    const emailAddressService = require('./server/services/email-address');
+    const statsService = require('./server/services/stats');
+    const explorePingService = require('./server/services/explore-ping');
 
     const urlUtils = require('./shared/url-utils');
 
@@ -292,28 +347,43 @@ async function initServices({config}) {
     //       so they are initialized before it.
     await stripe.init();
 
+    // NOTE: newsletter service and email service depend on email address service
+    await emailAddressService.init(),
+
     await Promise.all([
+        identityTokens.init(),
         memberAttribution.init(),
+        mentionsService.init(),
+        mentionsEmailReport.init(),
         staffService.init(),
         members.init(),
+        tiers.init(),
+        tagsPublic.init(),
+        postsPublic.init(),
+        membersEvents.init(),
         permissions.init(),
         xmlrpc.listen(),
         slack.listen(),
-        mega.listen(),
+        audienceFeedback.init(),
+        emailService.init(),
+        emailAnalytics.init(),
         webhooks.listen(),
-        appService.init(),
         apiVersionCompatibility.init(),
         scheduling.init({
             apiUrl: urlUtils.urlFor('api', {type: 'admin'}, true)
         }),
-        comments.init()
+        comments.init(),
+        linkTracking.init(),
+        emailSuppressionList.init(),
+        slackNotifications.init(),
+        mediaInliner.init(),
+        mailEvents.init(),
+        donationService.init(),
+        recommendationsService.init(),
+        statsService.init(),
+        explorePingService.init()
     ]);
     debug('End: Services');
-
-    // Initialize analytics events
-    if (config.get('segment:key')) {
-        require('./server/analytics-events').init();
-    }
 
     debug('End: initServices');
 }
@@ -338,14 +408,19 @@ async function initBackgroundServices({config}) {
         return;
     }
 
+    const activitypub = require('./server/services/activitypub');
+    await activitypub.init();
     // Load email analytics recurring jobs
     if (config.get('backgroundJobs:emailAnalytics')) {
         const emailAnalyticsJobs = require('./server/services/email-analytics/jobs');
         await emailAnalyticsJobs.scheduleRecurringJobs();
     }
 
-    const updateCheck = require('./server/update-check');
+    const updateCheck = require('./server/services/update-check');
     updateCheck.scheduleRecurringJobs();
+
+    const milestonesService = require('./server/services/milestones');
+    milestonesService.initAndRun();
 
     debug('End: initBackgroundServices');
 }
@@ -408,20 +483,32 @@ async function bootGhost({backend = true, frontend = true, server = true} = {}) 
 
     try {
         // Step 1 - require more fundamental components
+
         // Sentry must be initialized early, but requires config
         debug('Begin: Load sentry');
-        require('./shared/sentry');
+        const sentry = require('./shared/sentry');
         debug('End: Load sentry');
+
+        // Initialize prometheus client early to enable metrics collection during boot
+        // Note: this does not start the metrics server yet to avoid increasing boot time
+        const prometheusClient = initPrometheusClient({config});
 
         // Step 2 - Start server with minimal app in global maintenance mode
         debug('Begin: load server + minimal app');
         const rootApp = require('./app')();
 
         if (server) {
-            const GhostServer = require('./server/ghost-server');
+            const GhostServer = require('./server/GhostServer');
             ghostServer = new GhostServer({url: config.getSiteUrl(), env: config.get('env'), serverConfig: config.get('server')});
             await ghostServer.start(rootApp);
             bootLogger.log('server started');
+
+            // Ensure the prometheus client is stopped when the server shuts down
+            ghostServer.registerCleanupTask(async () => {
+                if (prometheusClient) {
+                    prometheusClient.stop();
+                }
+            });
             debug('End: load server + minimal app');
         }
 
@@ -429,11 +516,22 @@ async function bootGhost({backend = true, frontend = true, server = true} = {}) 
         debug('Begin: Get DB ready');
         await initDatabase({config});
         bootLogger.log('database ready');
+        const connection = require('./server/data/db/connection');
+        sentry.initQueryTracing(
+            connection
+        );
         debug('End: Get DB ready');
 
         // Step 4 - Load Ghost with all its services
         debug('Begin: Load Ghost Services & Apps');
-        await initCore({ghostServer, config, bootLogger, frontend});
+        await initCore({ghostServer, config, frontend});
+
+        // Instrument the knex instance and connection pool if prometheus is enabled
+        // Needs to be after initCore because the pool is destroyed and recreated in initCore, which removes the event listeners
+        if (prometheusClient) {
+            prometheusClient.instrumentKnex(connection);
+        }
+
         const {dataService} = await initServicesForFrontend({bootLogger});
 
         if (frontend) {
@@ -443,9 +541,10 @@ async function bootGhost({backend = true, frontend = true, server = true} = {}) 
 
         if (frontend) {
             await initDynamicRouting();
+            await initAppService();
         }
 
-        await initServices({config});
+        await initServices();
         debug('End: Load Ghost Services & Apps');
 
         // Step 5 - Mount the full Ghost app onto the minimal root app & disable maintenance mode
@@ -461,6 +560,11 @@ async function bootGhost({backend = true, frontend = true, server = true} = {}) 
 
         // Step 7 - Init our background services, we don't wait for this to finish
         initBackgroundServices({config});
+
+        // If we pass the env var, kill Ghost
+        if (process.env.GHOST_CI_SHUTDOWN_AFTER_BOOT) {
+            process.exit(0);
+        }
 
         // We return the server purely for testing purposes
         if (server) {

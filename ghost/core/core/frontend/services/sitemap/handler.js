@@ -1,5 +1,5 @@
 const config = require('../../../shared/config');
-const Manager = require('./manager');
+const Manager = require('./SiteMapManager');
 const manager = new Manager();
 
 // Responsible for handling requests for sitemap files
@@ -30,7 +30,7 @@ module.exports = function handler(siteApp) {
         const content = manager.getSiteMapXml(type, page);
         // Prevent x-1.xml as it is a duplicate of x.xml and empty sitemaps
         // (except for the first page so that at least one sitemap exists per type)
-        if (pageParam === '1' || (!content && page !== 1)) {
+        if (pageParam === '1' || content === null) {
             return res.sendStatus(404);
         }
 

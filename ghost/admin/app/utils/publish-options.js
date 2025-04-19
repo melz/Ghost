@@ -1,5 +1,6 @@
-import moment from 'moment';
-import {action, get} from '@ember/object';
+import moment from 'moment-timezone';
+import {action} from '@ember/object';
+import {htmlSafe} from '@ember/template';
 import {task} from 'ember-concurrency';
 import {tracked} from '@glimmer/tracking';
 
@@ -9,11 +10,13 @@ export default class PublishOptions {
     limit = null;
     settings = null;
     store = null;
+    membersCountCache = null;
 
     // passed in models
     post = null;
     user = null;
 
+    @tracked publishDisabledError = null;
     @tracked totalMemberCount = 0;
 
     get isLoading() {
@@ -21,10 +24,18 @@ export default class PublishOptions {
     }
 
     get willEmail() {
-        return this.publishType !== 'publish'
-            && this.recipientFilter
-            && this.post.isDraft
-            && !this.post.email;
+        return (
+            (this.publishType !== 'publish'
+                && this.recipientFilter
+                && this.post.isDraft
+                && !this.post.email
+            )
+                || (this.post.isDraft && this.post.email && this.post.email.status === 'failed')
+        );
+    }
+
+    get willEmailImmediately() {
+        return this.willEmail && !this.isScheduled;
     }
 
     get willPublish() {
@@ -41,7 +52,11 @@ export default class PublishOptions {
     @tracked scheduledAtUTC = this.minScheduledAt;
 
     get minScheduledAt() {
-        return moment.utc().add(5, 'minutes').milliseconds(0);
+        return moment.utc().add(5, 'seconds').milliseconds(0);
+    }
+
+    get defaultScheduledAt() {
+        return moment.utc().add(10, 'minutes').milliseconds(0);
     }
 
     @action
@@ -52,8 +67,8 @@ export default class PublishOptions {
 
         this.isScheduled = shouldSchedule;
 
-        if (shouldSchedule && (!this.scheduledAtUTC || this.scheduledAtUTC.isBefore(this.minScheduledAt))) {
-            this.scheduledAtUTC = this.minScheduledAt;
+        if (shouldSchedule && (!this.scheduledAtUTC || this.scheduledAtUTC.isBefore(this.defaultScheduledAt))) {
+            this.scheduledAtUTC = this.defaultScheduledAt;
         }
     }
 
@@ -107,8 +122,8 @@ export default class PublishOptions {
     }
 
     get emailDisabledInSettings() {
-        return get(this.settings, 'editorDefaultEmailRecipients') === 'disabled'
-            || get(this.settings, 'membersSignupAccess') === 'none';
+        return this.settings.editorDefaultEmailRecipients === 'disabled'
+            || this.settings.membersSignupAccess === 'none';
     }
 
     // publish type dropdown is not shown at all
@@ -124,8 +139,8 @@ export default class PublishOptions {
     }
 
     get mailgunIsConfigured() {
-        return get(this.settings, 'mailgunIsConfigured')
-            || get(this.config, 'mailgunIsConfigured');
+        return this.settings.mailgunIsConfigured
+            || this.config.mailgunIsConfigured;
     }
 
     @action
@@ -158,12 +173,16 @@ export default class PublishOptions {
     }
 
     get recipientFilter() {
-        return this.selectedRecipientFilter === undefined ? this.defaultRecipientFilter : this.selectedRecipientFilter;
+        if (this.selectedRecipientFilter === undefined) {
+            return (this.post.newsletter && this.post.emailSegment) || this.defaultRecipientFilter;
+        } else {
+            return this.selectedRecipientFilter;
+        }
     }
 
     get defaultRecipientFilter() {
-        const recipients = this.settings.get('editorDefaultEmailRecipients');
-        const filter = this.settings.get('editorDefaultEmailRecipientsFilter');
+        const recipients = this.settings.editorDefaultEmailRecipients;
+        const filter = this.settings.editorDefaultEmailRecipientsFilter;
 
         const usuallyNobody = recipients === 'filter' && filter === null;
 
@@ -216,13 +235,14 @@ export default class PublishOptions {
 
     // setup -------------------------------------------------------------------
 
-    constructor({config, limit, post, settings, store, user} = {}) {
+    constructor({config, limit, post, settings, store, user, membersCountCache} = {}) {
         this.config = config;
         this.limit = limit;
         this.post = post;
         this.settings = settings;
         this.store = store;
         this.user = user;
+        this.membersCountCache = membersCountCache;
 
         // this needs to be set here rather than a class-level property because
         // unlike Ember-based classes the services are not injected so can't be
@@ -248,10 +268,14 @@ export default class PublishOptions {
         // Set publish type to "Publish" but keep email recipients matching post visibility
         // to avoid multiple clicks to turn on emailing
         if (
-            this.settings.get('editorDefaultEmailRecipients') === 'filter' &&
-            this.settings.get('editorDefaultEmailRecipientsFilter') === null
+            this.settings.editorDefaultEmailRecipients === 'filter' &&
+            this.settings.editorDefaultEmailRecipientsFilter === null
         ) {
             this.publishType = 'publish';
+        }
+
+        if (this.post.isSent) {
+            this.publishType = 'send';
         }
     }
 
@@ -263,17 +287,21 @@ export default class PublishOptions {
         // Only Admins/Owners have permission to browse members and get a count
         // for Editors/Authors set member count to 1 so email isn't disabled for not having any members
         if (this.user.isAdmin) {
-            promises.push(this.store.query('member', {limit: 1}).then((res) => {
-                this.totalMemberCount = res.meta.pagination.total;
+            promises.push(this.membersCountCache.count({}).then((res) => {
+                this.totalMemberCount = res;
             }));
         } else {
             this.totalMemberCount = 1;
         }
 
-        // email limits
+        // limits
         promises.push(this._checkSendingLimit());
+        promises.push(this._checkPublishingLimit());
+
         // newsletters
-        promises.push(this.store.query('newsletter', {status: 'active', limit: 'all', include: 'count.members'}));
+        if (!this.user.isContributor) {
+            promises.push(this.store.query('newsletter', {status: 'active', limit: 'all', include: 'count.active_members'}));
+        }
 
         yield Promise.all(promises);
     }
@@ -314,6 +342,7 @@ export default class PublishOptions {
             }
 
             this.post.status = 'draft';
+            this.post.emailOnly = false;
 
             return yield this.post.save();
         } catch (e) {
@@ -370,11 +399,27 @@ export default class PublishOptions {
         try {
             if (this.limit.limiter && this.limit.limiter.isLimited('emails')) {
                 await this.limit.limiter.errorIfWouldGoOverLimit('emails');
-            } else if (get(this.settings, 'emailVerificationRequired')) {
+            } else if (this.settings.emailVerificationRequired) {
                 this.emailDisabledError = 'Email sending is temporarily disabled because your account is currently in review. You should have an email about this from us already, but you can also reach us any time at support@ghost.org.';
             }
         } catch (e) {
             this.emailDisabledError = e.message;
+        }
+    }
+
+    async _checkPublishingLimit() {
+        // non-admin users cannot fetch members count so we can't error at this stage for them
+        if (!this.user.isAdmin) {
+            return;
+        }
+
+        try {
+            if (this.limit.limiter?.isLimited('members')) {
+                await this.limit.limiter.errorIfIsOverLimit('members');
+            }
+        } catch (e) {
+            const linkedMessage = htmlSafe(e.message.replace(/please upgrade/i, '<a href="#/pro">$&</a>'));
+            this.publishDisabledError = linkedMessage;
         }
     }
 }

@@ -1,5 +1,5 @@
 const should = require('should');
-const Promise = require('bluebird');
+const sinon = require('sinon');
 const supertest = require('supertest');
 const testUtils = require('../../utils');
 const localUtils = require('./utils');
@@ -14,9 +14,15 @@ describe('Actions API', function () {
         await localUtils.doAuth(request, 'integrations', 'api_keys');
     });
 
+    after(async function () {
+        sinon.restore();
+    });
+
     // @NOTE: This test runs a little slower, because we store Dates without milliseconds.
     it('Can request actions for resource', async function () {
         let postUpdatedAt;
+
+        const clock = sinon.useFakeTimers();
 
         const res = await request
             .post(localUtils.API.getApiQuery('posts/'))
@@ -34,7 +40,7 @@ describe('Actions API', function () {
         postUpdatedAt = res.body.posts[0].updated_at;
 
         const res2 = await request
-            .get(localUtils.API.getApiQuery(`actions/?filter=resource_id:${postId}&include=actor`))
+            .get(localUtils.API.getApiQuery(`actions/?filter=${encodeURIComponent(`resource_id:'${postId}'`)}&include=actor`))
             .set('Origin', config.get('url'))
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
@@ -54,7 +60,7 @@ describe('Actions API', function () {
         res2.body.actions[0].actor.name.should.eql(testUtils.DataGenerator.Content.users[0].name);
         res2.body.actions[0].actor.slug.should.eql(testUtils.DataGenerator.Content.users[0].slug);
 
-        await Promise.delay(1000);
+        clock.tick(1000);
 
         const res3 = await request
             .put(localUtils.API.getApiQuery(`posts/${postId}/`))
@@ -72,7 +78,7 @@ describe('Actions API', function () {
         postUpdatedAt = res3.body.posts[0].updated_at;
 
         const res4 = await request
-            .get(localUtils.API.getApiQuery(`actions/?filter=resource_id:${postId}&include=actor`))
+            .get(localUtils.API.getApiQuery(`actions/?filter=${encodeURIComponent(`resource_id:'${postId}'`)}&include=actor`))
             .set('Origin', config.get('url'))
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)
@@ -92,7 +98,7 @@ describe('Actions API', function () {
         res4.body.actions[0].actor.name.should.eql(testUtils.DataGenerator.Content.users[0].name);
         res4.body.actions[0].actor.slug.should.eql(testUtils.DataGenerator.Content.users[0].slug);
 
-        await Promise.delay(1000);
+        clock.tick(1000);
 
         const integrationRequest = supertest.agent(config.get('url'));
         await integrationRequest
@@ -110,7 +116,7 @@ describe('Actions API', function () {
             .expect(200);
 
         const res5 = await request
-            .get(localUtils.API.getApiQuery(`actions/?filter=resource_id:${postId}&include=actor`))
+            .get(localUtils.API.getApiQuery(`actions/?filter=${encodeURIComponent(`resource_id:'${postId}'`)}&include=actor`))
             .set('Origin', config.get('url'))
             .expect('Content-Type', /json/)
             .expect('Cache-Control', testUtils.cacheRules.private)

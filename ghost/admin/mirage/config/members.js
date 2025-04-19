@@ -1,12 +1,22 @@
-import faker from 'faker';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import nql from '@tryghost/nql';
 import {Response} from 'miragejs';
-import {extractFilterParam, paginateModelCollection} from '../utils';
+import {
+    extractFilterParam,
+    paginateModelCollection,
+    withPermissionsCheck
+} from '../utils';
+import {faker} from '@faker-js/faker';
 import {underscore} from '@ember/string';
 
+const ALLOWED_ROLES = [
+    'Owner',
+    'Administrator',
+    'Super Editor'
+];
+
 export function mockMembersStats(server) {
-    server.get('/members/stats/count', function (db, {queryParams}) {
+    server.get('/members/stats/count', withPermissionsCheck(ALLOWED_ROLES, function (db, {queryParams}) {
         let {days} = queryParams;
 
         let firstSubscriberDays = faker.datatype.number({min: 30, max: 600});
@@ -58,20 +68,21 @@ export function mockMembersStats(server) {
                 };
             })
         };
-    });
+    }));
 }
 
 export default function mockMembers(server) {
-    server.post('/members/');
+    server.post('/members/', withPermissionsCheck(ALLOWED_ROLES, function ({members}) {
+        const attrs = this.normalizedRequestAttrs();
+        return members.create(attrs);
+    }));
 
-    server.get('/members/', function ({members}, {queryParams}) {
+    server.get('/members/', withPermissionsCheck(ALLOWED_ROLES, function ({members}, {queryParams}) {
         let {filter, search, page, limit} = queryParams;
-
         page = +page || 1;
         limit = +limit || 15;
 
         let collection = members.all();
-
         if (filter) {
             try {
                 const nqlFilter = nql(filter, {
@@ -83,6 +94,14 @@ export default function mockMembers(server) {
                         {
                             key: 'tier',
                             replacement: 'tiers.slug'
+                        },
+                        {
+                            key: 'tier_id',
+                            replacement: 'tiers.id'
+                        },
+                        {
+                            key: 'offer_redemptions',
+                            replacement: 'subscriptions.offer_id'
                         }
                     ]
                 });
@@ -99,7 +118,6 @@ export default function mockMembers(server) {
                     // similar deal for associated models
                     ['labels', 'tiers', 'subscriptions', 'newsletters'].forEach((association) => {
                         serializedMember[association] = [];
-
                         member[association].models.forEach((associatedModel) => {
                             const serializedAssociation = {};
                             Object.keys(associatedModel.attrs).forEach((key) => {
@@ -108,7 +126,6 @@ export default function mockMembers(server) {
                             serializedMember[association].push(serializedAssociation);
                         });
                     });
-
                     return nqlFilter.queryJSON(serializedMember);
                 });
             } catch (err) {
@@ -119,7 +136,6 @@ export default function mockMembers(server) {
 
         if (search) {
             const query = search.toLowerCase();
-
             collection = collection.filter((member) => {
                 return member.name.toLowerCase().indexOf(query) !== -1
                     || member.email.toLowerCase().indexOf(query) !== -1;
@@ -127,9 +143,9 @@ export default function mockMembers(server) {
         }
 
         return paginateModelCollection('members', collection, page, limit);
-    });
+    }));
 
-    server.del('/members/', function ({members}, {queryParams}) {
+    server.del('/members/', withPermissionsCheck(ALLOWED_ROLES, function ({members}, {queryParams}) {
         if (!queryParams.filter && !queryParams.search && queryParams.all !== 'true') {
             return new Response(422, {}, {errors: [{
                 type: 'IncorrectUsageError',
@@ -163,9 +179,9 @@ export default function mockMembers(server) {
                 }
             }
         };
-    });
+    }));
 
-    server.get('/members/:id/', function ({members}, {params}) {
+    server.get('/members/:id/', withPermissionsCheck(ALLOWED_ROLES, function ({members}, {params}) {
         let {id} = params;
         let member = members.find(id);
 
@@ -175,9 +191,9 @@ export default function mockMembers(server) {
                 message: 'Member not found.'
             }]
         });
-    });
+    }));
 
-    server.put('/members/:id/', function ({members, tiers, subscriptions}, {params}) {
+    server.put('/members/:id/', withPermissionsCheck(ALLOWED_ROLES, function ({members, tiers, subscriptions}, {params}) {
         const attrs = this.normalizedRequestAttrs();
         const member = members.find(params.id);
 
@@ -245,19 +261,22 @@ export default function mockMembers(server) {
         delete attrs.subscriptions;
 
         return member.update(attrs);
-    });
+    }));
 
-    server.del('/members/:id/');
+    server.del('/members/:id/', withPermissionsCheck(ALLOWED_ROLES, function ({members}, request) {
+        const id = request.params.id;
+        members.find(id).destroy();
+    }));
 
-    server.get('/members/upload/', function () {
+    server.get('/members/upload/', withPermissionsCheck(ALLOWED_ROLES, function () {
         return new Response(200, {
             'Content-Disposition': 'attachment',
             filename: `members.${moment().format('YYYY-MM-DD')}.csv`,
             'Content-Type': 'text/csv'
         }, '');
-    });
+    }));
 
-    server.post('/members/upload/', function ({labels}, request) {
+    server.post('/members/upload/', withPermissionsCheck(ALLOWED_ROLES, function ({labels}, request) {
         const label = labels.create();
 
         // TODO: parse CSV and create member records
@@ -272,19 +291,49 @@ export default function mockMembers(server) {
                 stats: {imported: 1, invalid: []}
             }
         });
-    });
+    }));
 
-    server.get('/members/events/', function ({memberActivityEvents}, {queryParams}) {
-        let {limit} = queryParams;
+    server.get('/members/events/', withPermissionsCheck(ALLOWED_ROLES, function ({memberActivityEvents}, {queryParams}) {
+        let {limit, filter, page} = queryParams;
 
         limit = +limit || 15;
+        page = +page || 1;
 
-        let collection = memberActivityEvents.all().sort((a, b) => {
-            return (new Date(a.createdAt)) - (new Date(b.createdAt));
-        }).slice(0, limit);
+        let collection = memberActivityEvents.all();
+        collection = collection.sort((a, b) => {
+            return Number(b.id) - Number(a.id);
+        });
 
-        return collection;
-    });
+        if (filter) {
+            try {
+                const nqlFilter = nql(filter, {
+                    expansions: [
+                        {
+                            key: 'data.created_at',
+                            replacement: 'created_at'
+                        }
+                    ]
+                });
+
+                collection = collection.filter((event) => {
+                    const serializedEvent = {};
+
+                    // mirage model keys match our main model keys, so we need to transform
+                    // camelCase to underscore to match the filter format
+                    Object.keys(event.attrs).forEach((key) => {
+                        serializedEvent[underscore(key)] = event.attrs[key];
+                    });
+
+                    return nqlFilter.queryJSON(serializedEvent);
+                });
+            } catch (err) {
+                console.error(err); // eslint-disable-line
+                throw err;
+            }
+        }
+
+        return paginateModelCollection('members', collection, page, limit);
+    }));
 
     mockMembersStats(server);
 }

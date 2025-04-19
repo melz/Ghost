@@ -1,11 +1,14 @@
 import Service, {inject as service} from '@ember/service';
-import {action, set} from '@ember/object';
+import {action} from '@ember/object';
 import {observes} from '@ember-decorators/object';
 import {tracked} from '@glimmer/tracking';
 
 const DEFAULT_SETTINGS = {
     expanded: {
         posts: true
+    },
+    menu: {
+        visible: true
     }
 };
 
@@ -30,7 +33,7 @@ export default class NavigationService extends Service {
         }
 
         let userSettings = JSON.parse(this.session.user.accessibility || '{}') || {};
-        this.settings = userSettings.navigation || Object.assign({}, DEFAULT_SETTINGS);
+        this.settings = {...DEFAULT_SETTINGS, ...userSettings.navigation};
     }
 
     @action
@@ -39,10 +42,18 @@ export default class NavigationService extends Service {
             this.settings.expanded = {};
         }
 
-        // set is still needed here because we're not tracking deep keys
-        // and Ember picks up that our templates are dependent on them and
-        // complains. TODO: can we avoid set?
-        set(this.settings.expanded, key, !this.settings.expanded[key]);
+        this.settings.expanded[key] = !this.settings.expanded[key];
+
+        return await this._saveNavigationSettings();
+    }
+
+    @action
+    async toggleMenu() {
+        if (!this.settings.menu) {
+            this.settings.menu = {};
+        }
+
+        this.settings.menu.visible = !this.settings.menu.visible;
 
         return await this._saveNavigationSettings();
     }

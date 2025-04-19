@@ -1,7 +1,5 @@
-/* eslint-disable camelcase */
 import Model, {attr} from '@ember-data/model';
 import ValidationEngine from 'ghost-admin/mixins/validation-engine';
-import {and} from '@ember/object/computed';
 
 export default Model.extend(ValidationEngine, {
     validationType: 'setting',
@@ -42,7 +40,6 @@ export default Model.extend(ValidationEngine, {
     mailgunApiKey: attr('string'),
     mailgunDomain: attr('string'),
     mailgunBaseUrl: attr('string'),
-    emailTrackOpens: attr('boolean'),
     portalButton: attr('boolean'),
     portalName: attr('boolean'),
     portalPlans: attr('json-string'),
@@ -50,7 +47,19 @@ export default Model.extend(ValidationEngine, {
     portalButtonStyle: attr('string'),
     portalButtonIcon: attr('string'),
     portalButtonSignupText: attr('string'),
+    portalSignupTermsHtml: attr('string'),
+    portalSignupCheckboxRequired: attr('boolean'),
     sharedViews: attr('string'),
+    announcementContent: attr('string'),
+    announcementBackground: attr('string'),
+    announcementVisibility: attr('json-string'),
+    /**
+     * Analytics settings
+     */
+    emailTrackOpens: attr('boolean'),
+    emailTrackClicks: attr('boolean'),
+    outboundLinkTagging: attr('boolean'),
+    membersTrackSources: attr('boolean'),
     /**
      * Members settings
      */
@@ -72,6 +81,7 @@ export default Model.extend(ValidationEngine, {
 
     membersEnabled: attr('boolean'),
     paidMembersEnabled: attr('boolean'),
+    membersInviteOnly: attr('boolean'),
 
     commentsEnabled: attr(), // "off", "free", "paid"
 
@@ -81,8 +91,35 @@ export default Model.extend(ValidationEngine, {
     editorDefaultEmailRecipients: attr('string'),
     editorDefaultEmailRecipientsFilter: attr('members-segment-string'),
     emailVerificationRequired: attr('boolean'),
+    /**
+     * Pintura settings
+     */
+    pintura: attr('boolean'),
+    pinturaJsUrl: attr('string'),
+    pinturaCssUrl: attr('string'),
 
-    mailgunIsConfigured: and('mailgunApiKey', 'mailgunDomain', 'mailgunBaseUrl'),
+    /**
+     * Donations
+     */
+    donationsEnabled: attr('boolean'),
+    donationsCurrency: attr('string'),
+    donationsSuggestedAmount: attr('number'),
+
+    /**
+     * Recommendations
+     */
+    recommendationsEnabled: attr('boolean'),
+
+    /**
+     * Newsletter emails
+     */
+    defaultEmailAddress: attr('string'),
+    supportEmailAddress: attr('string'),
+
+    /**
+     * Security settings
+     */
+    requireEmailMfa: attr('boolean'),
 
     // HACK - not a real model attribute but a workaround for Ember Data not
     //        exposing meta from save responses

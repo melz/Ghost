@@ -2,6 +2,7 @@ import EmberObject from '@ember/object';
 import UnauthenticatedRoute from 'ghost-admin/routes/unauthenticated';
 import ValidationEngine from 'ghost-admin/mixins/validation-engine';
 import classic from 'ember-classic-decorator';
+import {inject} from 'ghost-admin/decorators/inject';
 import {inject as service} from '@ember/service';
 import {tracked} from '@glimmer/tracking';
 
@@ -23,7 +24,8 @@ export default class SignupRoute extends UnauthenticatedRoute {
     @service notifications;
     @service session;
     @service ajax;
-    @service config;
+
+    @inject config;
 
     beforeModel() {
         if (this.session.isAuthenticated) {
@@ -72,7 +74,7 @@ export default class SignupRoute extends UnauthenticatedRoute {
                 }
 
                 // set blogTitle, so password validation has access to it
-                signupDetails.blogTitle = this.config.get('blogTitle');
+                signupDetails.blogTitle = this.config.blogTitle;
 
                 resolve(signupDetails);
             }).catch(() => {

@@ -1,13 +1,15 @@
-const _debug = require('@tryghost/debug')._base;
-const debug = _debug('ghost:services:url:service');
+const debug = require('@tryghost/debug')('services:url:service');
 const _ = require('lodash');
 const errors = require('@tryghost/errors');
+const logging = require('@tryghost/logging');
+const metrics = require('@tryghost/metrics');
 const labs = require('../../../shared/labs');
 const UrlGenerator = require('./UrlGenerator');
 const Queue = require('./Queue');
 const Urls = require('./Urls');
 const Resources = require('./Resources');
 const urlUtils = require('../../../shared/url-utils');
+const resourcesConfig = require('./config');
 
 /**
  * The url service class holds all instances in a centralized place.
@@ -15,9 +17,11 @@ const urlUtils = require('../../../shared/url-utils');
  * It will tell you if the url generation is in progress or not.
  */
 class UrlService {
+    lastInitStartTime = null;
+
     /**
      *
-     * @param {Object} options
+     * @param {Object} [options]
      * @param {Object} [options.cache] - cache handler instance
      * @param {Function} [options.cache.read] - read cache by type
      * @param {Function} [options.cache.write] - write into cache by type
@@ -25,7 +29,6 @@ class UrlService {
     constructor({cache} = {}) {
         this.utils = urlUtils;
         this.cache = cache;
-        this.onFinished = null;
         this.finished = false;
         this.urlGenerators = [];
 
@@ -35,6 +38,7 @@ class UrlService {
         //      Way too many tests fail if the initialization is removed so leaving it as is for time being
         this.urls = new Urls();
         this.resources = new Resources({
+            resourcesConfig: resourcesConfig,
             queue: this.queue
         });
 
@@ -50,7 +54,7 @@ class UrlService {
         this.queue.addListener('started', this._onQueueStartedListener);
 
         this._onQueueEndedListener = this._onQueueEnded.bind(this);
-        this.queue.addListener('ended', this._onQueueEnded.bind(this));
+        this.queue.addListener('ended', this._onQueueEndedListener);
     }
 
     /**
@@ -64,6 +68,7 @@ class UrlService {
      */
     _onQueueStarted(event) {
         if (event === 'init') {
+            this.lastInitStartTime = Date.now();
             this.finished = false;
         }
     }
@@ -76,9 +81,10 @@ class UrlService {
     _onQueueEnded(event) {
         if (event === 'init') {
             this.finished = true;
-            if (this.onFinished) {
-                this.onFinished();
-            }
+
+            const now = Date.now();
+            logging.info(`URL Service ready in ${now - this.lastInitStartTime}ms`);
+            metrics.metric('url-service', now - this.lastInitStartTime);
         }
     }
 
@@ -90,7 +96,7 @@ class UrlService {
      * @param {String} permalink
      */
     onRouterAddedType(identifier, filter, resourceType, permalink) {
-        debug('Registering route: ', filter, resourceType, permalink);
+        debug('Registering route:', filter, resourceType, permalink);
 
         let urlGenerator = new UrlGenerator({
             identifier,
@@ -217,14 +223,12 @@ class UrlService {
      * They would show localhost:2368/null/.
      *
      * @param {String} id
-     * @param {Object} options
+     * @param {Object} [options]
      * @param {Object} [options.absolute]
      * @param {Object} [options.withSubdirectory]
      * @returns {String}
      */
-    getUrlByResourceId(id, options) {
-        options = options || {};
-
+    getUrlByResourceId(id, options = {}) {
         const obj = this.urls.getByResourceId(id);
 
         if (obj) {
@@ -259,17 +263,7 @@ class UrlService {
     owns(routerId, id) {
         debug('owns', routerId, id);
 
-        let urlGenerator;
-
-        this.urlGenerators.every((_urlGenerator) => {
-            if (_urlGenerator.identifier === routerId) {
-                urlGenerator = _urlGenerator;
-                return false;
-            }
-
-            return true;
-        });
-
+        const urlGenerator = this.urlGenerators.find(g => g.identifier === routerId);
         if (!urlGenerator) {
             return false;
         }
@@ -304,12 +298,9 @@ class UrlService {
     /**
      * @description Initializes components needed for the URL Service to function
      * @param {Object} options
-     * @param {Function} [options.onFinished] - callback when url generation is finished
      * @param {Boolean} [options.urlCache] - whether to init using url cache or not
      */
-    async init({onFinished, urlCache} = {}) {
-        this.onFinished = onFinished;
-
+    async init({urlCache} = {}) {
         let persistedUrls;
         let persistedResources;
 
@@ -321,12 +312,10 @@ class UrlService {
         if (persistedUrls && persistedResources) {
             this.urls.urls = persistedUrls;
             this.resources.data = persistedResources;
-            this.resources.initResourceConfig();
             this.resources.initEventListeners();
 
             this._onQueueEnded('init');
         } else {
-            this.resources.initResourceConfig();
             this.resources.initEventListeners();
             await this.resources.fetchResources();
             // CASE: all resources are fetched, start the queue

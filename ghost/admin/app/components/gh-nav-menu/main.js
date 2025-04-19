@@ -7,15 +7,14 @@ import {action} from '@ember/object';
 import {and, equal, match, or, reads} from '@ember/object/computed';
 import {getOwner} from '@ember/application';
 import {htmlSafe} from '@ember/template';
+import {inject} from 'ghost-admin/decorators/inject';
 import {inject as service} from '@ember/service';
 import {tagName} from '@ember-decorators/component';
-import {task} from 'ember-concurrency';
 
 @classic
 @tagName('')
 export default class Main extends Component.extend(ShortcutsMixin) {
     @service billing;
-    @service config;
     @service customViews;
     @service feature;
     @service ghostPaths;
@@ -24,14 +23,15 @@ export default class Main extends Component.extend(ShortcutsMixin) {
     @service router;
     @service session;
     @service ui;
-    @service whatsNew;
     @service membersStats;
     @service settings;
+    @service explore;
+    @service notifications;
+
+    @inject config;
 
     iconStyle = '';
     iconClass = '';
-    memberCountLoading = true;
-    memberCount = 0;
     shortcuts = null;
 
     @match('router.currentRouteName', /^settings\.integration/)
@@ -42,14 +42,11 @@ export default class Main extends Component.extend(ShortcutsMixin) {
     @equal('router.currentRouteName', 'site')
         isOnSite;
 
-    @or('session.user.isAdmin', 'session.user.isEditor')
+    @or('session.user.isAdmin', 'session.user.isEitherEditor')
         showTagsNavigation;
 
     @and('config.clientExtensions.menu', 'session.user.isOwnerOnly')
         showMenuExtension;
-
-    @and('config.clientExtensions.script', 'session.user.isOwnerOnly')
-        showScriptExtension;
 
     @reads('config.hostSettings.billing.enabled')
         showBilling;
@@ -60,6 +57,7 @@ export default class Main extends Component.extend(ShortcutsMixin) {
         let shortcuts = {};
 
         shortcuts[`${ctrlOrCmd}+k`] = {action: 'openSearchModal'};
+        shortcuts[`${ctrlOrCmd}+,`] = {action: 'openSettings'};
         this.shortcuts = shortcuts;
     }
 
@@ -70,7 +68,6 @@ export default class Main extends Component.extend(ShortcutsMixin) {
     didReceiveAttrs() {
         super.didReceiveAttrs(...arguments);
         this._setIconStyle();
-        this._loadMemberCountsTask.perform();
     }
 
     didInsertElement() {
@@ -103,25 +100,19 @@ export default class Main extends Component.extend(ShortcutsMixin) {
     }
 
     @action
+    openSettings() {
+        this.router.transitionTo('settings-x');
+    }
+
+    @action
     toggleBillingModal() {
         this.billing.openBillingWindow(this.router.currentURL);
     }
 
-    @task(function* () {
-        try {
-            this.set('memberCountLoading', true);
-            const stats = yield this.membersStats.fetchCounts();
-            this.set('memberCountLoading', false);
-            if (stats) {
-                const statsDateObj = this.membersStats.fillCountDates(stats.data) || {};
-                const dateValues = Object.values(statsDateObj);
-                this.set('memberCount', dateValues.length ? dateValues[dateValues.length - 1].total : 0);
-            }
-        } catch (e) {
-            return false;
-        }
-    })
-        _loadMemberCountsTask;
+    @action
+    toggleExploreWindow() {
+        this.explore.openExploreWindow();
+    }
 
     _setIconStyle() {
         let icon = this.icon;

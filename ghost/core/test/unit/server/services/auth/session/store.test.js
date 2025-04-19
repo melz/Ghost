@@ -1,4 +1,4 @@
-const SessionStore = require('../../../../../../core/server/services/auth/session/store');
+const SessionStore = require('../../../../../../core/server/services/auth/session/SessionStore');
 const models = require('../../../../../../core/server/models');
 const EventEmitter = require('events');
 const {Store} = require('express-session');
@@ -127,16 +127,6 @@ describe('Auth Service SessionStore', function () {
     });
 
     describe('SessionStore#set', function () {
-        it('calls back with an error if there is no user_id on the session_data', function (done) {
-            const store = new SessionStore(models.Session);
-            const sid = 1;
-            const session_data = {};
-            store.set(sid, session_data, function (err) {
-                should.exist(err);
-                done();
-            });
-        });
-
         it('calls upsert on the model with the session_id and the session_data', function (done) {
             const upsertStub = sinon.stub(models.Session, 'upsert')
                 .resolves();

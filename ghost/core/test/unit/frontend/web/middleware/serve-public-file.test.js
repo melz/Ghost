@@ -1,7 +1,6 @@
 const should = require('should');
 const sinon = require('sinon');
 const fs = require('fs-extra');
-const path = require('path');
 const servePublicFile = require('../../../../../core/frontend/web/middleware/serve-public-file');
 
 describe('servePublicFile', function () {
@@ -188,6 +187,6 @@ describe('servePublicFile', function () {
         res.writeHead.called.should.be.true();
         res.writeHead.args[0][0].should.equal(200);
 
-        fileStub.firstCall.args[0].should.endWith('content/public/something.css');
+        fileStub.firstCall.args[0].should.endWith('/public/something.css');
     });
 });

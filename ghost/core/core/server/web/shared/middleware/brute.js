@@ -51,6 +51,28 @@ module.exports = {
         })(req, res, next);
     },
     /**
+     * block per IP
+    */
+    sendVerificationCode(req, res, next) {
+        return spamPrevention.sendVerificationCode().getMiddleware({
+            ignoreIP: false,
+            key(_req, _res, _next) {
+                return _next('send_verification_code');
+            }
+        })(req, res, next);
+    },
+    /**
+     * block per IP
+     */
+    userVerification(req, res, next) {
+        return spamPrevention.userVerification().getMiddleware({
+            ignoreIP: false,
+            key(_req, _res, _next) {
+                return _next('user_verification');
+            }
+        })(req, res, next);
+    },
+    /**
      * block per ip
      */
     privateBlog(req, res, next) {
@@ -84,6 +106,7 @@ module.exports = {
     },
 
     /**
+     * Block too many password guesses for the same email address
      */
     membersAuth(req, res, next) {
         return spamPrevention.membersAuth().getMiddleware({
@@ -94,6 +117,39 @@ module.exports = {
                 }
 
                 return _next();
+            }
+        })(req, res, next);
+    },
+
+    /**
+     * Blocks user enumeration
+     */
+    membersAuthEnumeration(req, res, next) {
+        return spamPrevention.membersAuthEnumeration().prevent(req, res, next);
+    },
+
+    /**
+     * Blocks webmention spam
+     */
+
+    webmentionsLimiter(req, res, next) {
+        return spamPrevention.webmentionsBlock().getMiddleware({
+            ignoreIP: false,
+            key(_req, _res, _next) {
+                return _next('webmention_blocked');
+            }
+        })(req, res, next);
+    },
+
+    /**
+     * Blocks preview email spam
+     */
+
+    previewEmailLimiter(req, res, next) {
+        return spamPrevention.emailPreviewBlock().getMiddleware({
+            ignoreIP: false,
+            key(_req, _res, _next) {
+                return _next('preview_email_blocked');
             }
         })(req, res, next);
     }

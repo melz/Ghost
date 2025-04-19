@@ -1,22 +1,16 @@
-const errors = require('@tryghost/errors');
-const membersService = require('../../services/members');
+const tiersService = require('../../services/tiers');
 
-const tpl = require('@tryghost/tpl');
-
-const allowedIncludes = ['monthly_price', 'yearly_price', 'benefits'];
-
-const messages = {
-    productNotFound: 'Tier not found.'
-};
-
-module.exports = {
+/** @type {import('@tryghost/api-framework').Controller} */
+const controller = {
     docName: 'tiers',
 
     browse: {
+        headers: {
+            cacheInvalidate: false
+        },
         options: [
             'limit',
             'fields',
-            'include',
             'filter',
             'order',
             'debug',
@@ -25,48 +19,24 @@ module.exports = {
         permissions: {
             docName: 'products'
         },
-        validation: {
-            options: {
-                include: {
-                    values: allowedIncludes
-                }
-            }
-        },
         async query(frame) {
-            const page = await membersService.api.productRepository.list(frame.options);
-
+            const page = await tiersService.api.browse(frame.options);
             return page;
         }
     },
 
     read: {
-        options: [
-            'include'
-        ],
-        headers: {},
+        headers: {
+            cacheInvalidate: false
+        },
         data: [
             'id'
         ],
-        validation: {
-            options: {
-                include: {
-                    values: allowedIncludes
-                }
-            }
-        },
         permissions: {
             docName: 'products'
         },
         async query(frame) {
-            const model = await membersService.api.productRepository.get(frame.data, frame.options);
-
-            if (!model) {
-                throw new errors.NotFoundError({
-                    message: tpl(messages.productNotFound)
-                });
-            }
-
-            return model;
+            return await tiersService.api.read(frame.data.id);
         }
     },
 
@@ -84,11 +54,7 @@ module.exports = {
             docName: 'products'
         },
         async query(frame) {
-            const model = await membersService.api.productRepository.create(
-                frame.data,
-                frame.options
-            );
-            return model;
+            return await tiersService.api.add(frame.data);
         }
     },
 
@@ -111,12 +77,9 @@ module.exports = {
             docName: 'products'
         },
         async query(frame) {
-            const model = await membersService.api.productRepository.update(
-                frame.data,
-                frame.options
-            );
-
-            return model;
+            return await tiersService.api.edit(frame.options.id, frame.data);
         }
     }
 };
+
+module.exports = controller;

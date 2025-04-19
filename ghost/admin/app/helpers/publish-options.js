@@ -1,14 +1,17 @@
 import PublishOptions from '../utils/publish-options';
 import {Resource} from 'ember-could-get-used-to-this';
+import {inject} from 'ghost-admin/decorators/inject';
 import {inject as service} from '@ember/service';
 import {tracked} from '@glimmer/tracking';
 
 export default class PublishOptionsResource extends Resource {
-    @service config;
     @service limit;
     @service session;
     @service settings;
     @service store;
+    @service membersCountCache;
+
+    @inject config;
 
     @tracked publishOptions;
 
@@ -33,7 +36,7 @@ export default class PublishOptionsResource extends Resource {
     }
 
     _createPublishOptions(post) {
-        const {config, limit, settings, store} = this;
+        const {config, limit, settings, store, membersCountCache} = this;
 
         return new PublishOptions({
             config,
@@ -41,6 +44,7 @@ export default class PublishOptionsResource extends Resource {
             post,
             settings,
             store,
+            membersCountCache,
             user: this.session.user
         });
     }

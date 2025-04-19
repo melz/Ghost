@@ -12,7 +12,12 @@
 
 const {themeI18n} = require('../services/handlebars');
 
-module.exports = function t(text, options) {
+module.exports = function t(text, options = {}) {
+    if (!text || text.length === 0) {
+        // no-op: translation key is missing, return an empty string
+        return '';
+    }
+
     const bindings = {};
     let prop;
     for (prop in options.hash) {

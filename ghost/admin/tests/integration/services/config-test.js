@@ -5,7 +5,7 @@ import {expect} from 'chai';
 import {settled} from '@ember/test-helpers';
 import {setupTest} from 'ember-mocha';
 
-describe('Integration: Service: config', function () {
+describe('Integration: Service: config-manager', function () {
     setupTest();
 
     let server;
@@ -18,17 +18,15 @@ describe('Integration: Service: config', function () {
         server.shutdown();
     });
 
-    it('returns a list of timezones in the expected format', function (done) {
-        let service = this.owner.lookup('service:config');
+    it('returns a list of timezones in the expected format', function () {
+        const injection = this.owner.lookup('config:main');
+        const timezones = injection.availableTimezones;
 
-        service.get('availableTimezones').then(function (timezones) {
-            expect(timezones.length).to.equal(66);
-            expect(timezones[0].name).to.equal('Pacific/Pago_Pago');
-            expect(timezones[0].label).to.equal('(GMT -11:00) Midway Island, Samoa');
-            expect(timezones[1].name).to.equal('Pacific/Honolulu');
-            expect(timezones[1].label).to.equal('(GMT -10:00) Hawaii');
-            done();
-        });
+        expect(timezones.length).to.equal(67);
+        expect(timezones[0].name).to.equal('Pacific/Pago_Pago');
+        expect(timezones[0].label).to.equal('(GMT -11:00) Midway Island, Samoa');
+        expect(timezones[1].name).to.equal('Pacific/Honolulu');
+        expect(timezones[1].label).to.equal('(GMT -10:00) Hawaii');
     });
 
     it('normalizes blogUrl to non-trailing-slash', function (done) {
@@ -53,13 +51,14 @@ describe('Integration: Service: config', function () {
                 ];
             });
         };
-        let service = this.owner.lookup('service:config');
+        const service = this.owner.lookup('service:config-manager');
+        const injection = this.owner.lookup('config:main');
 
         stubBlogUrl('http://localhost:2368/');
 
         service.fetch().then(() => {
             expect(
-                service.get('blogUrl'), 'trailing-slash'
+                injection.blogUrl, 'trailing-slash'
             ).to.equal('http://localhost:2368');
         });
 
@@ -68,7 +67,7 @@ describe('Integration: Service: config', function () {
 
             service.fetch().then(() => {
                 expect(
-                    service.get('blogUrl'), 'non-trailing-slash'
+                    injection.blogUrl, 'non-trailing-slash'
                 ).to.equal('http://localhost:2368');
 
                 done();

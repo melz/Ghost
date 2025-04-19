@@ -4,8 +4,7 @@
  */
 const _ = require('lodash');
 
-const Promise = require('bluebird');
-const ObjectId = require('bson-objectid');
+const ObjectId = require('bson-objectid').default;
 const errors = require('@tryghost/errors');
 
 /**

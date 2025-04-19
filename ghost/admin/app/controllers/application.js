@@ -1,29 +1,32 @@
-import classic from 'ember-classic-decorator';
-import {computed} from '@ember/object';
-import {reads} from '@ember/object/computed';
-import {inject as service} from '@ember/service';
-/* eslint-disable ghost/ember/alias-model-in-controller */
 import Controller from '@ember/controller';
+import {inject} from 'ghost-admin/decorators/inject';
+import {inject as service} from '@ember/service';
 
-@classic
 export default class ApplicationController extends Controller {
     @service billing;
-    @service config;
-    @service dropdown;
-    @service feature;
+    @service explore;
     @service router;
     @service session;
     @service settings;
     @service ui;
+    @service upgradeStatus;
 
-    @reads('config.hostSettings.billing.enabled')
-        showBilling;
+    @inject config;
 
-    @computed(
-        'router.currentRouteName',
-        'session.{isAuthenticated,user}',
-        'ui.isFullScreen'
-    )
+    get showBilling() {
+        return this.config.hostSettings?.billing?.enabled;
+    }
+
+    get showScriptExtension() {
+        const {session} = this;
+
+        if (!session.isAuthenticated || !session.user) {
+            return false;
+        }
+
+        return this.config.clientExtensions?.script;
+    }
+
     get showNavMenu() {
         let {router, session, ui} = this;
 

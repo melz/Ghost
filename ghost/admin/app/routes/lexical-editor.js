@@ -4,7 +4,6 @@ import {run} from '@ember/runloop';
 import {inject as service} from '@ember/service';
 
 export default AuthenticatedRoute.extend({
-    config: service(),
     feature: service(),
     notifications: service(),
     router: service(),
@@ -12,15 +11,19 @@ export default AuthenticatedRoute.extend({
 
     classNames: ['editor'],
 
-    beforeModel() {
-        if (!this.config.get('editor.lexicalUrl')) {
-            return this.router.transitionTo('posts');
-        }
-    },
-
     activate() {
         this._super(...arguments);
         this.ui.set('isFullScreen', true);
+    },
+
+    setupController(controller, model, transition) {
+        if (transition.from?.name === 'posts.analytics' && transition.to?.name !== 'lexical-editor.new') {
+            controller.fromAnalytics = true;
+        }
+    },
+
+    resetController(controller) {
+        controller.fromAnalytics = false;
     },
 
     deactivate() {
@@ -36,7 +39,8 @@ export default AuthenticatedRoute.extend({
         },
 
         authorizationFailed() {
-            this.controller.send('toggleReAuthenticateModal');
+            // noop - re-auth is handled by controller save
+            return;
         },
 
         willTransition(transition) {

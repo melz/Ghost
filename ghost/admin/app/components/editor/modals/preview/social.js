@@ -4,12 +4,15 @@ import {
     IMAGE_MIME_TYPES
 } from 'ghost-admin/components/gh-image-uploader';
 import {action} from '@ember/object';
+import {inject} from 'ghost-admin/decorators/inject';
 import {inject as service} from '@ember/service';
 import {tracked} from '@glimmer/tracking';
+
 export default class ModalPostPreviewSocialComponent extends Component {
-    @service config;
     @service settings;
     @service ghostPaths;
+
+    @inject config;
 
     @tracked editingFacebookTitle = false;
     @tracked editingFacebookDescription = false;
@@ -24,7 +27,7 @@ export default class ModalPostPreviewSocialComponent extends Component {
     get _fallbackDescription() {
         return this.args.post.customExcerpt ||
             this.serpDescription ||
-            this.settings.get('description');
+            this.settings.description;
     }
 
     @action
@@ -57,17 +60,17 @@ export default class ModalPostPreviewSocialComponent extends Component {
             urlParts.push(canonicalUrl.host);
             urlParts.push(...canonicalUrl.pathname.split('/').reject(p => !p));
         } else {
-            const blogUrl = new URL(this.config.get('blogUrl'));
+            const blogUrl = new URL(this.config.blogUrl);
             urlParts.push(blogUrl.host);
             urlParts.push(...blogUrl.pathname.split('/').reject(p => !p));
             urlParts.push(this.args.post.slug);
         }
 
-        return urlParts.join(' > ');
+        return urlParts.join(' › ');
     }
 
     get serpDescription() {
-        return this.args.post.metaDescription || this.args.post.excerpt;
+        return this.args.post.metaDescription;
     }
 
     @action
@@ -107,7 +110,7 @@ export default class ModalPostPreviewSocialComponent extends Component {
     }
 
     get facebookImage() {
-        return this.args.post.ogImage || this.args.post.featureImage || this.settings.get('ogImage') || this.settings.get('coverImage');
+        return this.args.post.ogImage || this.args.post.featureImage || this.settings.ogImage || this.settings.coverImage;
     }
 
     @action
@@ -166,7 +169,7 @@ export default class ModalPostPreviewSocialComponent extends Component {
     }
 
     get twitterImage() {
-        return this.args.post.twitterImage || this.args.post.featureImage || this.settings.get('twitterImage') || this.settings.get('coverImage');
+        return this.args.post.twitterImage || this.args.post.featureImage || this.settings.twitterImage || this.settings.coverImage;
     }
 
     @action

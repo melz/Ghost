@@ -1,10 +1,9 @@
 const should = require('should');
 const sinon = require('sinon');
 const testUtils = require('../../utils');
-const Promise = require('bluebird');
 const moment = require('moment-timezone');
-const ObjectId = require('bson-objectid');
-const assert = require('assert');
+const ObjectId = require('bson-objectid').default;
+const assert = require('assert/strict');
 const _ = require('lodash');
 const validator = require('@tryghost/validator');
 
@@ -13,7 +12,9 @@ const db = require('../../../core/server/data/db');
 
 const models = require('../../../core/server/models');
 const importer = require('../../../core/server/data/importer');
-const dataImporter = importer.importers[1];
+const dataImporter = importer.importers.find((instance) => {
+    return instance.type === 'data';
+});
 
 const importOptions = {
     returnImportedData: true
@@ -40,8 +41,6 @@ describe('Importer', function () {
         beforeEach(testUtils.setup('roles', 'owner'));
 
         it('ensure return structure', function () {
-            let exportData;
-
             return dataImporter.doImport(exportedBodyV2().db[0], importOptions)
                 .then(function (importResult) {
                     should.exist(importResult);
@@ -115,7 +114,7 @@ describe('Importer', function () {
                     return models.Settings.findOne(_.merge({key: 'active_theme'}, testUtils.context.internal));
                 })
                 .then(function (result) {
-                    result.attributes.value.should.eql('casper');
+                    result.attributes.value.should.eql('source');
                 });
         });
 
@@ -239,10 +238,7 @@ describe('Importer', function () {
                         return postTag.tag_id !== 2;
                     });
 
-                    importResult.problems.length.should.equal(1);
-
-                    importResult.problems[0].message.should.eql('Entry was not imported and ignored. Detected duplicated entry.');
-                    importResult.problems[0].help.should.eql('Tag');
+                    importResult.problems.length.should.equal(0);
                 });
         });
 
@@ -828,7 +824,7 @@ describe('Importer', function () {
 
             exportData.data.settings[0] = testUtils.DataGenerator.forKnex.createSetting({
                 key: 'labs',
-                value: JSON.stringify({activitypub: true})
+                value: JSON.stringify({additionalPaymentMethods: true})
             });
 
             return dataImporter.doImport(exportData, importOptions)
@@ -839,7 +835,7 @@ describe('Importer', function () {
                 .then(function (result) {
                     should.equal(result.attributes.key, 'labs');
                     should.equal(result.attributes.group, 'labs');
-                    should.equal(result.attributes.value, '{"activitypub":true}');
+                    should.equal(result.attributes.value, '{"additionalPaymentMethods":true}');
                 });
         });
 

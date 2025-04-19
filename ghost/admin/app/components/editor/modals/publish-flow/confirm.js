@@ -1,5 +1,5 @@
 import Component from '@glimmer/component';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import {htmlSafe} from '@ember/template';
 import {isArray} from '@ember/array';
 import {isServerUnreachableError} from 'ghost-admin/services/ajax';
@@ -13,6 +13,8 @@ function isString(str) {
 
 export default class PublishFlowOptions extends Component {
     @service settings;
+    @service feature;
+    @service router;
 
     @tracked errorMessage;
 
@@ -66,7 +68,7 @@ export default class PublishFlowOptions extends Component {
         }
 
         if (this.args.publishOptions.isScheduled) {
-            const scheduleMoment = moment.tz(this.args.publishOptions.scheduledAtUTC, this.settings.get('timezone'));
+            const scheduleMoment = moment.tz(this.args.publishOptions.scheduledAtUTC, this.settings.timezone);
             buttonText += `, on ${scheduleMoment.format('MMMM Do')}`;
         } else {
             buttonText += ', right now';
@@ -91,6 +93,7 @@ export default class PublishFlowOptions extends Component {
 
         try {
             yield this.args.saveTask.perform();
+            this.args.setCompleted();
         } catch (e) {
             if (e === undefined && this.args.publishOptions.post.errors.length !== 0) {
                 // validation error
@@ -101,15 +104,19 @@ export default class PublishFlowOptions extends Component {
 
             let errorMessage = '';
 
+            const payloadError = e?.payload?.errors?.[0];
+
             if (isServerUnreachableError(e)) {
                 errorMessage = 'Unable to connect, please check your internet connection and try again.';
+            } else if (payloadError?.type === 'HostLimitError') {
+                errorMessage = htmlSafe(payloadError.context.replace(/please upgrade/i, '<a href="#/pro">$&</a>'));
             } else if (e && isString(e)) {
                 errorMessage = e;
             } else if (e && isArray(e)) {
                 // This is here because validation errors are returned as an array
                 // TODO: remove this once validations are fixed
                 errorMessage = e[0];
-            } else if (e?.payload?.errors?.[0].message) {
+            } else if (payloadError?.message) {
                 errorMessage = e.payload.errors[0].message;
             } else {
                 errorMessage = 'Unknown Error';

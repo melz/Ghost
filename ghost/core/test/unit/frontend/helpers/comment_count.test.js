@@ -3,12 +3,11 @@ const sinon = require('sinon');
 const configUtils = require('../../../utils/configUtils');
 const {mockManager} = require('../../../utils/e2e-framework');
 
-const commentCount = require('../../../../core/frontend/helpers/comment_count');
 const proxy = require('../../../../core/frontend/services/proxy');
 const {html} = require('common-tags');
 const {settingsCache} = proxy;
 
-const handlebars = require('../../../../core/frontend/services/theme-engine/engine').handlebars;
+const {registerHelper, shouldCompileToExpected} = require('./utils/handlebars');
 
 describe('{{comment_count}} helper', function () {
     let keyStub;
@@ -19,25 +18,18 @@ describe('{{comment_count}} helper', function () {
             getFrontendKey: keyStub
         };
         proxy.init({dataService});
-        handlebars.registerHelper('comment_count', commentCount);
+        registerHelper('comment_count');
     });
-
-    function shouldCompileToExpected(templateString, hash, expected) {
-        const template = handlebars.compile(templateString);
-        const result = template(hash);
-
-        result.should.eql(expected);
-    }
 
     beforeEach(function () {
         mockManager.mockMail();
         sinon.stub(settingsCache, 'get');
     });
 
-    afterEach(function () {
+    afterEach(async function () {
         mockManager.restore();
         sinon.restore();
-        configUtils.restore();
+        await configUtils.restore();
     });
 
     it('returns a script with the post id when autowrap is disabled', async function () {

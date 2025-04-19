@@ -1,4 +1,3 @@
-const Promise = require('bluebird');
 const tpl = require('@tryghost/tpl');
 const errors = require('@tryghost/errors');
 const models = require('../../models');
@@ -7,7 +6,7 @@ const dbBackup = require('../../data/db/backup');
 const auth = require('../../services/auth');
 const apiMail = require('./index').mail;
 const apiSettings = require('./index').settings;
-const UsersService = require('../../services/users');
+const UsersService = require('../../services/Users');
 const userService = new UsersService({dbBackup, models, auth, apiMail, apiSettings});
 const ALLOWED_INCLUDES = ['count.posts', 'permissions', 'roles', 'roles.permissions'];
 const UNSAFE_ATTRS = ['status', 'roles'];
@@ -41,10 +40,54 @@ async function fetchOrCreatePersonalToken(userId) {
     return token;
 }
 
-module.exports = {
+function shouldInvalidateCacheAfterChange(model) {
+    // Model attributes that should trigger cache invalidation when changed
+    // (because they affect the frontend)
+    const publicAttrs = [
+        'name',
+        'slug',
+        'profile_image',
+        'cover_image',
+        'bio',
+        'website',
+        'location',
+        'facebook',
+        'twitter',
+        'mastodon',
+        'youtube',
+        'linkedin',
+        'bluesky',
+        'instagram',
+        'tiktok',
+        'threads',
+        'status',
+        'visibility',
+        'meta_title',
+        'meta_description'
+    ];
+
+    if (model.wasChanged() === false) {
+        return false;
+    }
+
+    // Check if any of the changed attributes are public
+    for (const attr of Object.keys(model._changed)) {
+        if (publicAttrs.includes(attr) === true) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/** @type {import('@tryghost/api-framework').Controller} */
+const controller = {
     docName: 'users',
 
     browse: {
+        headers: {
+            cacheInvalidate: false
+        },
         options: [
             'include',
             'filter',
@@ -68,6 +111,9 @@ module.exports = {
     },
 
     read: {
+        headers: {
+            cacheInvalidate: false
+        },
         options: [
             'include',
             'filter',
@@ -103,7 +149,9 @@ module.exports = {
     },
 
     edit: {
-        headers: {},
+        headers: {
+            cacheInvalidate: false
+        },
         options: [
             'id',
             'include'
@@ -130,10 +178,8 @@ module.exports = {
                         }));
                     }
 
-                    if (model.wasChanged()) {
-                        this.headers.cacheInvalidate = true;
-                    } else {
-                        this.headers.cacheInvalidate = false;
+                    if (shouldInvalidateCacheAfterChange(model)) {
+                        frame.setHeader('X-Cache-Invalidate', '/*');
                     }
 
                     return model;
@@ -166,6 +212,9 @@ module.exports = {
     },
 
     changePassword: {
+        headers: {
+            cacheInvalidate: false
+        },
         validation: {
             docName: 'password',
             data: {
@@ -188,6 +237,9 @@ module.exports = {
     },
 
     transferOwnership: {
+        headers: {
+            cacheInvalidate: false
+        },
         permissions(frame) {
             return models.Role.findOne({name: 'Owner'})
                 .then((ownerRole) => {
@@ -200,6 +252,9 @@ module.exports = {
     },
 
     readToken: {
+        headers: {
+            cacheInvalidate: false
+        },
         options: [
             'id'
         ],
@@ -218,6 +273,9 @@ module.exports = {
     },
 
     regenerateToken: {
+        headers: {
+            cacheInvalidate: false
+        },
         options: [
             'id'
         ],
@@ -237,3 +295,5 @@ module.exports = {
         }
     }
 };
+
+module.exports = controller;

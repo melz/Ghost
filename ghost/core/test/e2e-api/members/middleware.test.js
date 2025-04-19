@@ -1,31 +1,34 @@
-const {agentProvider, mockManager, fixtureManager, matchers} = require('../../utils/e2e-framework');
-const {anyEtag, anyObjectId, anyUuid, anyISODateTime} = matchers;
+const crypto = require('crypto');
+const {agentProvider, mockManager, fixtureManager, matchers, configUtils} = require('../../utils/e2e-framework');
+const {anyEtag, anyObjectId, anyUuid, anyISODateTime, stringMatching} = matchers;
 const models = require('../../../core/server/models');
-require('should');
+const should = require('should');
+const sinon = require('sinon');
+const settingsHelpers = require('../../../core/server/services/settings-helpers');
 
 let membersAgent;
 
 const memberMatcher = (newslettersCount) => {
     return {
         uuid: anyUuid,
+        // @NOTE: check if this field is even needed? it differs to the output in the other matcher
+        created_at: anyISODateTime,
         newsletters: new Array(newslettersCount).fill(
             {
-                id: anyObjectId
+                id: anyObjectId,
+                uuid: anyUuid
             }
         )
     };
 };
 
-// @todo: we currently don't serialise the output of /api/member/newsletters/, we should fix this
-const memberMatcherUnserialised = (newslettersCount) => {
+const buildMemberMatcher = (newslettersCount) => {
     return {
         uuid: anyUuid,
         newsletters: new Array(newslettersCount).fill(
             {
                 id: anyObjectId,
-                uuid: anyUuid,
-                created_at: anyISODateTime,
-                updated_at: anyISODateTime
+                uuid: anyUuid
             }
         )
     };
@@ -39,6 +42,7 @@ describe('Comments API', function () {
     });
 
     beforeEach(function () {
+        sinon.stub(settingsHelpers, 'createUnsubscribeUrl').returns('http://domain.com/unsubscribe/?uuid=memberuuid&key=abc123dontstealme');
         mockManager.mockMail();
     });
 
@@ -59,8 +63,11 @@ describe('Comments API', function () {
             let member = await models.Member.findOne({id: fixtureManager.get('members', 0).id}, {require: true});
             member.get('enable_comment_notifications').should.eql(true, 'This test requires the initial value to be true');
 
+            sinon.stub(settingsHelpers, 'getMembersValidationKey').returns('test');
+            const hmac = crypto.createHmac('sha256', 'test').update(member.get('uuid')).digest('hex');
+
             await membersAgent
-                .put(`/api/member/newsletters/?uuid=${member.get('uuid')}`)
+                .put(`/api/member/newsletters/?uuid=${member.get('uuid')}&key=${hmac}`)
                 .body({
                     enable_comment_notifications: false
                 })
@@ -68,7 +75,7 @@ describe('Comments API', function () {
                 .matchHeaderSnapshot({
                     etag: anyEtag
                 })
-                .matchBodySnapshot(memberMatcherUnserialised(1))
+                .matchBodySnapshot(buildMemberMatcher(1))
                 .expect(({body}) => {
                     body.email.should.eql(member.get('email'));
                     body.enable_comment_notifications.should.eql(false);
@@ -99,11 +106,11 @@ describe('Comments API', function () {
                 });
         });
 
-        it('can update member bio', async function () {
+        it('can update member expertise', async function () {
             await membersAgent
                 .put(`/api/member/`)
                 .body({
-                    bio: 'Head of Testing'
+                    expertise: 'Head of Testing'
                 })
                 .expectStatus(200)
                 .matchHeaderSnapshot({
@@ -112,17 +119,17 @@ describe('Comments API', function () {
                 .matchBodySnapshot(memberMatcher(2))
                 .expect(({body}) => {
                     body.email.should.eql(member.get('email'));
-                    body.bio.should.eql('Head of Testing');
+                    body.expertise.should.eql('Head of Testing');
                 });
             member = await models.Member.findOne({id: member.id}, {require: true});
-            member.get('bio').should.eql('Head of Testing');
+            member.get('expertise').should.eql('Head of Testing');
         });
 
-        it('trims whitespace from bio', async function () {
+        it('trims whitespace from expertise', async function () {
             await membersAgent
                 .put(`/api/member/`)
                 .body({
-                    bio: '  test  '
+                    expertise: '  test  '
                 })
                 .expectStatus(200)
                 .matchHeaderSnapshot({
@@ -131,10 +138,10 @@ describe('Comments API', function () {
                 .matchBodySnapshot(memberMatcher(2))
                 .expect(({body}) => {
                     body.email.should.eql(member.get('email'));
-                    body.bio.should.eql('test');
+                    body.expertise.should.eql('test');
                 });
             member = await models.Member.findOne({id: member.id}, {require: true});
-            member.get('bio').should.eql('test');
+            member.get('expertise').should.eql('test');
         });
 
         it('can update name', async function () {
@@ -178,9 +185,12 @@ describe('Comments API', function () {
             member = await models.Member.findOne({id: member.id}, {require: true});
             member.get('enable_comment_notifications').should.eql(false);
 
+            sinon.stub(settingsHelpers, 'getMembersValidationKey').returns('test');
+            const hmac = crypto.createHmac('sha256', 'test').update(member.get('uuid')).digest('hex');
+
             // Via updateMemberNewsletters
             await membersAgent
-                .put(`/api/member/newsletters/?uuid=${member.get('uuid')}`)
+                .put(`/api/member/newsletters/?uuid=${member.get('uuid')}&key=${hmac}`)
                 .body({
                     enable_comment_notifications: true
                 })
@@ -188,13 +198,97 @@ describe('Comments API', function () {
                 .matchHeaderSnapshot({
                     etag: anyEtag
                 })
-                .matchBodySnapshot(memberMatcherUnserialised(2))
+                .matchBodySnapshot(buildMemberMatcher(2))
                 .expect(({body}) => {
                     body.email.should.eql(member.get('email'));
                     body.enable_comment_notifications.should.eql(true);
                 });
             member = await models.Member.findOne({id: member.id}, {require: true});
             member.get('enable_comment_notifications').should.eql(true);
+        });
+
+        it('can remove a member\'s email from the suppression list', async function () {
+            // add member's email to the suppression list
+            await models.Suppression.add({
+                email: member.get('email'),
+                reason: 'bounce'
+            });
+
+            // disable member's email
+            await member.save({email_disabled: true});
+
+            // remove suppression
+            await membersAgent
+                .delete(`/api/member/suppression`)
+                .expectStatus(204)
+                .expectEmptyBody();
+
+            // check that member is removed from suppression list
+            const suppression = await models.Suppression.findOne({email: member.get('email')});
+
+            should(suppression).be.null();
+
+            // check that member's email is enabled
+            await member.refresh();
+
+            should(member.get('email_disabled')).be.false();
+        });
+    });
+
+    describe('when caching members content is enabled', function () {
+        it('sets ghost-access and ghost-access-hmac cookies', async function () {
+            configUtils.set('cacheMembersContent:enabled', true);
+            configUtils.set('cacheMembersContent:hmacSecret', crypto.randomBytes(64).toString('base64'));
+            membersAgent = await agentProvider.getMembersAPIAgent();
+            await fixtureManager.init('newsletters', 'members:newsletters');
+            await membersAgent.loginAs('member@example.com');
+            const member = await models.Member.findOne({email: 'member@example.com'}, {require: true});
+            await membersAgent
+                .get(`/api/member/`)
+                .expectStatus(200)
+                .matchHeaderSnapshot({
+                    etag: anyEtag,
+                    'set-cookie': [
+                        stringMatching(/^ghost-access=[0-9a-fA-F]{24}:\d{10}/),
+                        stringMatching(/^ghost-access-hmac=[a-fA-F0-9]{64}/)
+                    ]
+                })
+                .matchBodySnapshot(memberMatcher(2))
+                .expect(({body}) => {
+                    body.email.should.eql(member.get('email'));
+                });
+        });
+
+        it('does not set ghost-access and ghost-access-hmac cookies when not authenticated', async function () {
+            configUtils.set('cacheMembersContent:enabled', true);
+            configUtils.set('cacheMembersContent:hmacSecret', crypto.randomBytes(64).toString('base64'));
+            membersAgent = await agentProvider.getMembersAPIAgent();
+            await fixtureManager.init('newsletters', 'members:newsletters');
+            await membersAgent
+                .get(`/api/member/`)
+                .expectStatus(204)
+                .expectEmptyBody()
+                .expect(({headers}) => {
+                    should.not.exist(headers['set-cookie']);
+                });
+        });
+
+        it('sets ghost-access and ghost-access-hmac cookies to null when not authenticated but a cookie is sent', async function () {
+            // This is to ensure that the cookies are reset when a user logs out
+            configUtils.set('cacheMembersContent:enabled', true);
+            configUtils.set('cacheMembersContent:hmacSecret', crypto.randomBytes(64).toString('base64'));
+            membersAgent = await agentProvider.getMembersAPIAgent();
+            await fixtureManager.init('newsletters', 'members:newsletters');
+            // Send a ghost-access cookie but without a valid member session
+            await membersAgent.jar.setCookie('ghost-access=fake;');
+            await membersAgent
+                .get('/api/member/')
+                .expect(({headers}) => {
+                    should.exist(headers['set-cookie']);
+                    headers['set-cookie'].should.matchAny(/ghost-access=null;/);
+                })
+                .expectStatus(204)
+                .expectEmptyBody();
         });
     });
 });

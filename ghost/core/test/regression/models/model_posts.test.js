@@ -4,7 +4,6 @@ const sinon = require('sinon');
 const testUtils = require('../../utils');
 const moment = require('moment');
 const _ = require('lodash');
-const Promise = require('bluebird');
 const {sequence} = require('@tryghost/promise');
 const urlService = require('../../../core/server/services/url');
 const ghostBookshelf = require('../../../core/server/models/base');
@@ -41,8 +40,8 @@ describe('Post Model', function () {
     });
 
     describe('Single author posts', function () {
-        afterEach(function () {
-            configUtils.restore();
+        afterEach(async function () {
+            await configUtils.restore();
         });
 
         describe('fetchOne/fetchAll/fetchPage', function () {
@@ -475,7 +474,9 @@ describe('Post Model', function () {
                     should.exist(eventsTriggered['post.rescheduled']);
                     eventsTriggered = {};
 
-                    return Promise.delay(1000 * 3);
+                    return new Promise((resolve) => {
+                        setTimeout(resolve, 3000);
+                    });
                 }).then(function () {
                     return models.Post.edit({
                         status: 'scheduled'
@@ -943,10 +944,10 @@ describe('Post Model', function () {
                 });
             });
 
-            it('add scheduled post with published_at not in future-> we expect an error', function (done) {
+            it('add scheduled post with published_at more than 2 minutes in the past -> we expect an error', function (done) {
                 models.Post.add({
                     status: 'scheduled',
-                    published_at: moment().subtract(1, 'minute'),
+                    published_at: moment().subtract(3, 'minute'),
                     title: 'scheduled 1',
                     mobiledoc: markdownToMobiledoc('This is some content')
                 }, context).catch(function (err) {
@@ -957,17 +958,19 @@ describe('Post Model', function () {
                 });
             });
 
-            it('add scheduled post with published_at 1 minutes in future -> we expect an error', function (done) {
-                models.Post.add({
+            it('add scheduled post with published_at 1 minutes in past -> we expect success', async function () {
+                const post = await models.Post.add({
                     status: 'scheduled',
                     published_at: moment().add(1, 'minute'),
                     title: 'scheduled 1',
                     mobiledoc: markdownToMobiledoc('This is some content')
-                }, context).catch(function (err) {
-                    (err instanceof errors.ValidationError).should.eql(true);
-                    Object.keys(eventsTriggered).length.should.eql(0);
-                    done();
-                });
+                }, context);
+                should.exist(post);
+
+                Object.keys(eventsTriggered).length.should.eql(3);
+                should.exist(eventsTriggered['post.added']);
+                should.exist(eventsTriggered['post.scheduled']);
+                should.exist(eventsTriggered['user.attached']);
             });
 
             it('add scheduled post with published_at 10 minutes in future -> we expect success', function (done) {
@@ -1184,6 +1187,21 @@ describe('Post Model', function () {
 
                     done();
                 }).catch(done);
+            });
+
+            // NOTE: separate to the test above because mobiledoc+lexical cannot co-exist
+            it('stores lexical as transform-ready and reads as absolute', async function () {
+                const post = {
+                    title: 'Absolute->Transform-ready Lexical URL Transform Test',
+                    lexical: `{"root":{"children":[{"type":"image","src":"http://127.0.0.1:2369/content/images/card.jpg"},{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"local link","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"link","version":1,"rel":null,"target":null,"url":"http://127.0.0.1:2369/local"}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"external link","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"link","version":1,"rel":null,"target":null,"url":"https://example.com/external"}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}`
+                };
+
+                const createdPost = await models.Post.add(post, context);
+                createdPost.get('lexical').should.equal(`{"root":{"children":[{"type":"image","src":"http://127.0.0.1:2369/content/images/card.jpg"},{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"local link","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"link","version":1,"rel":null,"target":null,"url":"http://127.0.0.1:2369/local"}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"external link","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"link","version":1,"rel":null,"target":null,"url":"https://example.com/external"}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}`, 'Post.add result');
+
+                const knexResult = await db.knex('posts').where({id: createdPost.id});
+                const [knexPost] = knexResult;
+                knexPost.lexical.should.equal('{"root":{"children":[{"type":"image","src":"__GHOST_URL__/content/images/card.jpg"},{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"local link","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"link","version":1,"rel":null,"target":null,"url":"__GHOST_URL__/local"}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"external link","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"link","version":1,"rel":null,"target":null,"url":"https://example.com/external"}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}', 'knex result');
             });
         });
 
@@ -1483,7 +1501,7 @@ describe('Post Model', function () {
 
                     return models.MobiledocRevision
                         .findAll({
-                            filter: `post_id:${updatedPost.id}`
+                            filter: `post_id:'${updatedPost.id}'`
                         });
                 })
                 .then((mobiledocRevisions) => {
@@ -1518,7 +1536,7 @@ describe('Post Model', function () {
                 })
                 .then(() => models.MobiledocRevision
                     .findAll({
-                        filter: `post_id:${revisionedPost.id}`
+                        filter: `post_id:'${revisionedPost.id}'`
                     })
                 )
                 .then((mobiledocRevisions) => {
@@ -1548,7 +1566,7 @@ describe('Post Model', function () {
 
                     return models.MobiledocRevision
                         .findAll({
-                            filter: `post_id:${createdPost.id}`
+                            filter: `post_id:'${createdPost.id}'`
                         });
                 })
                 .then((mobiledocRevisions) => {
@@ -1564,7 +1582,7 @@ describe('Post Model', function () {
 
                     return models.MobiledocRevision
                         .findAll({
-                            filter: `post_id:${editedPost.id}`
+                            filter: `post_id:'${editedPost.id}'`
                         });
                 })
                 .then((mobiledocRevisions) => {
@@ -1593,10 +1611,11 @@ describe('Post Model', function () {
                 id: testUtils.DataGenerator.Content.users[0].id,
                 slug: testUtils.DataGenerator.Content.users[0].slug
             };
+            const staffCount = testUtils.DataGenerator.forKnex.users.length;
 
             const preReassignPosts = await models.Post.findAll({context: {internal: true}});
-            // There are 10 posts created by posts:mu fixture
-            preReassignPosts.length.should.equal(10);
+            // The posts:mu fixture creates two posts per staff member.
+            preReassignPosts.length.should.equal(2 * staffCount);
 
             const preReassignOwnerWithPosts = await models.Post.findAll({
                 filter: `authors:${ownerData.slug}`,
@@ -1607,8 +1626,8 @@ describe('Post Model', function () {
             await models.Post.reassignByAuthor(authorData);
 
             const postReassignPosts = await models.Post.findAll({context: {internal: true}});
-            // All 10 should remain
-            postReassignPosts.length.should.equal(10);
+            // All posts should remain
+            postReassignPosts.length.should.equal(2 * staffCount);
 
             const postReassignOwnerWithPosts = await models.Post.findAll({
                 filter: `authors:${ownerData.slug}`,
@@ -1715,7 +1734,7 @@ describe('Post Model', function () {
                 });
         });
 
-        beforeEach(function () {
+        beforeEach(async function () {
             tagJSON = [];
 
             const post = _.cloneDeep(testUtils.DataGenerator.forModel.posts[0]);
@@ -1735,21 +1754,21 @@ describe('Post Model', function () {
             post.tags = postTags;
             post.status = 'published';
 
-            return Promise.props({
-                post: models.Post.add(post, _.extend({}, context, {withRelated: ['tags']})),
-                tag1: models.Tag.add(extraTags[0], context),
-                tag2: models.Tag.add(extraTags[1], context),
-                tag3: models.Tag.add(extraTags[2], context)
-            }).then(function (result) {
-                postJSON = result.post.toJSON({withRelated: ['tags']});
-                tagJSON.push(result.tag1.toJSON());
-                tagJSON.push(result.tag2.toJSON());
-                tagJSON.push(result.tag3.toJSON());
-                editOptions = _.extend({}, context, {id: postJSON.id, withRelated: ['tags']});
+            const [newPost, tag1, tag2, tag3] = await Promise.all([
+                models.Post.add(post, _.extend({}, context, {withRelated: ['tags']})),
+                models.Tag.add(extraTags[0], context),
+                models.Tag.add(extraTags[1], context),
+                models.Tag.add(extraTags[2], context)
+            ]);
 
-                // reset the eventSpy here
-                sinon.restore();
-            });
+            postJSON = newPost.toJSON({withRelated: ['tags']});
+            tagJSON.push(tag1.toJSON());
+            tagJSON.push(tag2.toJSON());
+            tagJSON.push(tag3.toJSON());
+            editOptions = _.extend({}, context, {id: postJSON.id, withRelated: ['tags']});
+
+            // reset the eventSpy here
+            sinon.restore();
         });
 
         it('should create the test data correctly', function (done) {
@@ -1806,7 +1825,9 @@ describe('Post Model', function () {
             delete newJSON.tags[0].parent;
 
             // Edit the post
-            return Promise.delay(1000)
+            return new Promise((resolve) => {
+                setTimeout(resolve, 1000);
+            })
                 .then(function () {
                     return models.Post.edit(newJSON, editOptions);
                 })
@@ -1834,7 +1855,6 @@ describe('Post Model', function () {
 
         it('can reorder existing, added and deleted tags', function () {
             const newJSON = _.cloneDeep(postJSON);
-            const lastTag = [postJSON.tags[2]];
 
             // remove tag in the middle (tag1, tag2, tag3 -> tag1, tag3)
             newJSON.tags.splice(1, 1);

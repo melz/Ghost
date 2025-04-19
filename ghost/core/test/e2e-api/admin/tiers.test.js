@@ -1,10 +1,12 @@
-const assert = require('assert');
+const assert = require('assert/strict');
 const {
     agentProvider,
     fixtureManager,
     mockManager,
     matchers
 } = require('../../utils/e2e-framework');
+const models = require('../../../core/server/models/index');
+const {anyContentVersion, anyEtag} = matchers;
 
 describe('Tiers API', function () {
     let agent;
@@ -94,7 +96,7 @@ describe('Tiers API', function () {
     });
 
     it('Can edit visibility', async function () {
-        const {body: {tiers: [tier]}} = await agent.get('/tiers/?type:paid&limit=1');
+        const {body: {tiers: [tier]}} = await agent.get('/tiers/?filter=type:paid&limit=1');
 
         const visibility = tier.visibility === 'none' ? 'public' : 'none';
 
@@ -125,5 +127,117 @@ describe('Tiers API', function () {
         const {body: {tiers: [updatedTier]}} = await agent.get(`/tiers/${tier.id}/`);
 
         assert(updatedTier.trial_days === 0, `The trial_days should have been set to 0`);
+    });
+
+    it('Can edit tier properties and relations', async function () {
+        let {body: {tiers: [tier]}} = await agent.get('/tiers/?filter=type:paid&limit=1')
+            .expectStatus(200)
+            .matchHeaderSnapshot({
+                'content-version': anyContentVersion,
+                etag: anyEtag
+            })
+            .matchBodySnapshot({
+                tiers: Array(1).fill({
+                    id: matchers.anyObjectId,
+                    created_at: matchers.anyISODateTime,
+                    updated_at: matchers.anyISODateTime
+                })
+            });
+
+        await agent.put(`/tiers/${tier.id}/`)
+            .body({
+                tiers: [{
+                    description: 'Updated description',
+                    benefits: ['daily cat pictures', 'delicious avo toast']
+                }]
+            })
+            .expectStatus(200);
+
+        await agent.get(`/tiers/${tier.id}/`)
+            .expectStatus(200)
+            .matchHeaderSnapshot({
+                'content-version': anyContentVersion,
+                etag: anyEtag
+            })
+            .matchBodySnapshot({
+                tiers: Array(1).fill({
+                    id: matchers.anyObjectId,
+                    created_at: matchers.anyISODateTime,
+                    updated_at: matchers.anyISODateTime
+                })
+            });
+    });
+
+    it('Can create a new tier', async function () {
+        const tier = {
+            name: 'new premium tier',
+            monthly_price: 100,
+            currency: 'usd'
+        };
+
+        await agent
+            .post('/tiers/')
+            .body({tiers: [tier]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                tiers: Array(1).fill({
+                    id: matchers.anyObjectId,
+                    created_at: matchers.anyISODate,
+                    name: 'new premium tier',
+                    slug: 'new-premium-tier',
+                    monthly_price: 100,
+                    currency: 'USD'
+                })
+            });
+    });
+
+    it('Can update a benefit\'s capitalization', async function () {
+        const tierData = {
+            name: 'benefit test tier',
+            monthly_price: 100,
+            currency: 'usd',
+            benefits: ['TEST BENEFIT']
+        };
+
+        let {body: {tiers: [tier]}} = await agent.post('/tiers/')
+            .body({tiers: [tierData]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                tiers: Array(1).fill({
+                    id: matchers.anyObjectId,
+                    created_at: matchers.anyISODate,
+                    name: 'benefit test tier',
+                    slug: 'benefit-test-tier',
+                    monthly_price: 100,
+                    currency: 'USD'
+                })
+            });
+
+        await agent.put(`/tiers/${tier.id}/`)
+            .body({
+                tiers: [{
+                    benefits: ['Test benefit']
+                }]
+            })
+            .expectStatus(200);
+
+        await agent.get(`/tiers/${tier.id}/`)
+            .expectStatus(200)
+            .matchHeaderSnapshot({
+                'content-version': anyContentVersion,
+                etag: anyEtag
+            })
+            .matchBodySnapshot({
+                tiers: Array(1).fill({
+                    id: matchers.anyObjectId,
+                    created_at: matchers.anyISODate,
+                    benefits: ['Test benefit']
+                })
+            });
+
+        const benefit = await models.Benefit.findOne({slug: 'test-benefit'});
+        assert(benefit.attributes.name === 'Test benefit', 'The benefit should have been updated.');
+        const previousBenefit = await models.Benefit.findOne({slug: 'test-benefit-2'});
+        assert(!previousBenefit, 'The previous benefit should have been overwritten');
     });
 });

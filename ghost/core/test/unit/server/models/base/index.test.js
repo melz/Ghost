@@ -1,8 +1,5 @@
-const errors = require('@tryghost/errors');
 const should = require('should');
 const sinon = require('sinon');
-const _ = require('lodash');
-const Promise = require('bluebird');
 const security = require('@tryghost/security');
 const models = require('../../../../../core/server/models');
 const urlUtils = require('../../../../../core/shared/url-utils');
@@ -37,6 +34,42 @@ describe('Models: base', function () {
             security.string.safe.withArgs('My-Slug').returns('my-slug');
 
             return models.Base.Model.generateSlug(Model, 'My-Slug', options)
+                .then((slug) => {
+                    slug.should.eql('my-slug');
+                });
+        });
+
+        it('slug exists but it does not exist for the id', function () {
+            let i = 0;
+            Model.findOne.callsFake(() => {
+                i = i + 1;
+                if (i === 1) {
+                    return Promise.resolve({id: 'correct-model-id'});
+                }
+                return Promise.resolve(null);
+            });
+
+            security.string.safe.withArgs('My-Slug').returns('my-slug');
+
+            return models.Base.Model.generateSlug(Model, 'My-Slug', {modelId: 'incorrect-model-id'})
+                .then((slug) => {
+                    slug.should.eql('my-slug-2');
+                });
+        });
+
+        it('slug exists but it exists for the id', function () {
+            let i = 0;
+            Model.findOne.callsFake(() => {
+                i = i + 1;
+                if (i === 1) {
+                    return Promise.resolve({id: 'correct-model-id'});
+                }
+                return Promise.resolve(null);
+            });
+
+            security.string.safe.withArgs('My-Slug').returns('my-slug');
+
+            return models.Base.Model.generateSlug(Model, 'My-Slug', {modelId: 'correct-model-id'})
                 .then((slug) => {
                     slug.should.eql('my-slug');
                 });

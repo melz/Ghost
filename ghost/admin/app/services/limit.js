@@ -2,6 +2,7 @@ import LimitService from '@tryghost/limit-service';
 import RSVP from 'rsvp';
 import Service, {inject as service} from '@ember/service';
 import {bind} from '@ember/runloop';
+import {inject} from 'ghost-admin/decorators/inject';
 
 class LimitError {
     constructor({errorType, errorDetails, message}) {
@@ -24,14 +25,16 @@ class HostLimitError extends LimitError {
 }
 
 export default class LimitsService extends Service {
-    @service config;
     @service store;
     @service membersStats;
+    @service membersCountCache;
+
+    @inject config;
 
     constructor() {
         super(...arguments);
 
-        let limits = this.config.get('hostSettings.limits');
+        let limits = this.config.hostSettings?.limits;
 
         this.limiter = new LimitService();
 
@@ -41,10 +44,8 @@ export default class LimitsService extends Service {
 
         let helpLink;
 
-        if (this.config.get('hostSettings.billing.enabled')
-            && this.config.get('hostSettings.billing.enabled') === true
-            && this.config.get('hostSettings.billing.url')) {
-            helpLink = this.config.get('hostSettings.billing.url');
+        if (this.config.hostSettings?.billing?.enabled === true && this.config.hostSettings?.billing?.url) {
+            helpLink = this.config.hostSettings.billing?.url;
         } else {
             helpLink = 'https://ghost.org/help/';
         }
@@ -93,9 +94,7 @@ export default class LimitsService extends Service {
     }
 
     async getMembersCount() {
-        const counts = await this.membersStats.fetchCounts();
-
-        return counts.total;
+        return this.membersCountCache.count({});
     }
 
     async getNewslettersCount() {

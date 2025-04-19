@@ -7,21 +7,25 @@ const JobManager = require('@tryghost/job-manager');
 const logging = require('@tryghost/logging');
 const models = require('../../models');
 const sentry = require('../../../shared/sentry');
-
+const domainEvents = require('@tryghost/domain-events');
+const config = require('../../../shared/config');
 const errorHandler = (error, workerMeta) => {
     logging.info(`Capturing error for worker during execution of job: ${workerMeta.name}`);
     logging.error(error);
     sentry.captureException(error);
 };
+const events = require('../../lib/common/events');
 
 const workerMessageHandler = ({name, message}) => {
-    logging.info(`Worker for job ${name} sent a message: ${message}`);
+    if (typeof message === 'string') {
+        logging.info(`Worker for job ${name} sent a message: ${message}`);
+    }
 };
 
 const initTestMode = () => {
     // Output job queue length every 5 seconds
     setInterval(() => {
-        logging.warn(`${jobManager.queue.length()} jobs in the queue. Idle: ${jobManager.queue.idle()}`);
+        logging.warn(`${jobManager.inlineQueue.length()} jobs in the queue. Idle: ${jobManager.inlineQueue.idle()}`);
 
         const runningScheduledjobs = Object.keys(jobManager.bree.workers);
         if (Object.keys(jobManager.bree.workers).length) {
@@ -39,7 +43,7 @@ const initTestMode = () => {
     }, 5000);
 };
 
-const jobManager = new JobManager({errorHandler, workerMessageHandler, JobModel: models.Job});
+const jobManager = new JobManager({errorHandler, workerMessageHandler, JobModel: models.Job, domainEvents, config, events});
 
 module.exports = jobManager;
 module.exports.initTestMode = initTestMode;

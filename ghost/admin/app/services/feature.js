@@ -4,6 +4,7 @@ import EmberError from '@ember/error';
 import Service, {inject as service} from '@ember/service';
 import classic from 'ember-classic-decorator';
 import {computed, set} from '@ember/object';
+import {inject} from 'ghost-admin/decorators/inject';
 
 export function feature(name, options = {}) {
     let {user, onChange} = options;
@@ -15,7 +16,7 @@ export function feature(name, options = {}) {
 
             if (user) {
                 enabled = this.get(`accessibility.${name}`);
-            } else if (this.get(`config.${name}`)) {
+            } else if (typeof this.get(`config.${name}`) === 'boolean') {
                 enabled = this.get(`config.${name}`);
             } else {
                 enabled = this.get(`labs.${name}`) || false;
@@ -39,14 +40,13 @@ export function feature(name, options = {}) {
 
 @classic
 export default class FeatureService extends Service {
-    @service store;
-    @service config;
-
+    @service lazyLoader;
+    @service notifications;
     @service session;
     @service settings;
+    @service store;
 
-    @service notifications;
-    @service lazyLoader;
+    @inject config;
 
     // features
     @feature('emailAnalytics') emailAnalytics;
@@ -55,22 +55,34 @@ export default class FeatureService extends Service {
     @feature('nightShift', {user: true, onChange: '_setAdminTheme'})
         nightShift;
 
+    // user-specific referral invitation
+    @feature('referralInviteDismissed', {user: true}) referralInviteDismissed;
+
     // labs flags
-    @feature('auditLog') auditLog;
-    @feature('urlCache') urlCache;
-    @feature('beforeAfterCard') beforeAfterCard;
-    @feature('newsletterPaywall') newsletterPaywall;
-    @feature('freeTrial') freeTrial;
-    @feature('compExpiring') compExpiring;
-    @feature('memberAttribution') memberAttribution;
-    @feature('searchHelper') searchHelper;
-    @feature('emailAlerts') emailAlerts;
+    @feature('audienceFeedback') audienceFeedback;
+    @feature('webmentions') webmentions;
+    @feature('stripeAutomaticTax') stripeAutomaticTax;
+    @feature('emailCustomization') emailCustomization;
+    @feature('i18n') i18n;
+    @feature('announcementBar') announcementBar;
+    @feature('signupCard') signupCard;
+    @feature('mailEvents') mailEvents;
+    @feature('collectionsCard') collectionsCard;
+    @feature('importMemberTier') importMemberTier;
+    @feature('lexicalIndicators') lexicalIndicators;
+    @feature('adminXDemo') adminXDemo;
+    @feature('ActivityPub') ActivityPub;
+    @feature('editorExcerpt') editorExcerpt;
+    @feature('contentVisibility') contentVisibility;
+    @feature('contentVisibilityAlpha') contentVisibilityAlpha;
+    @feature('postsX') postsX;
+    @feature('statsX') statsX;
 
     _user = null;
 
     @computed('settings.labs')
     get labs() {
-        let labs = this.get('settings.labs');
+        let labs = this.settings.labs;
 
         try {
             return JSON.parse(labs) || {};
@@ -141,11 +153,14 @@ export default class FeatureService extends Service {
             nightShift = enabled || this.nightShift;
         }
 
+        document.documentElement.classList.toggle('dark', nightShift ?? false);
+
         return this.lazyLoader.loadStyle('dark', 'assets/ghost-dark.css', true).then(() => {
             $('link[title=dark]').prop('disabled', !nightShift);
         }).catch(() => {
             //TODO: Also disable toggle from settings and Labs hover
             $('link[title=dark]').prop('disabled', true);
+            document.documentElement.classList.remove('dark');
         });
     }
 }

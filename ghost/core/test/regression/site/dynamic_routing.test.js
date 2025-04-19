@@ -65,8 +65,7 @@ describe('Dynamic Routing', function () {
 
                     $('title').text().should.equal('Ghost');
                     $('body.home-template').length.should.equal(1);
-                    $('article.post').length.should.equal(5);
-                    $('article.tag-getting-started').length.should.equal(5);
+                    $('article.post').length.should.equal(7);
 
                     done();
                 });
@@ -74,7 +73,7 @@ describe('Dynamic Routing', function () {
 
         it('should not have a third page', function (done) {
             request.get('/page/3/')
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .expect(/Page not found/)
                 .end(doEnd(done));
@@ -103,22 +102,17 @@ describe('Dynamic Routing', function () {
 
             request.get('/' + date + '/static-page-test/')
                 .expect('Content-Type', /html/)
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .end(doEnd(done));
         });
     });
 
     describe('Tag', function () {
-        before(function (done) {
-            testUtils.clearData().then(function () {
-                // we initialise data, but not a user. No user should be required for navigating the frontend
-                return testUtils.initData();
-            }).then(function () {
-                return testUtils.fixtures.overrideOwnerUser('ghost-owner');
-            }).then(function () {
-                done();
-            }).catch(done);
+        before(async function () {
+            await testUtils.teardownDb();
+            await testUtils.initData();
+            await testUtils.fixtures.overrideOwnerUser('ghost-owner');
         });
 
         after(testUtils.teardownDb);
@@ -142,9 +136,8 @@ describe('Dynamic Routing', function () {
                     should.not.exist(res.headers['set-cookie']);
                     should.exist(res.headers.date);
 
-                    $('body').attr('class').should.eql('tag-template tag-getting-started');
+                    $('body').attr('class').should.eql('tag-template tag-getting-started has-sans-title has-sans-body');
                     $('article.post').length.should.equal(5);
-                    $('article.tag-getting-started').length.should.equal(5);
 
                     done();
                 });
@@ -152,7 +145,7 @@ describe('Dynamic Routing', function () {
 
         it('should 404 for /tag/ route', function (done) {
             request.get('/tag/')
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .expect(/Page not found/)
                 .end(doEnd(done));
@@ -160,7 +153,7 @@ describe('Dynamic Routing', function () {
 
         it('should 404 for unknown tag', function (done) {
             request.get('/tag/spectacular/')
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .expect(/Page not found/)
                 .end(doEnd(done));
@@ -168,7 +161,7 @@ describe('Dynamic Routing', function () {
 
         it('should 404 for unknown tag with invalid characters', function (done) {
             request.get('/tag/~$pectacular~/')
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .expect(/Page not found/)
                 .end(doEnd(done));
@@ -211,7 +204,7 @@ describe('Dynamic Routing', function () {
 
             it('should 404 for non-edit parameter', function (done) {
                 request.get('/tag/getting-started/notedit/')
-                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect('Cache-Control', testUtils.cacheRules.noCache)
                     .expect(404)
                     .expect(/Page not found/)
                     .end(doEnd(done));
@@ -229,14 +222,12 @@ describe('Dynamic Routing', function () {
                     });
             });
 
-            after(function () {
-                configUtils.restore();
+            after(async function () {
+                await configUtils.restore();
 
-                return testUtils.startGhost({forceStart: true})
-                    .then(function () {
-                        sinon.stub(themeEngine.getActive(), 'config').withArgs('posts_per_page').returns(5);
-                        request = supertest.agent(config.get('url'));
-                    });
+                await testUtils.startGhost({forceStart: true});
+                sinon.stub(themeEngine.getActive(), 'config').withArgs('posts_per_page').returns(5);
+                request = supertest.agent(config.get('url'));
             });
 
             it('should redirect without slash', function (done) {
@@ -250,7 +241,7 @@ describe('Dynamic Routing', function () {
             it('should not redirect to admin', function (done) {
                 request.get('/tag/getting-started/edit/')
                     .expect(404)
-                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect('Cache-Control', testUtils.cacheRules.noCache)
                     .end(doEnd(done));
             });
         });
@@ -274,7 +265,7 @@ describe('Dynamic Routing', function () {
         const ownerSlug = 'ghost-owner';
 
         before(function (done) {
-            testUtils.clearData().then(function () {
+            testUtils.teardownDb().then(function () {
                 // we initialise data, but not a user. No user should be required for navigating the frontend
                 return testUtils.initData();
             }).then(function () {
@@ -316,7 +307,7 @@ describe('Dynamic Routing', function () {
 
         it('should 404 for /author/ route', function (done) {
             request.get('/author/')
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .expect(/Page not found/)
                 .end(doEnd(done));
@@ -324,7 +315,7 @@ describe('Dynamic Routing', function () {
 
         it('should 404 for unknown author', function (done) {
             request.get('/author/spectacular/')
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .expect(/Page not found/)
                 .end(doEnd(done));
@@ -332,7 +323,7 @@ describe('Dynamic Routing', function () {
 
         it('should 404 for unknown author with invalid characters', function (done) {
             request.get('/author/ghost!user^/')
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .expect(/Page not found/)
                 .end(doEnd(done));
@@ -413,7 +404,7 @@ describe('Dynamic Routing', function () {
 
             it('should 404 for something that isn\'t edit', function (done) {
                 request.get('/author/ghost-owner/notedit/')
-                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect('Cache-Control', testUtils.cacheRules.noCache)
                     .expect(404)
                     .expect(/Page not found/)
                     .end(doEnd(done));
@@ -431,14 +422,12 @@ describe('Dynamic Routing', function () {
                     });
             });
 
-            after(function () {
-                configUtils.restore();
+            after(async function () {
+                await configUtils.restore();
 
-                return testUtils.startGhost({forceStart: true})
-                    .then(function () {
-                        sinon.stub(themeEngine.getActive(), 'config').withArgs('posts_per_page').returns(5);
-                        request = supertest.agent(config.get('url'));
-                    });
+                await testUtils.startGhost({forceStart: true});
+                sinon.stub(themeEngine.getActive(), 'config').withArgs('posts_per_page').returns(5);
+                request = supertest.agent(config.get('url'));
             });
 
             it('should redirect without slash', function (done) {
@@ -451,7 +440,7 @@ describe('Dynamic Routing', function () {
 
             it('should not redirect to admin', function (done) {
                 request.get('/author/ghost-owner/edit/')
-                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect('Cache-Control', testUtils.cacheRules.noCache)
                     .expect(404)
                     .end(doEnd(done));
             });
@@ -460,7 +449,7 @@ describe('Dynamic Routing', function () {
         describe('Paged', function () {
             // Add enough posts to trigger pages
             before(function (done) {
-                testUtils.clearData().then(function () {
+                testUtils.teardownDb().then(function () {
                     // we initialize data, but not a user. No user should be required for navigating the frontend
                     return testUtils.initData();
                 }).then(function () {
@@ -502,7 +491,7 @@ describe('Dynamic Routing', function () {
 
             it('should 404 if page too high', function (done) {
                 request.get('/author/ghost-owner/page/6/')
-                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect('Cache-Control', testUtils.cacheRules.noCache)
                     .expect(404)
                     .expect(/Page not found/)
                     .end(doEnd(done));
@@ -510,7 +499,7 @@ describe('Dynamic Routing', function () {
 
             it('should 404 if page too low', function (done) {
                 request.get('/author/ghost-owner/page/0/')
-                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect('Cache-Control', testUtils.cacheRules.noCache)
                     .expect(404)
                     .expect(/Page not found/)
                     .end(doEnd(done));
@@ -519,7 +508,7 @@ describe('Dynamic Routing', function () {
             describe('RSS', function () {
                 it('should 404 if index attempted with 0', function (done) {
                     request.get('/author/ghost-owner/rss/0/')
-                        .expect('Cache-Control', testUtils.cacheRules.private)
+                        .expect('Cache-Control', testUtils.cacheRules.noCache)
                         .expect(404)
                         .expect(/Page not found/)
                         .end(doEnd(done));
@@ -527,7 +516,7 @@ describe('Dynamic Routing', function () {
 
                 it('should 404 if index attempted with 1', function (done) {
                     request.get('/author/ghost-owner/rss/1/')
-                        .expect('Cache-Control', testUtils.cacheRules.private)
+                        .expect('Cache-Control', testUtils.cacheRules.noCache)
                         .expect(404)
                         .expect(/Page not found/)
                         .end(doEnd(done));
@@ -535,7 +524,7 @@ describe('Dynamic Routing', function () {
 
                 it('should 404 for other pages', function (done) {
                     request.get('/author/ghost-owner/rss/2/')
-                        .expect('Cache-Control', testUtils.cacheRules.private)
+                        .expect('Cache-Control', testUtils.cacheRules.noCache)
                         .expect(404)
                         .expect(/Page not found/)
                         .end(doEnd(done));

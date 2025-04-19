@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const nql = require('@tryghost/nql');
 const debug = require('@tryghost/debug')('services:url:generator');
 const localUtils = require('../../../shared/url-utils');
@@ -121,25 +120,25 @@ class UrlGenerator {
      * @private
      */
     _onInit() {
-        debug('_onInit', this.resourceType);
-
         // @NOTE: get the resources of my type e.g. posts.
         const resources = this.resources.getAllByType(this.resourceType);
 
-        debug(resources.length);
+        debug('_onInit', this.resourceType, resources.length);
 
-        _.each(resources, (resource) => {
+        for (const resource of resources) {
             this._try(resource);
-        });
+        }
     }
 
     /**
      * @description Listener which get's called when a resource was added on runtime.
-     * @param {String} event
+     * @param {Object} event
+     * @param {String} event.type
+     * @param {String} event.id
      * @private
      */
     _onAdded(event) {
-        debug('onAdded', this.toString());
+        debug('_onAdded', this.toString());
 
         // CASE: you are type "pages", but the incoming type is "users"
         if (event.type !== this.resourceType) {
@@ -147,7 +146,6 @@ class UrlGenerator {
         }
 
         const resource = this.resources.getByIdAndType(event.type, event.id);
-
         this._try(resource);
     }
 
@@ -168,11 +166,22 @@ class UrlGenerator {
             return false;
         }
 
-        const url = this._generateUrl(resource);
-
         // CASE 1: route has no custom filter, it will own the resource for sure
+        let shouldReserve = !this.filter;
+
         // CASE 2: find out if my filter matches the resource
-        if ((!this.filter) || (this.nql.queryJSON(resource.data))) {
+        if (!shouldReserve) {
+            try {
+                shouldReserve = this.nql.queryJSON(resource.data);
+            } catch (err) {
+                debug(`Failed to queryJSON with filter "${this.filter}"`, err);
+
+                return false;
+            }
+        }
+
+        if (shouldReserve) {
+            const url = this._generateUrl(resource);
             this.urls.add({
                 url: url,
                 generatorId: this.uid,
@@ -188,7 +197,7 @@ class UrlGenerator {
     }
 
     /**
-     * @description Generate url based on the permlink configuration of the target router.
+     * @description Generate url based on the permalink configuration of the target router.
      *
      * @NOTE We currently generate relative urls (https://github.com/TryGhost/Ghost/commit/7b0d5d465ba41073db0c3c72006da625fa11df32).
      */

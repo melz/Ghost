@@ -1,6 +1,5 @@
 const url = require('url');
 const debug = require('@tryghost/debug')('headers');
-const Promise = require('bluebird');
 const INVALIDATE_ALL = '/*';
 
 const cacheInvalidate = (result, options = {}) => {
@@ -100,8 +99,8 @@ module.exports = {
      *
      * @param {Object} result - API response
      * @param {Object} apiConfigHeaders
-     * @param {Object} frame
-     * @return {Promise}
+     * @param {import('@tryghost/api-framework').Frame} frame
+     * @return {Promise<object>}
      */
     async get(result, apiConfigHeaders = {}, frame) {
         let headers = {};
@@ -123,7 +122,8 @@ module.exports = {
         }
 
         const locationHeaderDisabled = apiConfigHeaders?.location === false;
-        const hasFrameData = frame?.method === 'add' && result[frame.docName]?.[0]?.id;
+        const hasLocationResolver = apiConfigHeaders?.location?.resolve;
+        const hasFrameData = (frame?.method === 'add' || hasLocationResolver) && result[frame.docName]?.[0]?.id;
 
         if (!locationHeaderDisabled && hasFrameData) {
             const protocol = (frame.original.url.secure === false) ? 'http://' : 'https://';
@@ -133,7 +133,12 @@ module.exports = {
             if (!locationURL.endsWith('/')) {
                 locationURL += '/';
             }
+
             locationURL += `${resourceId}/`;
+
+            if (hasLocationResolver) {
+                locationURL = apiConfigHeaders.location.resolve(locationURL);
+            }
 
             const locationHeader = {
                 Location: locationURL
@@ -141,6 +146,10 @@ module.exports = {
 
             Object.assign(headers, locationHeader);
         }
+
+        const headersFromFrame = frame.getHeaders();
+
+        Object.assign(headers, headersFromFrame);
 
         debug(headers);
         return headers;

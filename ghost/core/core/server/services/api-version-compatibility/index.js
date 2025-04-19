@@ -1,5 +1,5 @@
-const APIVersionCompatibilityService = require('@tryghost/api-version-compatibility-service');
-const versionMismatchHandler = require('@tryghost/mw-api-version-mismatch');
+const APIVersionCompatibilityService = require('./APIVersionCompatibilityService');
+const versionMismatchHandler = require('./mw-api-version-mismatch');
 const ghostVersion = require('@tryghost/version');
 const {GhostMailer} = require('../mail');
 const settingsService = require('../settings/settings-service');
@@ -25,21 +25,23 @@ const init = () => {
     });
 };
 
-module.exports.errorHandler = (err, req, res, next) => {
+module.exports.errorHandler = function apiVersionCompatibilityErrorHandler(err, req, res, next) {
     return versionMismatchHandler(serviceInstance)(err, req, res, next);
 };
 
 /**
- * If Accept-Version is set on the request set Content-Version on the response
+ * Set Content-Version on the response, and add 'Accept-Version' to VARY as
+ * it effects response caching
+ * TODO: move the method to mw once back-compatibility with 4.x is sorted
  *
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
-module.exports.contentVersion = (req, res, next) => {
-    if (req.header('accept-version')) {
-        res.header('Content-Version', `v${ghostVersion.safe}`);
-    }
+module.exports.contentVersion = function apiVersionCompatibilityContentVersion(req, res, next) {
+    res.header('Content-Version', `v${ghostVersion.safe}`);
+    res.vary('Accept-Version');
+
     next();
 };
 

@@ -6,9 +6,14 @@ const messages = {
     memberNotFound: 'Member not found.'
 };
 
-module.exports = {
+/** @type {import('@tryghost/api-framework').Controller} */
+const controller = {
     docName: 'member_signin_urls',
+
     read: {
+        headers: {
+            cacheInvalidate: false
+        },
         data: [
             'id'
         ],
@@ -22,7 +27,7 @@ module.exports = {
                 });
             }
 
-            const magicLink = await membersService.api.getMagicLink(model.get('email'));
+            const magicLink = await membersService.api.getMagicLink(model.get('email'), 'signin');
 
             return {
                 member_id: model.get('id'),
@@ -31,3 +36,5 @@ module.exports = {
         }
     }
 };
+
+module.exports = controller;

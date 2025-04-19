@@ -7,7 +7,7 @@ const config = require('../../../shared/config');
 const renderer = require('../../services/rendering');
 
 // @TODO: make this properly shared code
-const {prepareError, prepareStack} = require('@tryghost/mw-error-handler');
+const {prepareError, prepareErrorCacheControl, prepareStack} = require('@tryghost/mw-error-handler');
 
 const messages = {
     oopsErrorTemplateHasError: 'Oops, seems there is an error in the error template.',
@@ -34,7 +34,7 @@ const errorFallbackMessage = err => `<h1>${tpl(messages.oopsErrorTemplateHasErro
      <br ><p>${tpl(messages.whilstTryingToRender)}</p>
      ${err.statusCode} <pre>${escapeExpression(err.message || err)}</pre>`;
 
-const themeErrorRenderer = (err, req, res, next) => {
+const themeErrorRenderer = function themeErrorRenderer(err, req, res, next) {
     // If the error code is explicitly set to STATIC_FILE_NOT_FOUND,
     // Skip trying to render an HTML error, and move on to the basic error renderer
     // We do this because customised 404 templates could reference the image that's missing
@@ -47,8 +47,6 @@ const themeErrorRenderer = (err, req, res, next) => {
     // Format Data
     const data = {
         message: err.message,
-        // @deprecated Remove in Ghost 5.0
-        code: err.statusCode,
         statusCode: err.statusCode,
         errorDetails: err.errorDetails || []
     };
@@ -86,6 +84,8 @@ const themeErrorRenderer = (err, req, res, next) => {
 module.exports.handleThemeResponse = [
     // Make sure the error can be served
     prepareError,
+    // Add cache-control header
+    prepareErrorCacheControl(),
     // Handle the error in Sentry
     sentry.errorHandler,
     // Format the stack for the user

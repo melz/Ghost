@@ -1,5 +1,4 @@
 const debug = require('@tryghost/debug')('validators:handle');
-const Promise = require('bluebird');
 const errors = require('@tryghost/errors');
 const {sequence} = require('@tryghost/promise');
 
@@ -13,7 +12,7 @@ const {sequence} = require('@tryghost/promise');
  *
  * @param {Object} apiConfig - Docname + method of the ctrl
  * @param {Object} apiValidators - Target API validators
- * @param {Object} frame
+ * @param {import('@tryghost/api-framework').Frame} frame
  */
 module.exports.input = (apiConfig, apiValidators, frame) => {
     debug('input begin');

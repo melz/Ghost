@@ -1,7 +1,20 @@
 <section class="gh-canvas">
     <GhCanvasHeader class="gh-canvas-header break tablet members-header">
-        <h2 class="gh-canvas-title" data-test-screen-title>Members</h2>
-        {{#if (not-eq this.settings.membersSignupAccess "none")}}
+        <div class="flex flex-column">
+            {{#if this.fromAnalytics}}
+                <div class="gh-canvas-breadcrumb">
+                    <LinkTo @route="posts">
+                        Posts
+                    </LinkTo>
+                    {{svg-jar "arrow-right-small"}}
+                    <LinkTo @route="posts.analytics" @models={{this.fromAnalytics}}>
+                        Analytics
+                    </LinkTo>
+                    {{svg-jar "arrow-right-small"}}Members
+                </div>
+            {{/if}}
+            <h2 class="gh-canvas-title" data-test-screen-title>Members</h2>
+        </div>
             <section class="view-actions">
                 <div class="view-actions-bottom-row {{if this.hideSearchBar "hidden"}}">
                     <div class="relative gh-members-header-search">
@@ -50,11 +63,13 @@
                             @tagName="ul"
                             @classNames="gh-member-actions-menu dropdown-menu dropdown-triangle-top-right"
                         >
-                            <li>
-                                <LinkTo @route="members.import" class="mr2" data-test-link="import-csv">
-                                    <span>Import members</span>
-                                </LinkTo>
-                            </li>
+                            {{#if (not-eq this.settings.membersSignupAccess "none")}}
+                                <li>
+                                    <LinkTo @route="members.import" class="mr2" data-test-link="import-csv">
+                                        <span>Import members</span>
+                                    </LinkTo>
+                                </li>
+                            {{/if}}
                             <li class="{{if this.members.length "" "disabled"}}">
                                 {{#if this.members.length}}
                                     <button class="mr2" type="button" {{on "click" this.exportData}} data-test-button="export-members">
@@ -82,24 +97,29 @@
                                         <span>Remove label from selected members ({{this.members.length}})</span>
                                     </button>
                                 </li>
-                                <li>
-                                    <button class="mr2" data-test-button="unsubscribe-selected" type="button" {{on "click" this.bulkUnsubscribe}}>
-                                        <span>Unsubscribe selected members ({{this.members.length}})</span>
-                                    </button>
-                                </li>
-                                <li class="divider"></li>
-                                <li>
-                                    <button class="mr2" data-test-button="delete-selected" type="button" {{on "click" this.bulkDelete}}>
-                                        <span class="red">Delete selected members ({{this.members.length}})</span>
-                                    </button>
-                                </li>
+                                {{#if (not-eq this.settings.membersSignupAccess "none")}}
+                                    <li>
+                                        <button class="mr2" data-test-button="unsubscribe-selected" type="button" {{on "click" this.bulkUnsubscribe}}>
+                                            <span>Unsubscribe selected members ({{this.members.length}})</span>
+                                        </button>
+                                    </li>
+                                {{/if}}
+                                {{#if this.isBulkDeletePermitted}}
+                                    <li class="divider"></li>
+                                    <li>
+                                        <button class="mr2" data-test-button="delete-selected" type="button" {{on "click" this.bulkDelete}}>
+                                            <span class="red">Delete selected members ({{this.members.length}})</span>
+                                        </button>
+                                    </li>
+                                {{/if}}
                             {{/if}}
                         </GhDropdown>
                     </span>
-                    <LinkTo @route="member.new" class="gh-btn gh-btn-primary" data-test-new-member-button="true"><span>New member</span><span class="gh-btn-text-hide-for-mobile">New</span></LinkTo>
+                    {{#if (not-eq this.settings.membersSignupAccess "none")}}
+                        <LinkTo @route="member.new" class="gh-btn gh-btn-primary" data-test-new-member-button="true"><span>New member</span><span class="gh-btn-text-hide-for-mobile">New</span></LinkTo>
+                    {{/if}}
                 </div>
             </section>
-        {{/if}}
     </GhCanvasHeader>
 
     {{#if this.members.loading}}
@@ -115,23 +135,31 @@
                             <tr>
                                 <th>{{this.listHeader}}</th>
                                 <th data-test-table-column="status">Status</th>
-                                {{#if (not-eq this.settings.editorDefaultEmailRecipients "disabled")}}
+                                {{#if (and (not-eq this.settings.editorDefaultEmailRecipients "disabled") this.settings.emailTrackOpens)}}
                                     <th data-test-table-column="email_open_rate">Open rate</th>
                                 {{/if}}
                                 <th data-test-table-column="location">Location</th>
                                 <th data-test-table-column="created">Created</th>
-                                {{#each this.filterColumnLabels as |column|}}
+                                {{#each this.filterColumns as |column|}}
                                     <th data-test-table-column={{column.name}}>{{column.label}}</th>
                                 {{/each}}
                             </tr>
                         </thead>
-                        <VerticalCollection @tagName="tbody" @items={{this.members}} @key="id" @containerSelector=".gh-list-scrolling" @estimateHeight={{69}} @staticHeight={{true}} @bufferSize={{20}} as |member|>
-                            <GhMembersListItem
-                                @newsletterEnabled={{not-eq this.settings.editorDefaultEmailRecipients "disabled"}}
-                                @member={{member}}
-                                @filterColumns={{this.filterColumns}}
-                                data-test-member={{member.id}}
-                            />
+                        <VerticalCollection @tagName="tbody" @items={{this.members}} @key="id" @containerSelector=".gh-list-scrolling" @estimateHeight={{75}} @staticHeight={{true}} @bufferSize={{5}} @renderAll={{false}} as |member|>
+                            {{#if member.is_loading}}
+                                <Members::ListItemLoading
+                                    @newsletterEnabled={{and (not-eq this.settings.editorDefaultEmailRecipients "disabled") this.settings.emailTrackOpens}}
+                                    @filterColumns={{this.filterColumns}}
+                                />
+                            {{else}}
+                                <Members::ListItem
+                                    @newsletterEnabled={{and (not-eq this.settings.editorDefaultEmailRecipients "disabled") this.settings.emailTrackOpens}}
+                                    @member={{member.content}}
+                                    @filterColumns={{this.filterColumns}}
+                                    @query={{hash postAnalytics=this.postAnalytics}}
+                                    data-test-member={{member.id}}
+                                />
+                            {{/if}}
                         </VerticalCollection>
                     </table>
                 </div>
@@ -152,7 +180,7 @@
                 <div class="gh-main-section gh-members-help">
                     <h2 class="gh-main-section-header small bn">Get started with memberships</h2>
                     <div class="gh-main-section-block">
-                        <div class="gh-main-section-content grey">
+                        <div class="gh-main-section-content bordered">
                             <a href="https://ghost.org/resources/build-audience-subscriber-signups/" target="_blank" class="gh-members-help-card" rel="noopener noreferrer">
                                 <div class="gh-members-help-content">
                                     <div class="thumbnail" style="background-image: url(assets/img/marketing/members-1.jpg);"></div>

@@ -24,10 +24,10 @@ describe('{{comments}} helper', function () {
         configUtils.set('comments:version', 'test.version');
     });
 
-    afterEach(function () {
+    afterEach(async function () {
         mockManager.restore();
         sinon.restore();
-        configUtils.restore();
+        await configUtils.restore();
     });
 
     it('returns undefined if not used withing post context', function (done) {
@@ -55,20 +55,17 @@ describe('{{comments}} helper', function () {
             }
         });
         should.exist(rendered);
-        rendered.string.should.containEql('<script defer src="https://cdn.jsdelivr.net/npm/@tryghost/comments-ui');
+        rendered.string.should.containEql('<script defer src="https://cdn.jsdelivr.net/ghost/comments-ui');
         rendered.string.should.containEql('data-ghost-comments="http://127.0.0.1:2369/"');
         rendered.string.should.containEql('data-api="http://127.0.0.1:2369/ghost/api/content/"');
         rendered.string.should.containEql('data-admin="http://127.0.0.1:2369/ghost/"');
         rendered.string.should.containEql('data-key="xyz"');
-        rendered.string.should.containEql('data-styles="https://cdn.jsdelivr.net/npm/@tryghost/comments-ui@~test.version/umd/main.css"');
         rendered.string.should.containEql('data-title="null"');
         rendered.string.should.containEql('data-count="true"');
         rendered.string.should.containEql('data-post-id="post_id_123"');
-        rendered.string.should.containEql('data-sentry-dsn=""');
         rendered.string.should.containEql('data-color-scheme="auto"');
         rendered.string.should.containEql('data-avatar-saturation="60"');
         rendered.string.should.containEql('data-accent-color=""');
-        rendered.string.should.containEql('data-app-version="test.version"');
         rendered.string.should.containEql('data-comments-enabled="all"');
     });
 
@@ -87,20 +84,17 @@ describe('{{comments}} helper', function () {
             }
         });
         should.exist(rendered);
-        rendered.string.should.containEql('<script defer src="https://cdn.jsdelivr.net/npm/@tryghost/comments-ui');
+        rendered.string.should.containEql('<script defer src="https://cdn.jsdelivr.net/ghost/comments-ui');
         rendered.string.should.containEql('data-ghost-comments="http://127.0.0.1:2369/"');
         rendered.string.should.containEql('data-api="http://127.0.0.1:2369/ghost/api/content/"');
         rendered.string.should.containEql('data-admin="http://127.0.0.1:2369/ghost/"');
         rendered.string.should.containEql('data-key="xyz"');
-        rendered.string.should.containEql('data-styles="https://cdn.jsdelivr.net/npm/@tryghost/comments-ui@~test.version/umd/main.css"');
         rendered.string.should.containEql('data-title="null"');
         rendered.string.should.containEql('data-count="true"');
         rendered.string.should.containEql('data-post-id="post_id_123"');
-        rendered.string.should.containEql('data-sentry-dsn=""');
         rendered.string.should.containEql('data-color-scheme="auto"');
         rendered.string.should.containEql('data-avatar-saturation="60"');
         rendered.string.should.containEql('data-accent-color=""');
-        rendered.string.should.containEql('data-app-version="test.version"');
         rendered.string.should.containEql('data-comments-enabled="paid"');
     });
 

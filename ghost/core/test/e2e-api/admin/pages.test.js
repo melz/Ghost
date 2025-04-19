@@ -1,267 +1,324 @@
-const should = require('should');
-const supertest = require('supertest');
-const moment = require('moment');
-const _ = require('lodash');
-const testUtils = require('../../utils');
-const config = require('../../../core/shared/config');
+const {mobiledocToLexical} = require('@tryghost/kg-converters');
 const models = require('../../../core/server/models');
-const localUtils = require('./utils');
-const mockManager = require('../../utils/e2e-framework-mock-manager');
+const {agentProvider, fixtureManager, mockManager, matchers} = require('../../utils/e2e-framework');
+const {anyArray, anyBoolean, anyContentVersion, anyEtag, anyLocationFor, anyObject, anyObjectId, anyISODateTime, anyString, anyUuid} = matchers;
+
+const tierSnapshot = {
+    id: anyObjectId,
+    created_at: anyISODateTime,
+    updated_at: anyISODateTime
+};
+
+const matchPageShallowIncludes = {
+    id: anyObjectId,
+    uuid: anyUuid,
+    comment_id: anyString,
+    url: anyString,
+    authors: anyArray,
+    primary_author: anyObject,
+    tags: anyArray,
+    primary_tag: anyObject,
+    tiers: Array(2).fill(tierSnapshot),
+    created_at: anyISODateTime,
+    updated_at: anyISODateTime,
+    published_at: anyISODateTime,
+    show_title_and_feature_image: anyBoolean
+};
 
 describe('Pages API', function () {
-    let request;
+    let agent;
 
     before(async function () {
-        await localUtils.startGhost();
-        request = supertest.agent(config.get('url'));
-        await localUtils.doAuth(request, 'users:extra', 'posts');
+        mockManager.mockLabsEnabled('collectionsCard');
+        agent = await agentProvider.getAdminAPIAgent();
+        await fixtureManager.init('posts');
+        await agent.loginAsOwner();
     });
 
-    it('Can retrieve all pages', async function () {
-        const res = await request.get(localUtils.API.getApiQuery('pages/'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        should.not.exist(res.headers['x-cache-invalidate']);
-        const jsonResponse = res.body;
-        should.exist(jsonResponse.pages);
-        localUtils.API.checkResponse(jsonResponse, 'pages');
-        jsonResponse.pages.should.have.length(6);
-
-        localUtils.API.checkResponse(jsonResponse.pages[0], 'page');
-        localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
-        _.isBoolean(jsonResponse.pages[0].featured).should.eql(true);
-
-        // Absolute urls by default
-        jsonResponse.pages[0].url.should.match(new RegExp(`${config.get('url')}/p/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}`));
-        jsonResponse.pages[1].url.should.eql(`${config.get('url')}/contribute/`);
+    afterEach(function () {
+        mockManager.restore();
     });
 
-    it('Can add a page', async function () {
-        const page = {
-            title: 'My Page',
-            page: false,
-            status: 'published',
-            feature_image_alt: 'Testing feature image alt',
-            feature_image_caption: 'Testing <b>feature image caption</b>'
-        };
+    describe('Read', function () {
+        it('Re-renders html when null', async function () {
+            // "queue" an existing page for re-render as happens when a published page is updated/destroyed
+            const page = await models.Post.findOne({slug: 'static-page-test'});
+            // NOTE: re-rendering only occurs for lexical pages
+            const lexical = mobiledocToLexical(page.get('mobiledoc'));
+            await models.Base.knex.raw('UPDATE posts set html=NULL, mobiledoc=NULL, lexical=? WHERE id=?', [lexical, page.id]);
 
-        const res = await request.post(localUtils.API.getApiQuery('pages/'))
-            .set('Origin', config.get('url'))
-            .send({pages: [page]})
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(201);
-
-        res.body.pages.length.should.eql(1);
-
-        localUtils.API.checkResponse(res.body.pages[0], 'page');
-        should.exist(res.headers['x-cache-invalidate']);
-
-        should.exist(res.headers.location);
-        res.headers.location.should.equal(`http://127.0.0.1:2369${localUtils.API.getApiQuery('pages/')}${res.body.pages[0].id}/`);
-
-        const model = await models.Post.findOne({
-            id: res.body.pages[0].id
-        }, testUtils.context.internal);
-
-        const modelJson = model.toJSON();
-
-        modelJson.title.should.eql(page.title);
-        modelJson.status.should.eql(page.status);
-        modelJson.type.should.eql('page');
-
-        modelJson.posts_meta.feature_image_alt.should.eql(page.feature_image_alt);
-        modelJson.posts_meta.feature_image_caption.should.eql(page.feature_image_caption);
-    });
-
-    it('Can include free and paid tiers for public page', async function () {
-        const publicPost = testUtils.DataGenerator.forKnex.createPost({
-            type: 'page',
-            slug: 'free-to-see',
-            visibility: 'public',
-            published_at: moment().add(15, 'seconds').toDate() // here to ensure sorting is not modified
+            await agent
+                .get(`/pages/${page.id}/?formats=mobiledoc,lexical,html`)
+                .expectStatus(200)
+                .matchBodySnapshot({
+                    pages: [Object.assign({}, matchPageShallowIncludes)]
+                });
         });
-        await models.Post.add(publicPost, {context: {internal: true}});
-
-        const publicPostRes = await request
-            .get(localUtils.API.getApiQuery(`pages/${publicPost.id}/`))
-            .set('Origin', config.get('url'))
-            .expect(200);
-        const publicPostData = publicPostRes.body.pages[0];
-        publicPostData.tiers.length.should.eql(2);
     });
 
-    it('Can include free and paid tiers for members only page', async function () {
-        const membersPost = testUtils.DataGenerator.forKnex.createPost({
-            type: 'page',
-            slug: 'thou-shalt-not-be-seen',
-            visibility: 'members',
-            published_at: moment().add(45, 'seconds').toDate() // here to ensure sorting is not modified
+    describe('Browse', function () {
+        it('Re-renders html when null', async function () {
+            // convert inserted pages to lexical and set html=null so we can test re-render
+            const pages = await models.Post.where('type', 'page').fetchAll();
+            for (const page of pages) {
+                if (!page.get('mobiledoc')) {
+                    continue;
+                }
+                const lexical = mobiledocToLexical(page.get('mobiledoc'));
+                await models.Base.knex.raw('UPDATE posts set html=NULL, mobiledoc=NULL, lexical=? WHERE id=?', [lexical, page.id]);
+            }
+
+            await agent
+                .get('/pages/?formats=mobiledoc,lexical,html')
+                .expectStatus(200)
+                .matchBodySnapshot({
+                    pages: Array(pages.length).fill(Object.assign({}, matchPageShallowIncludes))
+                });
         });
-        await models.Post.add(membersPost, {context: {internal: true}});
-
-        const membersPostRes = await request
-            .get(localUtils.API.getApiQuery(`pages/${membersPost.id}/`))
-            .set('Origin', config.get('url'))
-            .expect(200);
-        const membersPostData = membersPostRes.body.pages[0];
-        membersPostData.tiers.length.should.eql(2);
     });
 
-    it('Can include only paid tier for paid page', async function () {
-        const paidPost = testUtils.DataGenerator.forKnex.createPost({
-            type: 'page',
-            slug: 'thou-shalt-be-paid-for',
-            visibility: 'paid',
-            published_at: moment().add(30, 'seconds').toDate() // here to ensure sorting is not modified
+    describe('Create', function () {
+        it('Can create a page with html', async function () {
+            const page = {
+                title: 'HTML test',
+                html: '<p>Testing page creation with html</p>'
+            };
+
+            await agent
+                .post('/pages/?source=html&formats=mobiledoc,lexical,html')
+                .body({pages: [page]})
+                .expectStatus(201)
+                .matchBodySnapshot({
+                    pages: [Object.assign({}, matchPageShallowIncludes, {published_at: null})]
+                })
+                .matchHeaderSnapshot({
+                    'content-version': anyContentVersion,
+                    etag: anyEtag,
+                    location: anyLocationFor('pages')
+                });
         });
-        await models.Post.add(paidPost, {context: {internal: true}});
-
-        const paidPostRes = await request
-            .get(localUtils.API.getApiQuery(`pages/${paidPost.id}/`))
-            .set('Origin', config.get('url'))
-            .expect(200);
-        const paidPostData = paidPostRes.body.pages[0];
-        paidPostData.tiers.length.should.eql(1);
     });
 
-    it('Can include specific tier for page with tiers visibility', async function () {
-        const res = await request.get(localUtils.API.getApiQuery('tiers/'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
+    describe('Update', function () {
+        it('Can modify show_title_and_feature_image property', async function () {
+            const page = {
+                title: 'Test Page',
+                status: 'draft'
+            };
 
-        const jsonResponse = res.body;
+            const {body: pageBody} = await agent
+                .post('/pages/?formats=mobiledoc,lexical,html', {
+                    headers: {
+                        'content-type': 'application/json'
+                    }
+                })
+                .body({pages: [page]})
+                .expectStatus(201);
 
-        const paidTier = jsonResponse.tiers.find(p => p.type === 'paid');
+            const [pageResponse] = pageBody.pages;
 
-        const tiersPage = testUtils.DataGenerator.forKnex.createPost({
-            type: 'page',
-            slug: 'thou-shalt-be-for-specific-tiers',
-            visibility: 'tiers',
-            published_at: moment().add(30, 'seconds').toDate() // here to ensure sorting is not modified
+            await agent
+                .put(`/pages/${pageResponse.id}/?formats=mobiledoc,lexical,html`)
+                .body({
+                    pages: [{
+                        id: pageResponse.id,
+                        show_title_and_feature_image: false, // default is true
+                        updated_at: pageResponse.updated_at // satisfy collision detection
+                    }]
+                })
+                .expectStatus(200)
+                .matchBodySnapshot({
+                    pages: [Object.assign({}, matchPageShallowIncludes, {
+                        published_at: null,
+                        show_title_and_feature_image: false
+                    })]
+                })
+                .matchHeaderSnapshot({
+                    'content-version': anyContentVersion,
+                    etag: anyEtag,
+                    'x-cache-invalidate': anyString
+                });
         });
 
-        tiersPage.tiers = [paidTier];
+        describe('Access', function () {
+            describe('Visibility is set to tiers', function () {
+                it('Saves only paid tiers', async function () {
+                    const page = {
+                        title: 'Test Page',
+                        status: 'draft'
+                    };
 
-        await models.Post.add(tiersPage, {context: {internal: true}});
+                    // @ts-ignore
+                    const products = await models.Product.findAll();
 
-        const tiersPageRes = await request
-            .get(localUtils.API.getApiQuery(`pages/${tiersPage.id}/`))
-            .set('Origin', config.get('url'))
-            .expect(200);
-        const tiersPageData = tiersPageRes.body.pages[0];
+                    const freeTier = products.models[0];
+                    const paidTier = products.models[1];
 
-        tiersPageData.tiers.length.should.eql(1);
-    });
+                    const {body: pageBody} = await agent
+                        .post('/pages/', {
+                            headers: {
+                                'content-type': 'application/json'
+                            }
+                        })
+                        .body({pages: [page]})
+                        .expectStatus(201);
 
-    it('Can update a page', async function () {
-        const page = {
-            title: 'updated page',
-            page: false
-        };
+                    const [pageResponse] = pageBody.pages;
 
-        const res = await request
-            .get(localUtils.API.getApiQuery(`pages/${testUtils.DataGenerator.Content.posts[5].id}/`))
-            .set('Origin', config.get('url'))
-            .expect(200);
-
-        page.updated_at = res.body.pages[0].updated_at;
-
-        const res2 = await request.put(localUtils.API.getApiQuery('pages/' + testUtils.DataGenerator.Content.posts[5].id))
-            .set('Origin', config.get('url'))
-            .send({pages: [page]})
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        should.exist(res2.headers['x-cache-invalidate']);
-        localUtils.API.checkResponse(res2.body.pages[0], 'page');
-
-        const model = await models.Post.findOne({
-            id: res2.body.pages[0].id
-        }, testUtils.context.internal);
-
-        model.get('type').should.eql('page');
-    });
-
-    it('Can update a page with restricted access to specific tier', async function () {
-        const page = {
-            title: 'updated page',
-            page: false
-        };
-
-        const res = await request
-            .get(localUtils.API.getApiQuery(`pages/${testUtils.DataGenerator.Content.posts[5].id}/`))
-            .set('Origin', config.get('url'))
-            .expect(200);
-
-        const resTiers = await request
-            .get(localUtils.API.getApiQuery(`tiers/`))
-            .set('Origin', config.get('url'))
-            .expect(200);
-
-        const tiers = resTiers.body.tiers;
-        page.updated_at = res.body.pages[0].updated_at;
-        page.visibility = 'tiers';
-        const paidTiers = tiers.filter((p) => {
-            return p.type === 'paid';
-        }).map((product) => {
-            return product;
+                    await agent
+                        .put(`/pages/${pageResponse.id}`)
+                        .body({
+                            pages: [{
+                                id: pageResponse.id,
+                                updated_at: pageResponse.updated_at,
+                                visibility: 'tiers',
+                                tiers: [
+                                    {id: freeTier.id},
+                                    {id: paidTier.id}
+                                ]
+                            }]
+                        })
+                        .expectStatus(200)
+                        .matchHeaderSnapshot({
+                            'content-version': anyContentVersion,
+                            etag: anyEtag,
+                            'x-cache-invalidate': anyString
+                        })
+                        .matchBodySnapshot({
+                            pages: [Object.assign({}, matchPageShallowIncludes, {
+                                published_at: null,
+                                tiers: [
+                                    {type: paidTier.get('type'), ...tierSnapshot}
+                                ]
+                            })]
+                        });
+                });
+            });
         });
-        page.tiers = paidTiers;
-
-        const res2 = await request.put(localUtils.API.getApiQuery('pages/' + testUtils.DataGenerator.Content.posts[5].id))
-            .set('Origin', config.get('url'))
-            .send({pages: [page]})
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        should.exist(res2.headers['x-cache-invalidate']);
-        localUtils.API.checkResponse(res2.body.pages[0], 'page');
-        res2.body.pages[0].tiers.length.should.eql(paidTiers.length);
-
-        const model = await models.Post.findOne({
-            id: res2.body.pages[0].id
-        }, testUtils.context.internal);
-
-        model.get('type').should.eql('page');
     });
 
-    it('Cannot get page via posts endpoint', async function () {
-        await request.get(localUtils.API.getApiQuery(`posts/${testUtils.DataGenerator.Content.posts[5].id}/`))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(404);
+    describe('Copy', function () {
+        it('Can copy a page', async function () {
+            const page = {
+                title: 'Test Page',
+                status: 'published'
+            };
+
+            const {body: pageBody} = await agent
+                .post('/pages/?formats=mobiledoc,lexical,html', {
+                    headers: {
+                        'content-type': 'application/json'
+                    }
+                })
+                .body({pages: [page]})
+                .expectStatus(201)
+                .matchBodySnapshot({
+                    pages: [Object.assign({}, matchPageShallowIncludes)]
+                });
+
+            const [pageResponse] = pageBody.pages;
+
+            await agent
+                .post(`/pages/${pageResponse.id}/copy?formats=mobiledoc,lexical`)
+                .expectStatus(201)
+                .matchBodySnapshot({
+                    pages: [Object.assign({}, matchPageShallowIncludes, {published_at: null})]
+                })
+                .matchHeaderSnapshot({
+                    'content-version': anyContentVersion,
+                    etag: anyEtag,
+                    location: anyLocationFor('pages')
+                });
+        });
     });
 
-    it('Cannot update page via posts endpoint', async function () {
-        const page = {
-            title: 'fails',
-            updated_at: new Date().toISOString()
-        };
+    describe('Convert', function () {
+        it('can convert a mobiledoc page to lexical', async function () {
+            const mobiledoc = JSON.stringify({
+                version: '0.3.1',
+                ghostVersion: '4.0',
+                markups: [],
+                atoms: [],
+                cards: [],
+                sections: [
+                    [1, 'p', [
+                        [0, [], 0, 'This is some great content.']
+                    ]]
+                ]
+            });
+            const expectedLexical = JSON.stringify({
+                root: {
+                    children: [
+                        {
+                            children: [
+                                {
+                                    detail: 0,
+                                    format: 0,
+                                    mode: 'normal',
+                                    style: '',
+                                    text: 'This is some great content.',
+                                    type: 'text',
+                                    version: 1
+                                }
+                            ],
+                            direction: 'ltr',
+                            format: '',
+                            indent: 0,
+                            type: 'paragraph',
+                            version: 1
+                        }
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
+                    type: 'root',
+                    version: 1
+                }
+            });
+            const pageData = {
+                title: 'Test Post',
+                status: 'published',
+                mobiledoc: mobiledoc,
+                lexical: null
+            };
 
-        await request.put(localUtils.API.getApiQuery('posts/' + testUtils.DataGenerator.Content.posts[5].id))
-            .set('Origin', config.get('url'))
-            .send({posts: [page]})
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(404);
-    });
+            const {body: pageBody} = await agent
+                .post('/pages/?formats=mobiledoc,lexical,html', {
+                    headers: {
+                        'content-type': 'application/json'
+                    }
+                })
+                .body({pages: [pageData]})
+                .expectStatus(201);
 
-    it('Can delete a page', async function () {
-        const res = await request.del(localUtils.API.getApiQuery('pages/' + testUtils.DataGenerator.Content.posts[5].id))
-            .set('Origin', config.get('url'))
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(204);
+            const [pageResponse] = pageBody.pages;
 
-        res.body.should.be.empty();
-        res.headers['x-cache-invalidate'].should.eql('/*');
+            const convertedResponse = await agent
+                .put(`/pages/${pageResponse.id}/?formats=mobiledoc,lexical,html&convert_to_lexical=true`)
+                .body({pages: [Object.assign({}, pageResponse)]})
+                .expectStatus(200)
+                .matchBodySnapshot({
+                    pages: [Object.assign({}, matchPageShallowIncludes, {lexical: expectedLexical, mobiledoc: null})]
+                })
+                .matchHeaderSnapshot({
+                    'content-version': anyContentVersion,
+                    etag: anyEtag
+                });
+
+            // rerunning the conversion against a converted post should not change it
+            const convertedPage = convertedResponse.body.pages[0];
+            const expectedConvertedLexical = convertedPage.lexical;
+            await agent
+                .put(`/pages/${pageResponse.id}/?formats=mobiledoc,lexical,html&convert_to_lexical=true`)
+                .body({pages: [Object.assign({}, convertedPage)]})
+                .expectStatus(200)
+                .matchBodySnapshot({
+                    pages: [Object.assign({}, matchPageShallowIncludes, {lexical: expectedConvertedLexical, mobiledoc: null})]
+                })
+                .matchHeaderSnapshot({
+                    'content-version': anyContentVersion,
+                    etag: anyEtag
+                });
+        });
     });
 });

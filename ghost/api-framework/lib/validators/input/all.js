@@ -1,6 +1,5 @@
 const debug = require('@tryghost/debug')('validators:input:all');
 const _ = require('lodash');
-const Promise = require('bluebird');
 const tpl = require('@tryghost/tpl');
 const {BadRequestError, ValidationError} = require('@tryghost/errors');
 const validator = require('@tryghost/validator');
@@ -91,6 +90,10 @@ const validate = (config, attrs) => {
 };
 
 module.exports = {
+    /**
+     * @param {object} apiConfig
+     * @param {import('@tryghost/api-framework').Frame} frame
+     */
     all(apiConfig, frame) {
         debug('validate all');
 
@@ -103,6 +106,10 @@ module.exports = {
         return Promise.resolve();
     },
 
+    /**
+     * @param {object} apiConfig
+     * @param {import('@tryghost/api-framework').Frame} frame
+     */
     browse(apiConfig, frame) {
         debug('validate browse');
 
@@ -122,6 +129,10 @@ module.exports = {
         return this.browse(...arguments);
     },
 
+    /**
+     * @param {object} apiConfig
+     * @param {import('@tryghost/api-framework').Frame} frame
+     */
     add(apiConfig, frame) {
         debug('validate add');
 
@@ -169,6 +180,10 @@ module.exports = {
         }
     },
 
+    /**
+     * @param {object} apiConfig
+     * @param {import('@tryghost/api-framework').Frame} frame
+     */
     edit(apiConfig, frame) {
         debug('validate edit');
         const result = this.add(...arguments);

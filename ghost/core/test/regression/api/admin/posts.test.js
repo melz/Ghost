@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const should = require('should');
 const supertest = require('supertest');
-const ObjectId = require('bson-objectid');
+const ObjectId = require('bson-objectid').default;
 const moment = require('moment-timezone');
 const testUtils = require('../../../utils');
 const config = require('../../../../core/shared/config');
@@ -24,6 +24,10 @@ describe('Posts API', function () {
         await models.Newsletter.edit({status: 'archived'}, {id: defaultNewsletter.id});
 
         await localUtils.doAuth(request, 'users:extra', 'posts', 'emails', 'newsletters', 'members:newsletters');
+    });
+
+    afterEach(function () {
+        mockManager.restore();
     });
 
     describe('Browse', function () {

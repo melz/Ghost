@@ -3,12 +3,17 @@ const sinon = require('sinon');
 const moment = require('moment');
 const _ = require('lodash');
 const nock = require('nock');
-const SchedulingDefault = require('../../../../../core/server/adapters/scheduling/SchedulingDefault');
+const SchedulingDefault = require('../../../../../core/server/adapters/scheduling/scheduling-default');
+const logging = require('@tryghost/logging');
 
 describe('Scheduling Default Adapter', function () {
     const scope = {};
 
+    /** @type {import('sinon').SinonFakeTimers} */
+    let clock;
+
     beforeEach(function () {
+        clock = sinon.useFakeTimers();
         scope.adapter = new SchedulingDefault();
     });
 
@@ -89,10 +94,10 @@ describe('Scheduling Default Adapter', function () {
                 }
             });
 
-            setTimeout(() => {
-                scope.adapter._pingUrl.calledOnce.should.eql(true);
-                done();
-            }, 50);
+            clock.tick(50);
+
+            scope.adapter._pingUrl.calledOnce.should.eql(true);
+            done();
         });
 
         it('reschedule: simulate restart', function (done) {
@@ -118,10 +123,9 @@ describe('Scheduling Default Adapter', function () {
                 }
             });
 
-            setTimeout(() => {
-                scope.adapter._pingUrl.calledOnce.should.eql(true);
-                done();
-            }, 50);
+            clock.tick(50);
+            scope.adapter._pingUrl.calledOnce.should.eql(true);
+            done();
         });
 
         it('run', function (done) {
@@ -146,6 +150,8 @@ describe('Scheduling Default Adapter', function () {
             scope.adapter.runTimeoutInMs = 100;
             scope.adapter.offsetInMinutes = 1;
             scope.adapter.run();
+
+            clock.runAll();
         });
 
         it('ensure recursive run works', function (done) {
@@ -156,10 +162,10 @@ describe('Scheduling Default Adapter', function () {
             scope.adapter.offsetInMinutes = 1;
             scope.adapter.run();
 
-            setTimeout(function () {
-                scope.adapter._execute.callCount.should.be.greaterThan(1);
-                done();
-            }, 30);
+            clock.tick(200);
+
+            scope.adapter._execute.callCount.should.be.greaterThan(1);
+            done();
         });
 
         it('execute', function (done) {
@@ -185,7 +191,8 @@ describe('Scheduling Default Adapter', function () {
 
             (function retry() {
                 if (pinged !== jobs) {
-                    return setTimeout(retry, 50);
+                    clock.tick(50);
+                    return retry();
                 }
 
                 done();
@@ -223,7 +230,8 @@ describe('Scheduling Default Adapter', function () {
 
             (function retry() {
                 if (pinged !== 2) {
-                    return setTimeout(retry, 50);
+                    clock.tick(50);
+                    return retry();
                 }
 
                 Object.keys(scope.adapter.deletedJobs).length.should.eql(2);
@@ -239,6 +247,12 @@ describe('Scheduling Default Adapter', function () {
 
         describe('pingUrl', function () {
             it('pingUrl (PUT)', function (done) {
+                // TODO: remove this once we figure out how to make this work with fake timers
+                sinon.restore();
+                sinon.useFakeTimers({
+                    shouldAdvanceTime: true
+                });
+
                 const ping = nock('http://localhost:1111')
                     .put('/ping')
                     .query({})
@@ -275,6 +289,7 @@ describe('Scheduling Default Adapter', function () {
                     }
                 });
 
+                clock.runToLast();
                 ping.isDone().should.be.true();
             });
 
@@ -292,6 +307,7 @@ describe('Scheduling Default Adapter', function () {
                     }
                 });
 
+                clock.runToLast();
                 ping.isDone().should.be.true();
             });
 
@@ -309,11 +325,20 @@ describe('Scheduling Default Adapter', function () {
                     }
                 });
 
+                clock.runToLast();
                 ping.isDone().should.be.true();
             });
 
             it('pingUrl, but blog returns 503', function (done) {
+                // TODO: remove this once we figure out how to make this work with fake timers
+                sinon.restore();
+                sinon.useFakeTimers({
+                    shouldAdvanceTime: true
+                });
+
                 scope.adapter.retryTimeoutInMs = 50;
+
+                const loggingStub = sinon.stub(logging, 'error');
 
                 const ping = nock('http://localhost:1111')
                     .put('/ping').reply(503)
@@ -330,6 +355,7 @@ describe('Scheduling Default Adapter', function () {
 
                 (function retry() {
                     if (ping.isDone()) {
+                        sinon.assert.calledTwice(loggingStub);
                         return done();
                     }
 

@@ -1,10 +1,13 @@
+import * as Sentry from '@sentry/ember';
 import AjaxService from 'ember-ajax/services/ajax';
 import classic from 'ember-classic-decorator';
 import config from 'ghost-admin/config/environment';
-import moment from 'moment';
+import moment from 'moment-timezone';
+import semverCoerce from 'semver/functions/coerce';
+import semverLt from 'semver/functions/lt';
 import {AjaxError, isAjaxError, isForbiddenError} from 'ember-ajax/errors';
-import {captureMessage} from '@sentry/browser';
 import {get} from '@ember/object';
+import {inject} from 'ghost-admin/decorators/inject';
 import {isArray as isEmberArray} from '@ember/array';
 import {isNone} from '@ember/utils';
 import {inject as service} from '@ember/service';
@@ -20,6 +23,19 @@ function isJSONContentType(header) {
     return header.indexOf(JSON_CONTENT_TYPE) === 0;
 }
 
+function getJSONPayload(payload) {
+    // ember-simple-auth prevents ember-ajax parsing response as JSON but
+    // we need a JSON object to test against
+    if (typeof payload === 'string') {
+        try {
+            payload = JSON.parse(payload);
+        } catch (e) {
+            // do nothing
+        }
+    }
+    return payload;
+}
+
 /* Version mismatch error */
 
 export class VersionMismatchError extends AjaxError {
@@ -33,6 +49,22 @@ export function isVersionMismatchError(errorOrStatus, payload) {
         return errorOrStatus instanceof VersionMismatchError;
     } else {
         return get(payload || {}, 'errors.firstObject.type') === 'VersionMismatchError';
+    }
+}
+
+/* DataImport error */
+
+export class DataImportError extends AjaxError {
+    constructor(payload) {
+        super(payload, 'The server encountered an error whilst importing data.');
+    }
+}
+
+export function isDataImportError(errorOrStatus, payload) {
+    if (isAjaxError(errorOrStatus)) {
+        return errorOrStatus instanceof DataImportError;
+    } else {
+        return get(payload || {}, 'errors.firstObject.type') === 'DataImportError';
     }
 }
 
@@ -84,6 +116,17 @@ export function isUnsupportedMediaTypeError(errorOrStatus) {
     }
 }
 
+/**
+ * Returns the code (from the payload) from an error object.
+ * @returns {string|null} error code
+ */
+export function getErrorCode(errorOrStatus) {
+    if (isAjaxError(errorOrStatus) && errorOrStatus.payload && errorOrStatus.payload.errors && Array.isArray(errorOrStatus.payload.errors) && errorOrStatus.payload.errors.length > 0) {
+        return errorOrStatus.payload.errors[0].code || null;
+    }
+    return null;
+}
+
 /* Maintenance error */
 
 export class MaintenanceError extends AjaxError {
@@ -132,6 +175,8 @@ export function isHostLimitError(errorOrStatus, payload) {
     }
 }
 
+/* Email error */
+
 export class EmailError extends AjaxError {
     constructor(payload) {
         super(payload, 'Please verify your email settings');
@@ -146,7 +191,24 @@ export function isEmailError(errorOrStatus, payload) {
     }
 }
 
-/* end: custom error types */
+/* 2FA required error */
+export class TwoFactorTokenRequiredError extends AjaxError {
+    constructor(payload) {
+        payload = getJSONPayload(payload);
+        super(payload, '2nd factor verification is required to sign in.');
+    }
+}
+
+export function isTwoFactorTokenRequiredError(errorOrStatus, payload) {
+    const twoFactorAuthCodes = ['2FA_TOKEN_REQUIRED', '2FA_NEW_DEVICE_DETECTED'];
+
+    if (isAjaxError(errorOrStatus)) {
+        return errorOrStatus instanceof TwoFactorTokenRequiredError || twoFactorAuthCodes.includes(getErrorCode(errorOrStatus));
+    } else {
+        payload = getJSONPayload(payload);
+        return twoFactorAuthCodes.includes(get(payload || {}, 'errors.firstObject.code'));
+    }
+}
 
 export class AcceptedResponse {
     constructor(data) {
@@ -163,8 +225,10 @@ export function isAcceptedResponse(errorOrStatus) {
 
 @classic
 class ajaxService extends AjaxService {
-    @service config;
     @service session;
+    @service upgradeStatus;
+
+    @inject config;
 
     // flag to tell our ESA authenticator not to try an invalidate DELETE request
     // because it's been triggered by this service's 401 handling which means the
@@ -196,6 +260,13 @@ class ajaxService extends AjaxService {
         }
 
         hash.withCredentials = true;
+
+        // mocked routes used in development/testing do not have access to the
+        // test context so we add a header here to give them access to the logged
+        // in user id that can be checked against the mocked database
+        if (this.isTesting) {
+            hash.headers['X-Test-User'] = this.session.user?.id;
+        }
 
         // attempt retries for 15 seconds in two situations:
         // 1. Server Unreachable error from the browser (code 0), typically from short internet blips
@@ -229,8 +300,8 @@ class ajaxService extends AjaxService {
                 const result = await makeRequest(hash);
                 success = true;
 
-                if (attempts !== 0 && this.config.get('sentry_dsn')) {
-                    captureMessage('Request took multiple attempts', {extra: getErrorData()});
+                if (attempts !== 0 && this.config.sentry_dsn) {
+                    Sentry.captureMessage('Request took multiple attempts', {extra: getErrorData()});
                 }
 
                 return result;
@@ -247,8 +318,8 @@ class ajaxService extends AjaxService {
                 if (retryErrorChecks.some(check => check(error.response)) && retryingMs <= maxRetryingMs) {
                     await timeout(retryPeriods[attempts] || retryPeriods[retryPeriods.length - 1]);
                     attempts += 1;
-                } else if (attempts > 0 && this.config.get('sentry_dsn')) {
-                    captureMessage('Request failed after multiple attempts', {extra: getErrorData()});
+                } else if (attempts > 0 && this.config.sentry_dsn) {
+                    Sentry.captureMessage('Request failed after multiple attempts', {extra: getErrorData()});
                     throw error;
                 } else {
                     throw error;
@@ -258,7 +329,28 @@ class ajaxService extends AjaxService {
     }
 
     handleResponse(status, headers, payload, request) {
-        if (this.isVersionMismatchError(status, headers, payload)) {
+        // set some context variables for Sentry in case there is an error
+        Sentry.setContext('ajax', {
+            url: request.url,
+            method: request.method,
+            status
+        });
+        Sentry.setTag('ajax_status', status);
+        Sentry.setTag('ajax_url', request.url.slice(0, 200)); // the max length of a tag value is 200 characters
+        Sentry.setTag('ajax_method', request.method);
+
+        if (headers['content-version']) {
+            const contentVersion = semverCoerce(headers['content-version']);
+            const appVersion = semverCoerce(config.APP.version);
+
+            if (semverLt(appVersion, contentVersion)) {
+                this.upgradeStatus.refreshRequired = true;
+            }
+        }
+
+        if (this.isTwoFactorTokenRequiredError(status, headers, payload)) {
+            return new TwoFactorTokenRequiredError(payload);
+        } else if (this.isVersionMismatchError(status, headers, payload)) {
             return new VersionMismatchError(payload);
         } else if (this.isServerUnreachableError(status, headers, payload)) {
             return new ServerUnreachableError(payload);
@@ -318,6 +410,10 @@ class ajaxService extends AjaxService {
         return super.normalizeErrorResponse(status, headers, payload);
     }
 
+    isTwoFactorTokenRequiredError(status, headers, payload) {
+        return isTwoFactorTokenRequiredError(status, payload);
+    }
+
     isVersionMismatchError(status, headers, payload) {
         return isVersionMismatchError(status, payload);
     }
@@ -332,6 +428,10 @@ class ajaxService extends AjaxService {
 
     isUnsupportedMediaTypeError(status) {
         return isUnsupportedMediaTypeError(status);
+    }
+
+    isDataImportError(status) {
+        return isDataImportError(status);
     }
 
     isMaintenanceError(status, headers, payload) {

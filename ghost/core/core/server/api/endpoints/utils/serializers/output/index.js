@@ -97,6 +97,10 @@ module.exports = {
         return require('./email-posts');
     },
 
+    get emails() {
+        return require('./emails');
+    },
+
     get oembed() {
         return require('./oembed');
     },
@@ -127,5 +131,13 @@ module.exports = {
 
     get members_stripe_connect() {
         return require('./members-stripe-connect');
+    },
+
+    get links() {
+        return require('./links');
+    },
+
+    get mail_events() {
+        return require('./mail-events');
     }
 };

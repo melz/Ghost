@@ -1,6 +1,6 @@
 <GhTokenInput
     @extra={{hash
-        tokenComponent="gh-token-input/tag-token"
+        tokenComponent=(component "gh-token-input/tag-token")
     }}
     @onChange={{action "updateTags"}}
     @onCreate={{action "createTag"}}
@@ -9,4 +9,5 @@
     @selected={{this.post.tags}}
     @showCreateWhen={{action "hideCreateOptionOnMatchingTag"}}
     @triggerId={{this.triggerId}}
+    @triggerClass={{@triggerClass}}
 />

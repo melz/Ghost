@@ -14,6 +14,11 @@ const Product = ghostBookshelf.Model.extend({
     },
 
     relationships: ['benefits'],
+    relationshipConfig: {
+        benefits: {
+            editable: true
+        }
+    },
 
     relationshipBelongsTo: {
         benefits: 'benefits'
@@ -77,7 +82,7 @@ const Product = ghostBookshelf.Model.extend({
                 return benefitToSave.name.toLowerCase() === existingBenefit.get('name').toLowerCase();
             });
             if (existingBenefitModel) {
-                benefitToSave.name = existingBenefitModel.get('name');
+                benefitToSave.id = existingBenefitModel.id;
             }
         });
 
@@ -138,7 +143,7 @@ const Product = ghostBookshelf.Model.extend({
     }
 }, {
     orderDefaultRaw() {
-        return 'stripe_prices.amount asc';
+        return 'monthly_price ASC';
     }
 });
 

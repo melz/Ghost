@@ -7,12 +7,13 @@ const mobiledocLib = require('../../../../core/server/lib/mobiledoc');
 const storage = require('../../../../core/server/adapters/storage');
 const urlUtils = require('../../../../core/shared/url-utils');
 const mockUtils = require('../../../utils/mocks');
+const logging = require('@tryghost/logging');
 
 describe('lib/mobiledoc', function () {
-    afterEach(function () {
+    afterEach(async function () {
         sinon.restore();
         nock.cleanAll();
-        configUtils.restore();
+        await configUtils.restore();
         // ensure config changes are reset and picked up by next test
         mobiledocLib.reload();
         mockUtils.modules.unmockNonExistentModule(/sharp/);
@@ -271,7 +272,7 @@ describe('lib/mobiledoc', function () {
         });
 
         it('does not render srcsets with incompatible storage engine', function () {
-            sinon.stub(storage.getStorage(), 'saveRaw').value(null);
+            sinon.stub(storage.getStorage('images'), 'saveRaw').value(null);
 
             let mobiledoc = {
                 version: '0.3.1',
@@ -296,14 +297,15 @@ describe('lib/mobiledoc', function () {
 
     describe('populateImageSizes', function () {
         let originalStoragePath;
+        let loggingStub;
 
         beforeEach(function () {
             originalStoragePath = storage.getStorage().storagePath;
-            storage.getStorage().storagePath = path.join(__dirname, '../../../utils/fixtures/images/');
+            storage.getStorage('images').storagePath = path.join(__dirname, '../../../utils/fixtures/images/');
         });
 
         afterEach(function () {
-            storage.getStorage().storagePath = originalStoragePath;
+            storage.getStorage('images').storagePath = originalStoragePath;
         });
 
         it('works', async function () {
@@ -316,6 +318,12 @@ describe('lib/mobiledoc', function () {
                 ]
             };
 
+            loggingStub = sinon.stub(logging, 'error');
+
+            nock('http://example.com/')
+                .get('/external.jpg')
+                .query(true)
+                .reply(404, 'Image not found');
             const unsplashMock = nock('https://images.unsplash.com/')
                 .get('/favicon_too_large')
                 .query(true)
@@ -327,6 +335,7 @@ describe('lib/mobiledoc', function () {
             const transformed = JSON.parse(transformedMobiledoc);
 
             unsplashMock.isDone().should.be.true();
+            sinon.assert.calledOnce(loggingStub);
 
             transformed.cards.length.should.equal(4);
         });

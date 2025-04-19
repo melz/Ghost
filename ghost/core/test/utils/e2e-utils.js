@@ -1,25 +1,21 @@
 // Utility Packages
 const debug = require('@tryghost/debug')('test');
-const Promise = require('bluebird');
 const _ = require('lodash');
 const fs = require('fs-extra');
 const path = require('path');
 const os = require('os');
-const uuid = require('uuid');
-const KnexMigrator = require('knex-migrator');
-const knexMigrator = new KnexMigrator();
+const crypto = require('crypto');
 
 // Ghost Internals
-const config = require('../../core/shared/config');
 const boot = require('../../core/boot');
-const db = require('../../core/server/data/db');
 const models = require('../../core/server/models');
 const urlService = require('../../core/server/services/url');
 const settingsService = require('../../core/server/services/settings/settings-service');
 const routeSettingsService = require('../../core/server/services/route-settings');
 const themeService = require('../../core/server/services/themes');
 const limits = require('../../core/server/services/limits');
-const customRedirectsService = require('../../core/server/services/redirects');
+const customRedirectsService = require('../../core/server/services/custom-redirects');
+const adapterManager = require('../../core/server/services/adapter-manager');
 
 // Other Test Utilities
 const configUtils = require('./configUtils');
@@ -40,7 +36,7 @@ let totalBoots = 0;
  */
 const exposeFixtures = async () => {
     const fixturePromises = {
-        roles: models.Role.findAll({columns: ['id']}),
+        roles: models.Role.findAll({columns: ['id', 'name']}),
         users: models.User.findAll({columns: ['id', 'email', 'slug']}),
         tags: models.Tag.findAll({columns: ['id']}),
         apiKeys: models.ApiKey.findAll({withRelated: 'integration'})
@@ -61,7 +57,7 @@ const exposeFixtures = async () => {
         });
 };
 
-const prepareContentFolder = (options) => {
+const prepareContentFolder = async (options) => {
     const contentFolderForTests = options.contentFolder;
 
     /**
@@ -70,31 +66,36 @@ const prepareContentFolder = (options) => {
      */
     configUtils.set('paths:contentPath', contentFolderForTests);
 
-    fs.ensureDirSync(contentFolderForTests);
-    fs.ensureDirSync(path.join(contentFolderForTests, 'data'));
-    fs.ensureDirSync(path.join(contentFolderForTests, 'themes'));
-    fs.ensureDirSync(path.join(contentFolderForTests, 'images'));
-    fs.ensureDirSync(path.join(contentFolderForTests, 'logs'));
-    fs.ensureDirSync(path.join(contentFolderForTests, 'adapters'));
-    fs.ensureDirSync(path.join(contentFolderForTests, 'settings'));
+    await fs.ensureDir(contentFolderForTests);
+    await fs.ensureDir(path.join(contentFolderForTests, 'data'));
+    await fs.ensureDir(path.join(contentFolderForTests, 'themes'));
+    await fs.ensureDir(path.join(contentFolderForTests, 'images'));
+    await fs.ensureDir(path.join(contentFolderForTests, 'logs'));
+    await fs.ensureDir(path.join(contentFolderForTests, 'adapters'));
+    await fs.ensureDir(path.join(contentFolderForTests, 'settings'));
 
     if (options.copyThemes) {
-        // Copy all themes into the new test content folder. Default active theme is always casper. If you want to use a different theme, you have to set the active theme (e.g. stub)
-        fs.copySync(path.join(__dirname, 'fixtures', 'themes'), path.join(contentFolderForTests, 'themes'));
-    } else if (options.frontend) {
-        // Just copy Casper
-        fs.copySync(path.join(__dirname, 'fixtures', 'themes', 'casper'), path.join(contentFolderForTests, 'themes', 'casper'));
+        // Copy all themes into the new test content folder. Default active theme is always source. If you want to use a different theme, you have to set the active theme (e.g. stub)
+        await fs.copy(path.join(__dirname, 'fixtures', 'themes'), path.join(contentFolderForTests, 'themes'));
     }
 
+    // Copy theme even if frontend is disabled, as admin can use source when viewing themes section
+    await fs.copy(path.join(__dirname, 'fixtures', 'themes', 'source'), path.join(contentFolderForTests, 'themes', 'source'));
+
     if (options.redirectsFile) {
-        redirects.setupFile(contentFolderForTests, options.redirectsFileExt);
+        await redirects.setupFile(contentFolderForTests, options.redirectsFileExt);
     }
 
     if (options.routesFilePath) {
-        fs.copySync(options.routesFilePath, path.join(contentFolderForTests, 'settings', 'routes.yaml'));
+        await fs.copy(options.routesFilePath, path.join(contentFolderForTests, 'settings', 'routes.yaml'));
     } else if (options.copySettings) {
-        fs.copySync(path.join(__dirname, 'fixtures', 'settings', 'routes.yaml'), path.join(contentFolderForTests, 'settings', 'routes.yaml'));
+        await fs.copy(path.join(__dirname, 'fixtures', 'settings', 'routes.yaml'), path.join(contentFolderForTests, 'settings', 'routes.yaml'));
     }
+
+    // Used by newsletter fixtures
+    await fs.ensureDir(path.join(contentFolderForTests, 'images', '2022', '05'));
+    const GIF1x1 = Buffer.from('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64');
+    await fs.writeFile(path.join(contentFolderForTests, 'images', '2022', '05', 'test.jpg'), GIF1x1);
 };
 
 // CASE: Ghost Server is Running
@@ -111,6 +112,9 @@ const restartModeGhostStart = async ({frontend, copyThemes, copySettings}) => {
     await dbUtils.reset({truncate: true});
 
     debug('init done');
+
+    // Adapter cache has to be cleared to avoid reusing cached adapter instances between restarts
+    adapterManager.clearCache();
 
     // Reset the settings cache
     await settingsService.init();
@@ -160,6 +164,9 @@ const freshModeGhostStart = async (options) => {
     // Stop the server (forceStart Mode)
     await stopGhost();
 
+    // Adapter cache has to be cleared to avoid reusing cached adapter instances between restarts
+    adapterManager.clearCache();
+
     // Reset the settings cache and disable listeners so they don't get triggered further
     settingsService.reset();
 
@@ -206,12 +213,12 @@ const startGhost = async (options) => {
         forceStart: false,
         copyThemes: false,
         copySettings: false,
-        contentFolder: path.join(os.tmpdir(), uuid.v4(), 'ghost-test'),
+        contentFolder: path.join(os.tmpdir(), crypto.randomUUID(), 'ghost-test'),
         subdir: false
     }, options);
 
     // @TODO: tidy up the tmp folders after tests
-    prepareContentFolder(options);
+    await prepareContentFolder(options);
 
     if (ghostServer && ghostServer.httpServer && !options.forceStart) {
         await restartModeGhostStart(options);
@@ -227,8 +234,8 @@ const startGhost = async (options) => {
     totalStartTime += totalTime;
     totalBoots += 1;
     const averageBootTime = Math.round(totalStartTime / totalBoots);
-    debug(`Started Ghost in ${totalTime / 1000}s`);
-    debug(`Accumulated start time across ${totalBoots} boots is ${totalStartTime / 1000}s (average = ${averageBootTime}ms)`);
+    debug(`[e2e-utils] Started Ghost in ${totalTime / 1000}s`);
+    debug(`[e2e-utils] Accumulated start time across ${totalBoots} boots is ${totalStartTime / 1000}s (average = ${averageBootTime}ms)`);
     return ghostServer;
 };
 

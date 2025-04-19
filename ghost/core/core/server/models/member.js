@@ -1,9 +1,7 @@
 const ghostBookshelf = require('./base');
-const uuid = require('uuid');
+const crypto = require('crypto');
 const _ = require('lodash');
 const config = require('../../shared/config');
-const {gravatar} = require('../lib/image');
-const labs = require('../../shared/labs');
 
 const Member = ghostBookshelf.Model.extend({
     tableName: 'members',
@@ -11,7 +9,8 @@ const Member = ghostBookshelf.Model.extend({
     defaults() {
         return {
             status: 'free',
-            uuid: uuid.v4(),
+            uuid: crypto.randomUUID(),
+            transient_id: crypto.randomUUID(),
             email_count: 0,
             email_opened_count: 0,
             enable_comment_notifications: true
@@ -38,6 +37,9 @@ const Member = ghostBookshelf.Model.extend({
             key: 'tiers',
             replacement: 'products.slug'
         }, {
+            key: 'tier_id',
+            replacement: 'products.id'
+        },{
             key: 'newsletters',
             replacement: 'newsletters.slug'
         }, {
@@ -46,6 +48,15 @@ const Member = ghostBookshelf.Model.extend({
         }, {
             key: 'conversion',
             replacement: 'conversions.attribution_id'
+        }, {
+            key: 'opened_emails.post_id',
+            replacement: 'emails.post_id',
+            // Currently we cannot expand on values such as null or a string in mongo-knex
+            // But the line below is essentially the same as: `email_recipients.opened_at:-null`
+            expansion: 'email_recipients.opened_at:>=0'
+        }, {
+            key: 'offer_redemptions',
+            replacement: 'offer_redemptions.offer_id'
         }];
     },
 
@@ -92,6 +103,33 @@ const Member = ghostBookshelf.Model.extend({
                 tableNameAs: 'conversions',
                 type: 'oneToOne',
                 joinFrom: 'member_id'
+            },
+            clicked_links: {
+                tableName: 'redirects',
+                tableNameAs: 'clicked_links',
+                type: 'manyToMany',
+                joinTable: 'members_click_events',
+                joinFrom: 'member_id',
+                joinTo: 'redirect_id'
+            },
+            emails: {
+                tableName: 'emails',
+                tableNameAs: 'emails',
+                type: 'manyToMany',
+                joinTable: 'email_recipients',
+                joinFrom: 'member_id',
+                joinTo: 'email_id'
+            },
+            feedback: {
+                tableName: 'members_feedback',
+                tableNameAs: 'feedback',
+                type: 'oneToOne',
+                joinFrom: 'member_id'
+            },
+            offer_redemptions: {
+                tableName: 'offer_redemptions',
+                type: 'oneToOne',
+                joinFrom: 'member_id'
             }
         };
     },
@@ -101,6 +139,12 @@ const Member = ghostBookshelf.Model.extend({
     // do not delete email_recipients records when a member is destroyed. Recipient
     // records are used for analytics and historical records
     relationshipConfig: {
+        products: {
+            editable: true
+        },
+        labels: {
+            editable: true
+        },
         email_recipients: {
             destroyRelated: false
         }
@@ -111,7 +155,8 @@ const Member = ghostBookshelf.Model.extend({
         newsletters: 'newsletters',
         labels: 'labels',
         stripeCustomers: 'members_stripe_customers',
-        email_recipients: 'email_recipients'
+        email_recipients: 'email_recipients',
+        offers: 'offers'
     },
 
     productEvents() {
@@ -126,16 +171,13 @@ const Member = ghostBookshelf.Model.extend({
             .query((qb) => {
                 // avoids bookshelf adding a `DISTINCT` to the query
                 // we know the result set will already be unique and DISTINCT hurts query performance
-                if (labs.isSet('compExpiring')) {
-                    qb.columns('products.*', 'expiry_at');
-                } else {
-                    qb.columns('products.*');
-                }
+                qb.columns('products.*', 'expiry_at');
             });
     },
 
     newsletters() {
         return this.belongsToMany('Newsletter', 'members_newsletters', 'member_id', 'newsletter_id')
+            .query('orderBy', 'newsletters.sort_order', 'ASC')
             .query((qb) => {
                 // avoids bookshelf adding a `DISTINCT` to the query
                 // we know the result set will already be unique and DISTINCT hurts query performance
@@ -179,12 +221,9 @@ const Member = ghostBookshelf.Model.extend({
     },
 
     async updateTierExpiry(products = [], options = {}) {
-        if (!labs.isSet('compExpiring')) {
-            return;
-        }
         for (const product of products) {
-            if (product?.expiry_at) {
-                const expiry = new Date(product.expiry_at);
+            if (product?.id) {
+                const expiry = product.expiry_at ? new Date(product.expiry_at) : null;
                 const queryOptions = _.extend({}, options, {
                     query: {where: {product_id: product.id}}
                 });
@@ -334,8 +373,10 @@ const Member = ghostBookshelf.Model.extend({
     },
 
     searchQuery: function searchQuery(queryBuilder, query) {
-        queryBuilder.where('members.name', 'like', `%${query}%`);
-        queryBuilder.orWhere('members.email', 'like', `%${query}%`);
+        queryBuilder.where(function () {
+            this.where('members.name', 'like', `%${query}%`)
+                .orWhere('members.email', 'like', `%${query}%`);
+        });
     },
 
     orderRawQuery(field, direction) {
@@ -347,14 +388,14 @@ const Member = ghostBookshelf.Model.extend({
     },
 
     toJSON(unfilteredOptions) {
-        const options = Member.filterOptions(unfilteredOptions, 'toJSON');
-        const attrs = ghostBookshelf.Model.prototype.toJSON.call(this, options);
+        const attrs = ghostBookshelf.Model.prototype.toJSON.call(this, unfilteredOptions);
 
         // Inject a computed avatar url. Uses gravatar's default ?d= query param
         // to serve a blank image if there is no gravatar for the member's email.
         // Will not use gravatar if privacy.useGravatar is false in config
         attrs.avatar_image = null;
         if (attrs.email && !config.isPrivacyDisabled('useGravatar')) {
+            const {gravatar} = require('../lib/image');
             attrs.avatar_image = gravatar.url(attrs.email, {size: 250, default: 'blank'});
         }
 
@@ -432,7 +473,11 @@ const Member = ghostBookshelf.Model.extend({
         // we use raw queries instead of model relationships because model hydration is expensive
         const query = ghostBookshelf.knex('members_newsletters')
             .join('newsletters', 'members_newsletters.newsletter_id', '=', 'newsletters.id')
-            .where('newsletters.status', 'active')
+            .join('members', 'members_newsletters.member_id', '=', 'members.id')
+            .where({
+                'newsletters.status': 'active',
+                'members.email_disabled': false
+            })
             .distinct('member_id as id');
 
         if (unfilteredOptions.transacting) {

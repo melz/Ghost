@@ -1,11 +1,11 @@
 import Component from '@glimmer/component';
 import {action} from '@ember/object';
-import {inject as service} from '@ember/service';
+import {inject} from 'ghost-admin/decorators/inject';
 import {task, timeout} from 'ember-concurrency';
 import {tracked} from '@glimmer/tracking';
 
 export default class GhSiteIframeComponent extends Component {
-    @service config;
+    @inject config;
 
     @tracked isInvisible = this.args.invisibleUntilLoaded;
 
@@ -19,7 +19,7 @@ export default class GhSiteIframeComponent extends Component {
     }
 
     get srcUrl() {
-        const srcUrl = new URL(this.args.src || `${this.config.get('blogUrl')}/`);
+        const srcUrl = new URL(this.args.src || `${this.config.blogUrl}/`);
 
         if (this.args.guid) {
             srcUrl.searchParams.set('v', this.args.guid);

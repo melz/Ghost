@@ -45,17 +45,17 @@ describe('Themes API', function () {
         const jsonResponse = res.body;
         should.exist(jsonResponse.themes);
         localUtils.API.checkResponse(jsonResponse, 'themes');
-        jsonResponse.themes.length.should.eql(6);
+        jsonResponse.themes.length.should.eql(7);
 
         localUtils.API.checkResponse(jsonResponse.themes[0], 'theme');
         jsonResponse.themes[0].name.should.eql('broken-theme');
         jsonResponse.themes[0].package.should.be.an.Object().with.properties('name', 'version');
         jsonResponse.themes[0].active.should.be.false();
 
-        localUtils.API.checkResponse(jsonResponse.themes[1], 'theme', 'templates');
+        localUtils.API.checkResponse(jsonResponse.themes[1], 'theme');
         jsonResponse.themes[1].name.should.eql('casper');
         jsonResponse.themes[1].package.should.be.an.Object().with.properties('name', 'version');
-        jsonResponse.themes[1].active.should.be.true();
+        jsonResponse.themes[1].active.should.be.false();
 
         localUtils.API.checkResponse(jsonResponse.themes[2], 'theme');
         jsonResponse.themes[2].name.should.eql('locale-theme');
@@ -67,15 +67,20 @@ describe('Themes API', function () {
         jsonResponse.themes[3].package.should.be.an.Object().with.properties('name', 'version');
         jsonResponse.themes[3].active.should.be.false();
 
-        localUtils.API.checkResponse(jsonResponse.themes[4], 'theme');
-        jsonResponse.themes[4].name.should.eql('test-theme');
+        localUtils.API.checkResponse(jsonResponse.themes[4], 'theme', 'templates');
+        jsonResponse.themes[4].name.should.eql('source');
         jsonResponse.themes[4].package.should.be.an.Object().with.properties('name', 'version');
-        jsonResponse.themes[4].active.should.be.false();
+        jsonResponse.themes[4].active.should.be.true();
 
         localUtils.API.checkResponse(jsonResponse.themes[5], 'theme');
-        jsonResponse.themes[5].name.should.eql('test-theme-channels');
-        jsonResponse.themes[5].package.should.be.false();
+        jsonResponse.themes[5].name.should.eql('test-theme');
+        jsonResponse.themes[5].package.should.be.an.Object().with.properties('name', 'version');
         jsonResponse.themes[5].active.should.be.false();
+
+        localUtils.API.checkResponse(jsonResponse.themes[6], 'theme');
+        jsonResponse.themes[6].name.should.eql('test-theme-channels');
+        jsonResponse.themes[6].package.should.be.false();
+        jsonResponse.themes[6].active.should.be.false();
     });
 
     it('Can download a theme', async function () {
@@ -84,6 +89,13 @@ describe('Themes API', function () {
             .set('Origin', config.get('url'))
             .expect('Content-Type', /application\/zip/)
             .expect('Content-Disposition', 'attachment; filename=casper.zip')
+            .expect(200);
+    });
+
+    it('Can fetch active theme', async function () {
+        await ownerRequest
+            .get(localUtils.API.getApiQuery('themes/active/'))
+            .set('Origin', config.get('url'))
             .expect(200);
     });
 
@@ -122,13 +134,13 @@ describe('Themes API', function () {
 
         should.exist(jsonResponse3.themes);
         localUtils.API.checkResponse(jsonResponse3, 'themes');
-        jsonResponse3.themes.length.should.eql(7);
+        jsonResponse3.themes.length.should.eql(8);
 
-        // Casper should be present and still active
-        const casperTheme = _.find(jsonResponse3.themes, {name: 'casper'});
-        should.exist(casperTheme);
-        localUtils.API.checkResponse(casperTheme, 'theme', 'templates');
-        casperTheme.active.should.be.true();
+        // Source should be present and still active
+        const sourceTheme = _.find(jsonResponse3.themes, {name: 'source'});
+        should.exist(sourceTheme);
+        localUtils.API.checkResponse(sourceTheme, 'theme', 'templates');
+        sourceTheme.active.should.be.true();
 
         // The added theme should be here
         const addedTheme = _.find(jsonResponse3.themes, {name: 'valid'});
@@ -142,6 +154,7 @@ describe('Themes API', function () {
             'casper',
             'locale-theme',
             'members-test-theme',
+            'source',
             'test-theme',
             'test-theme-channels',
             'valid'
@@ -164,7 +177,7 @@ describe('Themes API', function () {
                 tmpFolderContents.splice(i, 1);
             }
         }
-        tmpFolderContents.should.be.an.Array().with.lengthOf(10);
+        tmpFolderContents.should.be.an.Array().with.lengthOf(12);
 
         tmpFolderContents.should.eql([
             'broken-theme',
@@ -173,6 +186,8 @@ describe('Themes API', function () {
             'invalid.zip',
             'locale-theme',
             'members-test-theme',
+            'source',
+            'source.zip',
             'test-theme',
             'test-theme-channels',
             'valid.zip',
@@ -189,13 +204,13 @@ describe('Themes API', function () {
 
         should.exist(jsonResponse2.themes);
         localUtils.API.checkResponse(jsonResponse2, 'themes');
-        jsonResponse2.themes.length.should.eql(6);
+        jsonResponse2.themes.length.should.eql(7);
 
-        // Casper should be present and still active
-        const casperTheme = _.find(jsonResponse2.themes, {name: 'casper'});
-        should.exist(casperTheme);
-        localUtils.API.checkResponse(casperTheme, 'theme', 'templates');
-        casperTheme.active.should.be.true();
+        // Source should be present and still active
+        const sourceTheme = _.find(jsonResponse2.themes, {name: 'source'});
+        should.exist(sourceTheme);
+        localUtils.API.checkResponse(sourceTheme, 'theme', 'templates');
+        sourceTheme.active.should.be.true();
 
         // The deleted theme should not be here
         const deletedTheme = _.find(jsonResponse2.themes, {name: 'valid'});
@@ -231,12 +246,12 @@ describe('Themes API', function () {
 
         should.exist(jsonResponse.themes);
         localUtils.API.checkResponse(jsonResponse, 'themes');
-        jsonResponse.themes.length.should.eql(6);
+        jsonResponse.themes.length.should.eql(7);
 
-        const casperTheme = _.find(jsonResponse.themes, {name: 'casper'});
-        should.exist(casperTheme);
-        localUtils.API.checkResponse(casperTheme, 'theme', 'templates');
-        casperTheme.active.should.be.true();
+        const sourceTheme = _.find(jsonResponse.themes, {name: 'source'});
+        should.exist(sourceTheme);
+        localUtils.API.checkResponse(sourceTheme, 'theme', 'templates');
+        sourceTheme.active.should.be.true();
 
         const testTheme = _.find(jsonResponse.themes, {name: 'test-theme'});
         should.exist(testTheme);
@@ -256,14 +271,22 @@ describe('Themes API', function () {
         localUtils.API.checkResponse(jsonResponse2, 'themes');
         jsonResponse2.themes.length.should.eql(1);
 
-        const casperTheme2 = _.find(jsonResponse2.themes, {name: 'casper'});
-        should.not.exist(casperTheme2);
+        const sourceTheme2 = _.find(jsonResponse2.themes, {name: 'source'});
+        should.not.exist(sourceTheme2);
 
         const testTheme2 = _.find(jsonResponse2.themes, {name: 'test-theme'});
         should.exist(testTheme2);
         localUtils.API.checkResponse(testTheme2, 'theme', ['warnings', 'templates']);
         testTheme2.active.should.be.true();
         testTheme2.warnings.should.be.an.Array();
+
+        // Result should be the same
+        const activeThemeResult = await ownerRequest
+            .get(localUtils.API.getApiQuery('themes/active/'))
+            .set('Origin', config.get('url'))
+            .expect(200);
+
+        res2.body.should.eql(activeThemeResult.body);
     });
 
     it('Can download and install a theme from GitHub', async function () {
@@ -303,7 +326,7 @@ describe('Themes API', function () {
     });
 
     it('Can re-upload the active theme to override', async function () {
-        // The tricky thing about this test is the default active theme is Casper and you're not allowed to override it.
+        // The tricky thing about this test is the default active theme is Source and you're not allowed to override it.
         // So we upload a valid theme, activate it, and then upload again.
         sinon.stub(settingsCache, 'get').callsFake(function (key, options) {
             if (key === 'active_theme') {

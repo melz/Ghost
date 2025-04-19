@@ -1,4 +1,5 @@
 //@ts-check
+const _ = require('lodash');
 const debug = require('@tryghost/debug')('api:endpoints:utils:serializers:output:members');
 const {unparse} = require('@tryghost/members-csv');
 const mappers = require('./mappers');
@@ -27,7 +28,7 @@ module.exports = {
  *
  * @param {{data: import('bookshelf').Model[], meta: PageMeta}} page
  * @param {APIConfig} _apiConfig
- * @param {Frame} frame
+ * @param {import('@tryghost/api-framework').Frame} frame
  *
  * @returns {{members: SerializedMember[], meta: PageMeta}}
  */
@@ -41,7 +42,7 @@ function paginatedMembers(page, _apiConfig, frame) {
 /**
  * @param {import('bookshelf').Model} model
  * @param {APIConfig} _apiConfig
- * @param {Frame} frame
+ * @param {import('@tryghost/api-framework').Frame} frame
  *
  * @returns {{members: SerializedMember[]}}
  */
@@ -54,7 +55,7 @@ function singleMember(model, _apiConfig, frame) {
 /**
  * @param {object} bulkActionResult
  * @param {APIConfig} _apiConfig
- * @param {Frame} frame
+ * @param {import('@tryghost/api-framework').Frame} frame
  *
  * @returns {{bulk: SerializedBulkAction}}
  */
@@ -76,11 +77,12 @@ function bulkAction(bulkActionResult, _apiConfig, frame) {
 
 /**
  *
- * @returns {{events: any[]}}
+ * @returns {{events: any[], meta: any}}
  */
 function activityFeed(data, _apiConfig, frame) {
     return {
-        events: data.events.map(e => mappers.activityFeedEvents(e, frame))
+        events: data.events.map(e => mappers.activityFeedEvents(e, frame)),
+        meta: data.meta
     };
 }
 
@@ -94,6 +96,42 @@ function activityFeed(data, _apiConfig, frame) {
 function exportCSV(data) {
     debug('exportCSV');
     return unparse(data.data);
+}
+
+function serializeAttribution(attribution) {
+    if (!attribution) {
+        return attribution;
+    }
+
+    return {
+        id: attribution?.id,
+        type: attribution?.type,
+        url: attribution?.url,
+        title: attribution?.title,
+        referrer_source: attribution?.referrerSource,
+        referrer_medium: attribution?.referrerMedium,
+        referrer_url: attribution.referrerUrl
+    };
+}
+
+function serializeNewsletter(newsletter) {
+    const newsletterFields = [
+        'id',
+        'name',
+        'description',
+        'status'
+    ];
+
+    return _.pick(newsletter, newsletterFields);
+}
+
+function serializeNewsletters(newsletters) {
+    return newsletters
+        .filter(newsletter => newsletter.status === 'active')
+        .sort((a, b) => {
+            return a.sort_order - b.sort_order;
+        })
+        .map(newsletter => serializeNewsletter(newsletter));
 }
 
 /**
@@ -129,7 +167,8 @@ function serializeMember(member, options) {
         email_recipients: json.email_recipients,
         status: json.status,
         last_seen_at: json.last_seen_at,
-        attribution: json.attribution
+        attribution: serializeAttribution(json.attribution),
+        unsubscribe_url: json.unsubscribe_url
     };
 
     if (json.products) {
@@ -141,24 +180,23 @@ function serializeMember(member, options) {
         if (!subscription.price) {
             continue;
         }
-        
+
         if (!subscription.price.tier && subscription.price.product) {
             subscription.price.tier = subscription.price.product;
-            
+
             if (!subscription.price.tier.tier_id) {
                 subscription.price.tier.tier_id = subscription.price.tier.product_id;
             }
             delete subscription.price.tier.product_id;
         }
+        subscription.attribution = serializeAttribution(subscription.attribution);
         delete subscription.price.product;
     }
 
+    serialized.email_suppression = json.email_suppression;
+
     if (json.newsletters) {
-        serialized.newsletters = json.newsletters
-            .filter(newsletter => newsletter.status === 'active')
-            .sort((a, b) => {
-                return a.sort_order - b.sort_order;
-            });
+        serialized.newsletters = serializeNewsletters(json.newsletters);
     }
     // override the `subscribed` param to mean "subscribed to any active newsletter"
     serialized.subscribed = false;
@@ -182,9 +220,9 @@ function passthrough(data) {
  * @template Data
  * @template Response
  * @param {string} debugString
- * @param {(data: Data, apiConfig: APIConfig, frame: Frame) => Response} serialize - A function to serialize the data into an object suitable for API response
+ * @param {(data: Data, apiConfig: APIConfig, frame: import('@tryghost/api-framework').Frame) => Response} serialize
  *
- * @returns {(data: Data, apiConfig: APIConfig, frame: Frame) => void}
+ * @returns {(data: Data, apiConfig: APIConfig, frame: import('@tryghost/api-framework').Frame) => void}
  */
 function createSerializer(debugString, serialize) {
     return function serializer(data, apiConfig, frame) {
@@ -199,15 +237,15 @@ function createSerializer(debugString, serialize) {
  * @prop {string} id
  * @prop {string} uuid
  * @prop {string} email
- * @prop {string=} name
- * @prop {string=} note
+ * @prop {string} [name]
+ * @prop {string} [note]
  * @prop {null|string} geolocation
  * @prop {boolean} subscribed
  * @prop {string} created_at
  * @prop {string} updated_at
  * @prop {string[]} labels
  * @prop {SerializedMemberStripeSubscription[]} subscriptions
- * @prop {SerializedMemberProduct[]=} products
+ * @prop {SerializedMemberProduct[]} [products]
  * @prop {string} avatar_image
  * @prop {boolean} comped
  * @prop {number} email_count
@@ -317,9 +355,4 @@ function createSerializer(debugString, serialize) {
  * @typedef {Object} APIConfig
  * @prop {string} docName
  * @prop {string} method
- */
-
-/**
- * @typedef {Object<string, any>} Frame
- * @prop {Object} options
  */

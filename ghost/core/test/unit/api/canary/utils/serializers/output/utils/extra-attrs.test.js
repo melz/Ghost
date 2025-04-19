@@ -1,13 +1,10 @@
-const should = require('should');
+const assert = require('assert/strict');
 const sinon = require('sinon');
 const extraAttrsUtil = require('../../../../../../../../core/server/api/endpoints/utils/serializers/output/utils/extra-attrs');
 
 describe('Unit: endpoints/utils/serializers/output/utils/extra-attrs', function () {
-    const frame = {
-        // Question: is it okay to use actual column values here that the forPost function in extra-attrs would expect?
-        options: {
-            columns: ['excerpt', 'custom_excerpt', 'plaintext']
-        }
+    const options = {
+        columns: ['excerpt', 'custom_excerpt', 'plaintext']
     };
 
     let model;
@@ -21,34 +18,68 @@ describe('Unit: endpoints/utils/serializers/output/utils/extra-attrs', function 
     describe('for post', function () {
         it('respects custom excerpt', function () {
             const attrs = {custom_excerpt: 'custom excerpt'};
-            extraAttrsUtil.forPost(frame, model, attrs);
-            attrs.excerpt.should.eql(attrs.custom_excerpt);
+            extraAttrsUtil.forPost(options, model, attrs);
+            assert.equal(attrs.excerpt, attrs.custom_excerpt);
         });
 
         it('no custom excerpt', function () {
             const attrs = {};
 
-            extraAttrsUtil.forPost(frame, model, attrs);
-            model.get.called.should.be.true();
-
-            attrs.excerpt.should.eql(new Array(501).join('A'));
+            extraAttrsUtil.forPost(options, model, attrs);
+            assert.ok(model.get.called);
+            assert.equal(attrs.excerpt, new Array(501).join('A'));
         });
 
         it('has excerpt when plaintext is null', function () {
             model.get.withArgs('plaintext').returns(null);
             const attrs = {};
-            extraAttrsUtil.forPost(frame, model, attrs);
-            model.get.called.should.be.true();
-            attrs.should.have.property('excerpt');
-            (attrs.excerpt === null).should.be.true();
+            extraAttrsUtil.forPost(options, model, attrs);
+            assert.ok(model.get.called);
+            assert.equal(Object.prototype.hasOwnProperty.call(attrs, 'excerpt'), true);
+            assert.equal(attrs.excerpt, null);
         });
-        
-        it('has excerpt when no columns are passed', function () {
-            delete frame.options.columns;
+
+        it('has plaintext when columns includes plaintext', function () {
             const attrs = {};
-            extraAttrsUtil.forPost(frame, model, attrs);
-            model.get.called.should.be.true();
-            attrs.should.have.property('excerpt');
+            extraAttrsUtil.forPost({
+                columns: ['plaintext']
+            }, model, attrs);
+            assert.ok(model.get.called);
+            assert.equal(Object.prototype.hasOwnProperty.call(attrs, 'plaintext'), true);
+        });
+
+        it('has plaintext when formats includes plaintext', function () {
+            const attrs = {};
+            extraAttrsUtil.forPost({
+                formats: ['plaintext']
+            }, model, attrs);
+            assert.ok(model.get.called);
+            assert.equal(Object.prototype.hasOwnProperty.call(attrs, 'plaintext'), true);
+        });
+
+        it('has excerpt when no columns are passed', function () {
+            const attrs = {};
+            extraAttrsUtil.forPost({}, model, attrs);
+            assert.ok(model.get.called);
+            assert.equal(Object.prototype.hasOwnProperty.call(attrs, 'excerpt'), true);
+        });
+
+        it('has reading_time when no columns are passed', function () {
+            const attrs = {
+                html: 'html'
+            };
+            extraAttrsUtil.forPost({}, model, attrs);
+            assert.equal(Object.prototype.hasOwnProperty.call(attrs, 'reading_time'), true);
+        });
+
+        it('has reading_time when columns includes reading_time', function () {
+            const attrs = {
+                html: 'html'
+            };
+            extraAttrsUtil.forPost({
+                columns: ['reading_time']
+            }, model, attrs);
+            assert.equal(Object.prototype.hasOwnProperty.call(attrs, 'reading_time'), true);
         });
     });
 });

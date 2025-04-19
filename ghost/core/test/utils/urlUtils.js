@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const sinon = require('sinon');
 const UrlUtils = require('@tryghost/url-utils');
 const configUtils = require('./configUtils');
@@ -12,8 +11,6 @@ const getInstance = (options) => {
         getSubdir: config.getSubdir,
         getSiteUrl: config.getSiteUrl,
         getAdminUrl: config.getAdminUrl,
-        apiVersions: options.apiVersions,
-        defaultApiVersion: 'canary',
         slugs: options.slugs,
         redirectCacheMaxAge: options.redirectCacheMaxAge,
         baseApiPath: '/ghost/api'
@@ -55,7 +52,8 @@ const stubUrlUtilsFromConfig = () => {
 
 const restore = () => {
     defaultSandbox.restore();
-    configUtils.restore();
+    // eslint-disable-next-line no-console
+    configUtils.restore().catch(console.error);
 };
 
 module.exports.stubUrlUtilsFromConfig = stubUrlUtilsFromConfig;

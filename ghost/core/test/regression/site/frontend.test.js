@@ -7,7 +7,6 @@ const should = require('should');
 const sinon = require('sinon');
 const supertest = require('supertest');
 const cheerio = require('cheerio');
-const _ = require('lodash');
 const testUtils = require('../../utils');
 const configUtils = require('../../utils/configUtils');
 const config = require('../../../core/shared/config');
@@ -37,14 +36,10 @@ describe('Frontend Routing', function () {
         should.exist(res.headers.date);
     }
 
-    function addPosts(done) {
-        testUtils.clearData().then(function () {
-            return testUtils.initData();
-        }).then(function () {
-            return testUtils.fixtures.insertPostsAndTags();
-        }).then(function () {
-            done();
-        });
+    async function addPosts() {
+        await testUtils.teardownDb();
+        await testUtils.initData();
+        await testUtils.fixtures.insertPostsAndTags();
     }
 
     afterEach(function () {
@@ -65,7 +60,7 @@ describe('Frontend Routing', function () {
         describe('Error', function () {
             it('should 404 for unknown post with invalid characters', function (done) {
                 request.get('/$pec+acular~/')
-                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect('Cache-Control', testUtils.cacheRules.noCache)
                     .expect(404)
                     .expect(/Page not found/)
                     .end(doEnd(done));
@@ -74,7 +69,7 @@ describe('Frontend Routing', function () {
             it('should 404 for unknown frontend route', function (done) {
                 request.get('/spectacular/marvellous/')
                     .set('Accept', 'application/json')
-                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect('Cache-Control', testUtils.cacheRules.noCache)
                     .expect(404)
                     .expect(/Page not found/)
                     .end(doEnd(done));
@@ -82,7 +77,7 @@ describe('Frontend Routing', function () {
 
             it('should 404 for encoded char not 301 from uncapitalise', function (done) {
                 request.get('/|/')
-                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect('Cache-Control', testUtils.cacheRules.noCache)
                     .expect(404)
                     .expect(/Page not found/)
                     .end(doEnd(done));
@@ -192,7 +187,7 @@ describe('Frontend Routing', function () {
 
                 it('should 404 for non-edit parameter', async function () {
                     await request.get('/static-page-test/notedit/')
-                        .expect('Cache-Control', testUtils.cacheRules.private)
+                        .expect('Cache-Control', testUtils.cacheRules.noCache)
                         .expect(404)
                         .expect(/Page not found/)
                         .expect(assertCorrectFrontendHeaders);
@@ -200,24 +195,19 @@ describe('Frontend Routing', function () {
             });
 
             describe('edit with admin redirects disabled', function () {
-                before(function (done) {
+                before(async function () {
                     configUtils.set('admin:redirects', false);
 
-                    testUtils.startGhost({forceStart: true})
-                        .then(function () {
-                            request = supertest.agent(config.get('url'));
-                            addPosts(done);
-                        });
+                    await testUtils.startGhost({forceStart: true});
+                    request = supertest.agent(config.get('url'));
+                    await addPosts();
                 });
 
-                after(function (done) {
+                after(async function () {
                     configUtils.restore();
-
-                    testUtils.startGhost({forceStart: true})
-                        .then(function () {
-                            request = supertest.agent(config.get('url'));
-                            addPosts(done);
-                        });
+                    await testUtils.startGhost({forceStart: true});
+                    request = supertest.agent(config.get('url'));
+                    await addPosts();
                 });
 
                 it('should redirect without slash', function (done) {
@@ -231,7 +221,7 @@ describe('Frontend Routing', function () {
                 it('should not redirect to editor', function (done) {
                     request.get('/static-page-test/edit/')
                         .expect(404)
-                        .expect('Cache-Control', testUtils.cacheRules.private)
+                        .expect('Cache-Control', testUtils.cacheRules.noCache)
                         .end(doEnd(done));
                 });
             });
@@ -245,7 +235,7 @@ describe('Frontend Routing', function () {
                         // NOTE: only post pages are supported so the router doesn't have a way to distinguish if
                         //       the request was done after AMP 'Page' or 'Post'
                         request.get('/static-page-test/amp/')
-                            .expect('Cache-Control', testUtils.cacheRules.private)
+                            .expect('Cache-Control', testUtils.cacheRules.noCache)
                             .expect(404)
                             .expect(/Post not found/)
                             .end(doEnd(done));

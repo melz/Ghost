@@ -1,5 +1,4 @@
 const debug = require('@tryghost/debug')('serializers:handle');
-const Promise = require('bluebird');
 const {sequence} = require('@tryghost/promise');
 const errors = require('@tryghost/errors');
 
@@ -13,7 +12,7 @@ const errors = require('@tryghost/errors');
  *
  * @param {Object} apiConfig - Docname + method of the ctrl
  * @param {Object} apiSerializers - Target API serializers
- * @param {Object} frame
+ * @param {import('@tryghost/api-framework').Frame} frame
  */
 module.exports.input = (apiConfig, apiSerializers, frame) => {
     debug('input');
@@ -91,7 +90,7 @@ const getBestMatchSerializer = function (apiSerializers, docName, method) {
  * @param {Object} response - API response
  * @param {Object} apiConfig - Docname + method of the ctrl
  * @param {Object} apiSerializers - Target API serializers
- * @param {Object} frame
+ * @param {import('@tryghost/api-framework').Frame} frame
  */
 module.exports.output = (response = {}, apiConfig, apiSerializers, frame) => {
     debug('output');

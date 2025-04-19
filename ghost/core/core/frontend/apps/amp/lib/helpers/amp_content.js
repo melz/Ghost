@@ -6,7 +6,7 @@
 //
 // Converts normal HTML into AMP HTML with Amperize module and uses a cache to return it from
 // there if available. The cacheId is a combination of `updated_at` and the `slug`.
-const {DateTime, Interval} = require('luxon');
+const {DateTime} = require('luxon');
 const errors = require('@tryghost/errors');
 const logging = require('@tryghost/logging');
 
@@ -108,7 +108,7 @@ allowedAMPAttributes = {
     'amp-audio': ['src', 'width', 'height', 'autoplay', 'loop', 'muted', 'controls'],
     'amp-iframe': ['src', 'srcdoc', 'width', 'height', 'layout', 'frameborder', 'allowfullscreen', 'allowtransparency',
         'sandbox', 'referrerpolicy'],
-    'amp-youtube': ['src', 'width', 'height', 'layout', 'frameborder', 'autoplay', 'loop', 'data-videoid', 'data-live-channelid']
+    'amp-youtube': ['src', 'layout', 'frameborder', 'autoplay', 'loop', 'data-videoid', 'data-live-channelid', 'width', 'height']
 };
 
 function getAmperizeHTML(html, post) {
@@ -119,8 +119,6 @@ function getAmperizeHTML(html, post) {
     let Amperize = require('amperize');
 
     amperize = amperize || new Amperize();
-
-    const startedAtMoment = DateTime.now();
 
     let cacheDateTime;
     let postDateTime;
@@ -136,8 +134,6 @@ function getAmperizeHTML(html, post) {
     if (!amperizeCache[post.id] || cacheDateTime.diff(postDateTime).valueOf() < 0) {
         return new Promise((resolve) => {
             amperize.parse(html, (err, res) => {
-                logging.info('amp.parse', post.url, Interval.fromDateTimes(startedAtMoment, DateTime.now()).length('milliseconds') + 'ms');
-
                 if (err) {
                     if (err.src) {
                         // This is a valid 500 GhostError because it means the amperize parser is unable to handle some Ghost HTML.
@@ -192,6 +188,10 @@ module.exports = async function amp_content() { // eslint-disable-line camelcase
         // then we have to remove remaining, invalid HTML tags.
         $('audio').children('source').remove();
         $('audio').children('track').remove();
+
+        $('amp-youtube').attr('layout', 'responsive');
+        $('amp-youtube').attr('height', '350');
+        $('amp-youtube').attr('width', '600');
 
         ampHTML = $.html();
 

@@ -1,11 +1,10 @@
 const should = require('should');
-const sinon = require('sinon');
 
 const path = require('path');
 const fs = require('fs').promises;
 const os = require('os');
 
-const CardAssetService = require('../../../../core/frontend/services/card-assets/service');
+const CardAssetService = require('../../../../core/frontend/services/assets-minification/CardAssets');
 
 const themeDefaults = require('../../../../core/frontend/services/theme-engine/config/defaults.json');
 
@@ -26,7 +25,7 @@ describe('Card Asset Service', function () {
     });
 
     after(async function () {
-        await fs.rmdir(testDir, {recursive: true});
+        await fs.rm(testDir, {recursive: true});
     });
 
     it('can load nothing', async function () {
@@ -64,40 +63,6 @@ describe('Card Asset Service', function () {
         await cardAssets.load(false);
 
         cardAssets.files.should.eql([]);
-    });
-
-    it('can clearFiles', async function () {
-        const cardAssets = new CardAssetService({
-            src: srcDir,
-            dest: destDir
-        });
-
-        await fs.writeFile(path.join(destDir, 'cards.min.css'), 'test-css');
-        await fs.writeFile(path.join(destDir, 'cards.min.js'), 'test-js');
-
-        await cardAssets.clearFiles();
-
-        try {
-            await fs.readFile(path.join(destDir, 'cards.min.css'), 'utf-8');
-            should.fail(cardAssets, 'CSS file should not exist');
-        } catch (error) {
-            if (error instanceof should.AssertionError) {
-                throw error;
-            }
-
-            error.code.should.eql('ENOENT');
-        }
-
-        try {
-            await fs.readFile(path.join(destDir, 'cards.min.js'), 'utf-8');
-            should.fail(cardAssets, 'JS file should not exist');
-        } catch (error) {
-            if (error instanceof should.AssertionError) {
-                throw error;
-            }
-
-            error.code.should.eql('ENOENT');
-        }
     });
 
     describe('Generate the correct glob strings', function () {
@@ -158,8 +123,8 @@ describe('Card Asset Service', function () {
             });
 
             cardAssets.generateGlobs().should.eql({
-                'cards.min.css': 'css/(gallery).css',
-                'cards.min.js': 'js/(gallery).js'
+                'cards.min.css': 'css/@(gallery).css',
+                'cards.min.js': 'js/@(gallery).js'
             });
         });
 
@@ -172,8 +137,8 @@ describe('Card Asset Service', function () {
             });
 
             cardAssets.generateGlobs().should.eql({
-                'cards.min.css': 'css/(gallery).css',
-                'cards.min.js': 'js/(gallery).js'
+                'cards.min.css': 'css/@(gallery).css',
+                'cards.min.js': 'js/@(gallery).js'
             });
         });
     });

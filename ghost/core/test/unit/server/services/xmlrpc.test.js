@@ -10,22 +10,23 @@ const logging = require('@tryghost/logging');
 
 describe('XMLRPC', function () {
     let eventStub;
+    let loggingStub;
 
     beforeEach(function () {
         eventStub = sinon.stub(events, 'on');
         configUtils.set('privacy:useRpcPing', true);
     });
 
-    afterEach(function () {
+    afterEach(async function () {
         sinon.restore();
-        configUtils.restore();
+        await configUtils.restore();
         nock.cleanAll();
     });
 
     it('listen() should initialise event correctly', function () {
         xmlrpc.listen();
         eventStub.calledOnce.should.be.true();
-        eventStub.calledWith('post.published', xmlrpc.__get__('listener')).should.be.true();
+        eventStub.calledWith('post.published', xmlrpc.__get__('xmlrpcListener')).should.be.true();
     });
 
     it('listener() calls ping() with toJSONified model', function () {
@@ -39,7 +40,7 @@ describe('XMLRPC', function () {
 
         const pingStub = sinon.stub();
         const resetXmlRpc = xmlrpc.__set__('ping', pingStub);
-        const listener = xmlrpc.__get__('listener');
+        const listener = xmlrpc.__get__('xmlrpcListener');
 
         listener(testModel);
 
@@ -61,7 +62,7 @@ describe('XMLRPC', function () {
 
         const pingStub = sinon.stub();
         const resetXmlRpc = xmlrpc.__set__('ping', pingStub);
-        const listener = xmlrpc.__get__('listener');
+        const listener = xmlrpc.__get__('xmlrpcListener');
 
         listener(testModel, {importing: true});
 
@@ -75,6 +76,7 @@ describe('XMLRPC', function () {
         const ping = xmlrpc.__get__('ping');
 
         it('with a post should execute two pings', function (done) {
+            loggingStub = sinon.stub(logging, 'error');
             const ping1 = nock('http://rpc.pingomatic.com').post('/').reply(200);
             const testPost = _.clone(testUtils.DataGenerator.Content.posts[2]);
 
@@ -123,7 +125,7 @@ describe('XMLRPC', function () {
         it('captures && logs errors from requests', function (done) {
             const testPost = _.clone(testUtils.DataGenerator.Content.posts[2]);
             const ping1 = nock('http://rpc.pingomatic.com').post('/').reply(400);
-            const loggingStub = sinon.stub(logging, 'error');
+            loggingStub = sinon.stub(logging, 'error');
 
             ping(testPost);
 
@@ -166,7 +168,7 @@ describe('XMLRPC', function () {
                </params>
              </methodResponse>`);
 
-            const loggingStub = sinon.stub(logging, 'error');
+            loggingStub = sinon.stub(logging, 'error');
 
             ping(testPost);
 
@@ -209,7 +211,7 @@ describe('XMLRPC', function () {
                </params>
              </methodResponse>`).replace('\n', ''));
 
-            const loggingStub = sinon.stub(logging, 'error');
+            loggingStub = sinon.stub(logging, 'error');
 
             ping(testPost);
 
@@ -242,7 +244,7 @@ describe('XMLRPC', function () {
                   </params>
                 </methodResponse>`);
 
-            const loggingStub = sinon.stub(logging, 'error');
+            loggingStub = sinon.stub(logging, 'error');
 
             ping(testPost);
 
@@ -257,6 +259,7 @@ describe('XMLRPC', function () {
         });
 
         it('should behave correctly when getting a 429', function (done) {
+            loggingStub = sinon.stub(logging, 'error');
             const ping1 = nock('http://rpc.pingomatic.com').post('/').reply(429);
             const testPost = _.clone(testUtils.DataGenerator.Content.posts[2]);
 

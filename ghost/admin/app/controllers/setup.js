@@ -5,6 +5,7 @@ import Controller, {inject as controller} from '@ember/controller';
 import ValidationEngine from 'ghost-admin/mixins/validation-engine';
 import {action} from '@ember/object';
 import {htmlSafe} from '@ember/template';
+import {inject} from 'ghost-admin/decorators/inject';
 import {isInvalidError} from 'ember-ajax/errors';
 import {isVersionMismatchError} from 'ghost-admin/services/ajax';
 import {task} from 'ember-concurrency';
@@ -14,11 +15,12 @@ export default class SetupController extends Controller.extend(ValidationEngine)
     @controller application;
 
     @service ajax;
-    @service config;
     @service ghostPaths;
     @service notifications;
     @service router;
     @service session;
+
+    @inject config;
 
     // ValidationEngine settings
     validationType = 'setup';
@@ -48,17 +50,22 @@ export default class SetupController extends Controller.extend(ValidationEngine)
     })
         setupTask;
 
-    @task(function* (authStrategy, authentication) {
+    @task(function* (authStrategy, {identification, password}) {
         // we don't want to redirect after sign-in during setup
         this.session.skipAuthSuccessHandler = true;
 
         try {
-            yield this.session.authenticate(authStrategy, ...authentication);
+            yield this.session.authenticate(authStrategy, {identification, password});
 
             this.errors.remove('session');
 
             return true;
         } catch (error) {
+            // handle setup/done route redirecting to dashboard
+            if (error.message === 'TransitionAborted') {
+                return true;
+            }
+
             if (error && error.payload && error.payload.errors) {
                 if (isVersionMismatchError(error)) {
                     return this.notifications.showAPIError(error);
@@ -82,7 +89,6 @@ export default class SetupController extends Controller.extend(ValidationEngine)
     _passwordSetup() {
         let setupProperties = ['blogTitle', 'name', 'email', 'password'];
         let data = this.getProperties(setupProperties);
-        let config = this.config;
         let method = this.blogCreated ? 'put' : 'post';
 
         this.set('flowErrors', '');
@@ -102,7 +108,7 @@ export default class SetupController extends Controller.extend(ValidationEngine)
                     }]
                 }
             }).then((result) => {
-                config.set('blogTitle', data.blogTitle);
+                this.config.blogTitle = data.blogTitle;
 
                 // don't try to login again if we are already logged in
                 if (this.get('session.isAuthenticated')) {
@@ -112,7 +118,7 @@ export default class SetupController extends Controller.extend(ValidationEngine)
                 // Don't call the success handler, otherwise we will be redirected to admin
                 this.session.skipAuthSuccessHandler = true;
 
-                return this.session.authenticate('authenticator:cookie', data.email, data.password).then(() => {
+                return this.session.authenticate('authenticator:cookie', {identification: data.email, password: data.password}).then(() => {
                     this.set('blogCreated', true);
                     return this._afterAuthentication(result);
                 }).catch((error) => {
@@ -140,6 +146,11 @@ export default class SetupController extends Controller.extend(ValidationEngine)
             let [apiError] = error.payload.errors;
             this.set('flowErrors', [apiError.message, apiError.context].join(' '));
         } else {
+            // ignore setup/done route redirecting to dashboard
+            if (error.message === 'TransitionAborted') {
+                return true;
+            }
+
             // Connection errors don't return proper status message, only req.body
             this.notifications.showAlert('There was a problem on the server.', {type: 'error', key: 'setup.authenticate.failed'});
         }

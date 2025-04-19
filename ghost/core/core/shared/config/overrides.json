@@ -30,7 +30,7 @@
             "contentTypes": ["image/jpeg", "image/png", "image/gif", "image/svg+xml", "image/x-icon", "image/vnd.microsoft.icon", "image/webp"]
         },
         "media": {
-            "extensions": [".mp4",".webm", ".ogv", ".mp3", ".wav", ".ogg"],
+            "extensions": [".mp4",".webm", ".ogv", ".mp3", ".wav", ".ogg", ".m4a"],
             "contentTypes": [
                 "video/mp4",
                 "video/webm",
@@ -40,7 +40,42 @@
                 "audio/wave",
                 "audio/wav",
                 "audio/x-wav",
-                "audio/ogg"
+                "audio/ogg",
+                "audio/mp4",
+                "audio/x-m4a"
+            ]
+        },
+        "files": {
+            "extensions": [
+                ".pdf",
+                ".json",
+                ".jsonld",
+                ".odp",
+                ".ods",
+                ".odt",
+                ".ppt",
+                ".pptx",
+                ".rtf",
+                ".txt",
+                ".xls",
+                ".xlsx",
+                ".xml"
+            ],
+            "contentTypes": [
+                "application/pdf",
+                "application/json",
+                "application/ld+json",
+                "application/vnd.oasis.opendocument.presentation",
+                "application/vnd.oasis.opendocument.spreadsheet",
+                "application/vnd.oasis.opendocument.text",
+                "application/vnd.ms-powerpoint",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                "application/rtf",
+                "text/plain",
+                "application/vnd.ms-excel",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "application/xml",
+                "application/atom+xml"
             ]
         },
         "thumbnails": {
@@ -69,8 +104,8 @@
         }
     },
     "times": {
-        "cannotScheduleAPostBeforeInMinutes": 2,
-        "publishAPostBySchedulerToleranceInMinutes": 2,
+        "cannotScheduleAPostBeforeInMinutes": -2,
+        "publishAPostBySchedulerToleranceInMinutes": 5,
         "getImageSizeTimeoutInMS": 5000
     },
     "maintenance": {
@@ -85,7 +120,16 @@
             "w2400": {"width": 2400}
         },
         "internalImageSizes": {
-            "icon": {"width": 256, "height": 256}
+            "icon": {"width": 256, "height": 256},
+            "signup-form-icon": {"width": 192, "height": 192},
+            "email-cta-card": {"width": 64, "height": 64},
+            "email-header-image": {"width": 1200},
+            "email-latest-posts-image": {"width": 200, "height": 200},
+            "email-latest-posts-image-mobile": {"width": 1200, "height": 960},
+            "social-image": {"width": 1200}
+        },
+        "emailSizes" : {
+            "ctaMinimal": {"width": 64, "height": 64}
         }
     }
 }

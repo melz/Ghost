@@ -5,8 +5,7 @@ const {createIrreversibleMigration, createNonTransactionalMigration} = require('
 /**
  * Creates a migrations which will add a new table from schema.js to the database
  * @param {string} name - table name
- * @param {Object} tableSpec - copy of table schema definition as defined in schema.js at the moment of writing the migration,
- * this parameter MUST be present, otherwise @daniellockyer will hunt you down
+ * @param {Object} tableSpec - copy of table schema definition as defined in schema.js at the moment of writing the migration, this parameter MUST be present
  *
  * @returns {Object} migration object returning config/up/down properties
  */
@@ -38,7 +37,7 @@ function addTable(name, tableSpec) {
 /**
  * Creates migration which will drop a table
  *
- * @param {[string]} names  - names of the tables to drop
+ * @param {string[]} names  - names of the tables to drop
  */
 function dropTables(names) {
     return createIrreversibleMigration(
@@ -60,8 +59,7 @@ function dropTables(names) {
 /**
  * Creates a migration which will drop an existing table and then re-add a new table based on provided spec
  * @param {string} name - table name
- * @param {Object} tableSpec - copy of table schema definition as defined in schema.js at the moment of writing the migration,
- * this parameter MUST be present, otherwise @daniellockyer will hunt you down
+ * @param {Object} tableSpec - copy of table schema definition as defined in schema.js at the moment of writing the migration, this parameter MUST be present
  *
  * @returns {Object} migration object returning config/up/down properties
  */

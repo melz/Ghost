@@ -38,7 +38,7 @@ describe('Default Frontend routing', function () {
     describe('Error', function () {
         it('should 404 for unknown post', async function () {
             await request.get('/spectacular/')
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .expect(/Page not found/)
                 .expect(assertCorrectFrontendHeaders);
@@ -46,7 +46,7 @@ describe('Default Frontend routing', function () {
 
         it('should 404 for unknown file', async function () {
             await request.get('/content/images/some/file/that/doesnt-exist.jpg')
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .expect(/Image not found/)
                 .expect(assertCorrectFrontendHeaders);
@@ -68,7 +68,6 @@ describe('Default Frontend routing', function () {
 
                     $('body.home-template').length.should.equal(1);
                     $('article.post').length.should.equal(7);
-                    $('article.tag-getting-started').length.should.equal(7);
 
                     res.text.should.not.containEql('__GHOST_URL__');
                 });
@@ -137,7 +136,7 @@ describe('Default Frontend routing', function () {
             const date = moment().format('YYYY/MM/DD');
 
             await request.get('/' + date + '/welcome/')
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .expect(/Page not found/)
                 .expect(assertCorrectFrontendHeaders);
@@ -155,7 +154,7 @@ describe('Default Frontend routing', function () {
 
         it('should 404 for non-edit parameter', async function () {
             await request.get('/welcome/notedit/')
-                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect('Cache-Control', testUtils.cacheRules.noCache)
                 .expect(404)
                 .expect(/Page not found/)
                 .expect(assertCorrectFrontendHeaders);
@@ -170,7 +169,7 @@ describe('Default Frontend routing', function () {
             });
 
             after(async function () {
-                configUtils.restore();
+                await configUtils.restore();
 
                 await testUtils.startGhost({forceStart: true});
                 request = supertest.agent(configUtils.config.get('url'));
@@ -178,7 +177,7 @@ describe('Default Frontend routing', function () {
 
             it('/edit/ should NOT redirect to the editor', async function () {
                 await request.get('/welcome/edit/')
-                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect('Cache-Control', testUtils.cacheRules.noCache)
                     .expect(404)
                     .expect(assertCorrectFrontendHeaders);
             });
@@ -226,7 +225,7 @@ describe('Default Frontend routing', function () {
                 const date = moment().format('YYYY/MM/DD');
 
                 await request.get('/' + date + '/welcome/amp/')
-                    .expect('Cache-Control', testUtils.cacheRules.private)
+                    .expect('Cache-Control', testUtils.cacheRules.noCache)
                     .expect(404)
                     .expect(/Page not found/)
                     .expect(assertCorrectFrontendHeaders);
@@ -272,7 +271,7 @@ describe('Default Frontend routing', function () {
             await request.get('/rss/')
                 .expect(200)
                 .expect('Cache-Control', testUtils.cacheRules.public)
-                .expect('Content-Type', 'text/xml; charset=utf-8')
+                .expect('Content-Type', 'application/rss+xml; charset=utf-8')
                 .expect(assertCorrectFrontendHeaders)
                 .expect((res) => {
                     res.text.should.match(/<!\[CDATA\[Start here for a quick overview of everything you need to know\]\]>/);
@@ -284,7 +283,7 @@ describe('Default Frontend routing', function () {
             await request.get('/author/ghost/rss/')
                 .expect(200)
                 .expect('Cache-Control', testUtils.cacheRules.public)
-                .expect('Content-Type', 'text/xml; charset=utf-8')
+                .expect('Content-Type', 'application/rss+xml; charset=utf-8')
                 .expect(assertCorrectFrontendHeaders)
                 .expect((res) => {
                     res.text.should.match(/<!\[CDATA\[Start here for a quick overview of everything you need to know\]\]>/);
@@ -296,7 +295,7 @@ describe('Default Frontend routing', function () {
             await request.get('/tag/getting-started/rss/')
                 .expect(200)
                 .expect('Cache-Control', testUtils.cacheRules.public)
-                .expect('Content-Type', 'text/xml; charset=utf-8')
+                .expect('Content-Type', 'application/rss+xml; charset=utf-8')
                 .expect(assertCorrectFrontendHeaders)
                 .expect((res) => {
                     res.text.should.match(/<!\[CDATA\[Start here for a quick overview of everything you need to know\]\]>/);
@@ -320,13 +319,13 @@ describe('Default Frontend routing', function () {
                 .expect(200)
                 .expect(assertCorrectFrontendHeaders);
 
-            // The response here is a publicly documented format users rely on
-            // In case it's changed remember to update the docs at https://ghost.org/help/modifying-robots-txt/
             res.text.should.equal(
                 'User-agent: *\n' +
                 'Sitemap: http://127.0.0.1:2369/sitemap.xml\nDisallow: /ghost/\n' +
-                'Disallow: /p/\n' +
-                'Disallow: /email/\n'
+                'Disallow: /email/\n' +
+                'Disallow: /members/api/comments/counts/\n' +
+                'Disallow: /r/\n' +
+                'Disallow: /webmentions/receive/\n'
             );
         });
 
@@ -341,7 +340,7 @@ describe('Default Frontend routing', function () {
 
     describe('Site Map', function () {
         before(async function () {
-            await testUtils.clearData();
+            await testUtils.teardownDb();
             await testUtils.initData();
             await testUtils.initFixtures('posts');
         });
@@ -462,7 +461,7 @@ describe('Default Frontend routing', function () {
             await request.get(`/${settingsCache.get('public_hash')}/rss/`)
                 .expect(200)
                 .expect('Cache-Control', testUtils.cacheRules.private)
-                .expect('Content-Type', 'text/xml; charset=utf-8')
+                .expect('Content-Type', 'application/rss+xml; charset=utf-8')
                 .expect(assertCorrectFrontendHeaders)
                 .expect((res) => {
                     res.text.should.match(/<!\[CDATA\[Start here for a quick overview of everything you need to know\]\]>/);
@@ -473,7 +472,7 @@ describe('Default Frontend routing', function () {
             await request.get(`/tag/getting-started/${settingsCache.get('public_hash')}/rss/`)
                 .expect(200)
                 .expect('Cache-Control', testUtils.cacheRules.private)
-                .expect('Content-Type', 'text/xml; charset=utf-8')
+                .expect('Content-Type', 'application/rss+xml; charset=utf-8')
                 .expect(assertCorrectFrontendHeaders)
                 .expect((res) => {
                     res.text.should.match(/<!\[CDATA\[Start here for a quick overview of everything you need to know\]\]>/);
@@ -500,7 +499,7 @@ describe('Default Frontend routing', function () {
         // NOTE: this test extends the unit test, checking that there is no other robots.txt middleware overriding private blogging
         it('should serve private robots.txt', async function () {
             await request.get('/robots.txt')
-                .expect('Cache-Control', 'public, max-age=3600000')
+                .expect('Cache-Control', 'public, max-age=3600')
                 .expect(200)
                 .expect(assertCorrectFrontendHeaders)
                 .expect((res) => {

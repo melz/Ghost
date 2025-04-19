@@ -15,6 +15,7 @@ Router.map(function () {
     this.route('setup.done', {path: '/setup/done'});
 
     this.route('signin');
+    this.route('signin-verify', {path: '/signin/verify'});
     this.route('signout');
     this.route('signup', {path: '/signup/:token'});
     this.route('reset', {path: '/reset/:token'});
@@ -23,25 +24,26 @@ Router.map(function () {
     this.route('site');
     this.route('dashboard');
     this.route('launch');
+    // this.route('stats');
+
+    this.route('stats-x', {path: '/stats'}, function () {
+        this.route('stats-x', {path: '/*sub'});
+    });
 
     this.route('pro', function () {
         this.route('pro-sub', {path: '/*sub'});
     });
 
     this.route('posts');
+    this.route('posts.analytics', {path: '/posts/analytics/:post_id'});
+    this.route('posts.mentions', {path: '/posts/analytics/:post_id/mentions'});
+    this.route('posts.debug', {path: '/posts/analytics/:post_id/debug'});
+
+    this.route('restore-posts', {path: '/restore'});
+
     this.route('pages');
 
-    this.route('editor', function () {
-        this.route('new', {path: ':type'});
-        this.route('edit', {path: ':type/:post_id'});
-    });
-
-    this.route('react-editor', function () {
-        this.route('new', {path: ':type'});
-        this.route('edit', {path: ':type/:post_id'});
-    });
-
-    this.route('lexical-editor', function () {
+    this.route('lexical-editor', {path: 'editor'}, function () {
         this.route('new', {path: ':type'});
         this.route('edit', {path: ':type/:post_id'});
     });
@@ -50,49 +52,37 @@ Router.map(function () {
     this.route('tag.new', {path: '/tags/new'});
     this.route('tag', {path: '/tags/:tag_slug'});
 
-    this.route('settings');
-    this.route('settings.general', {path: '/settings/general'});
-    this.route('settings.membership', {path: '/settings/members'});
-    this.route('settings.code-injection', {path: '/settings/code-injection'});
-    this.route('settings.audit-log', {path: '/settings/audit-log'});
-
-    // redirect from old /settings/members-email to /settings/newsletters
-    this.route('settings.members-email', {path: '/settings/members-email'});
-    this.route('settings.newsletters', {path: '/settings/newsletters'}, function () {
-        this.route('new-newsletter', {path: 'new'});
-        this.route('edit-newsletter', {path: ':newsletter_id'});
+    this.route('demo-x', function () {
+        this.route('demo-x', {path: '/*sub'});
     });
 
-    this.route('settings.design', {path: '/settings/design'}, function () {
-        this.route('change-theme', function () {
-            this.route('view', {path: ':theme_name'});
-            this.route('install');
+    this.route('posts-x', function () {
+        this.route('posts-x', {path: '/*sub'});
+    });
+
+    this.route('settings-x', {path: '/settings'}, function () {
+        this.route('settings-x', {path: '/*sub'});
+    });
+
+    this.route('activitypub-x',{path: '/activitypub'}, function () {
+        this.route('activitypub-x', {path: '/*sub'});
+    });
+
+    this.route('explore', function () {
+        // actual Ember route, not rendered in iframe
+        this.route('connect');
+        // iframe sub pages, used for categories
+        this.route('explore-sub', {path: '/*sub'}, function () {
+            // needed to allow search to work, as it uses URL
+            // params for search queries. They don't need to
+            // be visible, but may not be cut off.
+            this.route('explore-query', {path: '/*query'});
         });
     });
-    // redirect for old install route used by ghost.org/marketplace
-    this.route('settings.theme-install', {path: '/settings/theme/install'});
 
-    this.route('settings.staff', {path: '/settings/staff'}, function () {
-        this.route('user', {path: ':user_slug'});
+    this.route('migrate', function () {
+        this.route('migrate', {path: '/*platform'});
     });
-
-    this.route('explore');
-
-    this.route('settings.integrations', {path: '/settings/integrations'}, function () {
-        this.route('new');
-    });
-    this.route('settings.integration', {path: '/settings/integrations/:integration_id'}, function () {
-        this.route('webhooks.new', {path: 'webhooks/new'});
-        this.route('webhooks.edit', {path: 'webhooks/:webhook_id'});
-    });
-    this.route('settings.integrations.slack', {path: '/settings/integrations/slack'});
-    this.route('settings.integrations.amp', {path: '/settings/integrations/amp'});
-    this.route('settings.integrations.firstpromoter', {path: '/settings/integrations/firstpromoter'});
-    this.route('settings.integrations.unsplash', {path: '/settings/integrations/unsplash'});
-    this.route('settings.integrations.zapier', {path: '/settings/integrations/zapier'});
-
-    this.route('settings.navigation', {path: '/settings/navigation'});
-    this.route('settings.labs', {path: '/settings/labs'});
 
     this.route('members', function () {
         this.route('import');
@@ -101,14 +91,11 @@ Router.map(function () {
     this.route('member', {path: '/members/:member_id'});
     this.route('members-activity');
 
-    this.route('offers');
-
-    this.route('offer.new', {path: '/offers/new'});
-    this.route('offer', {path: '/offers/:offer_id'});
-
     this.route('error404', {path: '/*path'});
 
     this.route('designsandbox');
+
+    this.route('mentions');
 });
 
 export default Router;

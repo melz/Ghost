@@ -1,10 +1,11 @@
 import Route from '@ember/routing/route';
+import {inject} from 'ghost-admin/decorators/inject';
 import {inject as service} from '@ember/service';
 
 Route.reopen({
-    config: service(),
     billing: service(),
     router: service(),
+    config: inject(),
 
     actions: {
         willTransition(transition) {
@@ -12,9 +13,9 @@ Route.reopen({
                 transition.abort();
                 this.upgradeStatus.requireUpgrade();
                 return false;
-            } else if (this.config.get('hostSettings.forceUpgrade')) {
-                // Do not prevent transitions to the BMA or to signout
-                if (transition.to?.name === 'pro.index' || transition.to?.name === 'signout') {
+            } else if (this.config.hostSettings?.forceUpgrade) {
+                // Do not prevent transitions to the BMA, to signout, or to any settings-x routes
+                if (transition.to?.name === 'pro.index' || transition.to?.name === 'signout' || transition.to?.name.match(/settings-x\.*/)) {
                     return true;
                 }
 

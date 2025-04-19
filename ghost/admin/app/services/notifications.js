@@ -1,8 +1,9 @@
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '@sentry/ember';
 import Service, {inject as service} from '@ember/service';
 import {TrackedArray} from 'tracked-built-ins';
 import {dasherize} from '@ember/string';
 import {htmlSafe} from '@ember/template';
+import {inject} from 'ghost-admin/decorators/inject';
 import {isArray} from '@ember/array';
 import {isBlank} from '@ember/utils';
 import {
@@ -32,14 +33,18 @@ const GENERIC_ERROR_NAMES = [
     'ReferenceError',
     'SyntaxError',
     'TypeError',
-    'URIError'
+    'URIError',
+    // ember-ajax errors - https://github.com/ember-cli/ember-ajax/blob/master/addon/errors.ts
+    'AjaxError',
+    'ServerError'
 ];
 
 export const GENERIC_ERROR_MESSAGE = 'An unexpected error occurred, please try again.';
 
 export default class NotificationsService extends Service {
-    @service config;
     @service upgradeStatus;
+
+    @inject config;
 
     @tracked delayedNotifications = new TrackedArray([]);
     @tracked content = new TrackedArray([]);
@@ -94,8 +99,8 @@ export default class NotificationsService extends Service {
     showAlert(message, options = {}) {
         options = options || {};
 
-        if (!options.isApiError) {
-            if (this.config.get('sentry_dsn')) {
+        if (!options.isApiError && (!options.type || options.type === 'error')) {
+            if (this.config.sentry_dsn) {
                 // message could be a htmlSafe object rather than a string
                 const displayedMessage = message.string || message;
 
@@ -103,15 +108,15 @@ export default class NotificationsService extends Service {
                     ghost: {
                         displayed_message: displayedMessage,
                         ghost_error_code: options.ghostErrorCode,
-                        full_error: message,
-                        source: 'showAlert'
+                        full_error: message
                     }
                 };
 
-                Sentry.captureException(displayedMessage, {
+                Sentry.captureMessage(displayedMessage, {
                     contexts,
                     tags: {
-                        shown_to_user: true
+                        shown_to_user: true,
+                        source: 'showAlert'
                     }
                 });
             }
@@ -172,23 +177,24 @@ export default class NotificationsService extends Service {
         }
         options.key = ['api-error', options.key].compact().join('.');
 
-        let msg = options.defaultErrorText || 'There was a problem on the server, please try again.';
+        let msg = options.defaultErrorText || GENERIC_ERROR_MESSAGE;
 
-        if (resp?.name && GENERIC_ERROR_NAMES.includes(resp.name)) {
+        if (
+            resp?.name && GENERIC_ERROR_NAMES.includes(resp.name) ||
+            resp?.constructor && GENERIC_ERROR_NAMES.includes(resp.constructor.name)
+        ) {
             msg = GENERIC_ERROR_MESSAGE;
         } else if (resp instanceof String) {
             msg = resp;
-        } else if (!isBlank(resp?.detail)) {
-            msg = resp.detail;
         } else if (!isBlank(resp?.message)) {
             msg = resp.message;
         }
 
-        if (!isBlank(resp?.context)) {
+        if (!isBlank(resp?.context) && resp?.context !== msg) {
             msg = `${msg} ${resp.context}`;
         }
 
-        if (this.config.get('sentry_dsn')) {
+        if (this.config.sentry_dsn) {
             const reportedError = resp instanceof Error ? resp : msg;
 
             Sentry.captureException(reportedError, {
@@ -196,12 +202,12 @@ export default class NotificationsService extends Service {
                     ghost: {
                         ghost_error_code: resp.ghostErrorCode,
                         displayed_message: msg,
-                        full_error: resp,
-                        source: 'showAPIError'
+                        full_error: resp
                     }
                 },
                 tags: {
-                    shown_to_user: true
+                    shown_to_user: true,
+                    source: 'showAPIError'
                 }
             });
         }

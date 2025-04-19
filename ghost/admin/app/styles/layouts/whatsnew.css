@@ -1,146 +1,9 @@
-/* About /ghost/settings/about/
-/* ---------------------------------------------------------- */
-.gh-about-logo svg {
-    position: relative;
-    width: 120px;
-    height: auto;
-}
-
-.gh-about-logo {
-    border-bottom: 1px solid var(--lightgrey-l2);
-    padding-bottom: 10px;
-    margin-bottom: 16px;
-}
-
-.gh-about-container {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    grid-gap: 80px;
-}
-
-.gh-whats-new-canvas .gh-about-container {
-    display: flex;
-    grid-template-columns: unset;
-    grid-gap: unset;
-    margin: 0 auto;
-    max-width: 920px;
-    margin-top: 60px;
-}
-
-.gh-about-box {
-    position: sticky;
-    top: 96px;
-    right: 0;
-    display: flex;
-    flex-grow: 1;
-    flex-direction: column;
-    height: max-content;
-    border-radius: 3px;
-    min-width: 300px;
-}
-
-.gh-about-box.grey {
-    border: none;
-    background: var(--main-color-content-greybg);
-}
-
-.gh-env-details {
-    display: flex;
-    flex-grow: 1;
-    flex-direction: column;
-    padding: 24px 28px 28px;
-}
-
-.gh-about-container h2 {
-    font-size: 1.65rem;
-    line-height: 1.4em;
-    font-weight: 600;
-    border-bottom: 1px solid var(--lightgrey-l2);
-    padding-bottom: 12px;
-    margin-bottom: 12px;
-}
-
-.gh-env-list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.gh-env-list li {
-    margin: 0 0 4px;
-    font-size: 1.4rem;
-    line-height: 1.5em;
-}
-
-.gh-env-error {
-    margin: 1.2rem 0;
-    padding: 16px;
-    line-height: 1.4em;
-    border: none;
-    background: color-mod(var(--red) a(6%));
-    border-radius: 3px;
-}
-
-.gh-env-error a {
-    color: var(--red);
-}
-
-.gh-env-help {
-    max-width: 200px;
-}
-
-.gh-env-help .gh-btn {
-    margin: 4px 0;
-}
-
-@media (max-width: 670px) {
-    .gh-env-details {
-        flex-direction: column;
-    }
-    .gh-env-help {
-        margin: 1em 0;
-        max-width: none;
-    }
-    .gh-env-help .gh-btn {
-        display: inline-block;
-    }
-}
-
-.gh-about-content-actions {
-    display: none;
-}
-
-
-
-/* Upgrade
-/* ---------------------------------------------------------- */
-
-.gh-upgrade-notification {
-    padding-top: 1em;
-}
-
-.gh-upgrade-notification a {
-    text-decoration: underline;
-}
-
-/* Copyright Info
-/* ---------------------------------------------------------- */
-
-.gh-copyright-info {
-    color: var(--midgrey);
-    font-size: 1.3rem;
-    border-top: 1px solid var(--lightgrey-l2);
-    padding-top: 16px;
-    margin-top: 16px;
-    line-height: 1.45em;
-}
-
-
 /* What's new */
 /* ---------------------------------------------------------- */
 .gh-whats-new-canvas .gh-canvas-header-content {
-    border-bottom: 1px solid var(--whitegrey);
     margin-bottom: -1px;
+    padding: 8px 0 16px;
+    align-items: center;
 }
 
 .gh-whats-new {
@@ -417,6 +280,47 @@
         0 -4px 7px rgba(0, 0, 0, 0.06);
 }
 
+.gh-about-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-gap: 80px;
+}
+
+.gh-whats-new-canvas .gh-about-container {
+    display: flex;
+    grid-template-columns: unset;
+    grid-gap: unset;
+    margin: 0 auto;
+    max-width: 920px;
+    margin-top: 60px;
+}
+
+.gh-about-container h2 {
+    font-size: 1.65rem;
+    line-height: 1.4em;
+    font-weight: 600;
+    border-bottom: 1px solid var(--lightgrey-l2);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.gh-about-box {
+    position: sticky;
+    top: 96px;
+    right: 0;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    height: max-content;
+    border-radius: 3px;
+    min-width: 300px;
+}
+
+.gh-about-box.grey {
+    border: none;
+    background: var(--main-color-content-greybg);
+}
+
 @media (max-width: 1380px) {
     .gh-wn-content {
         max-width: 36vw;
@@ -440,18 +344,6 @@
         grid-gap: 32px;
     }
 
-    .gh-env-details {
-        grid-row: 1/2;
-    }
-
-    .gh-about-content-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        grid-gap: 20px;
-        grid-row: 2/3;
-        margin-top: -12px;
-    }
-
     .gh-whats-new {
         grid-row: 3/4;
     }
@@ -463,15 +355,6 @@
 
     .gh-wn-entry iframe {
         max-width: 100%;
-    }
-}
-
-@media (max-width: 540px) {
-    .gh-about-content-actions {
-        grid-template-columns: unset;
-        grid-template-rows: auto;
-        grid-gap: 12px;
-        margin-top: -20px;
     }
 }
 
@@ -964,7 +847,7 @@
         font-size: 1.2em;
         padding-left: 1.75em;
         padding-right: 1.75em;
-    } 
+    }
 }
 
 .gh-whats-new .kg-button-card {

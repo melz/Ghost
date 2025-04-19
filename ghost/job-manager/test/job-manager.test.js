@@ -1,7 +1,4 @@
-// Switch these lines once there are useful utils
-// const testUtils = require('./utils');
-require('./utils');
-const assert = require('assert');
+const assert = require('assert/strict');
 const path = require('path');
 const sinon = require('sinon');
 const delay = require('delay');
@@ -21,11 +18,39 @@ const jobModelInstance = {
     }
 };
 
+const queuedJob = {
+    name: 'test-job',
+    metadata: {
+        job: path.resolve(__dirname, './jobs/simple.js'),
+        data: 'test data'
+    }
+};
+
 describe('Job Manager', function () {
+    let stubConfig, stubJobQueueManager, jobManager;
+
     beforeEach(function () {
         sandbox.stub(logging, 'info');
         sandbox.stub(logging, 'warn');
         sandbox.stub(logging, 'error');
+
+        stubConfig = {
+            get: sinon.stub().returns({
+                enabled: true,
+                queue: {
+                    enabled: true
+                }
+            })
+        };
+
+        stubJobQueueManager = {
+            addJob: sinon.stub().resolves({id: 'job1'})
+        };
+
+        jobManager = new JobManager({
+            config: stubConfig,
+            jobQueueManager: stubJobQueueManager
+        });
     });
 
     afterEach(function () {
@@ -33,61 +58,63 @@ describe('Job Manager', function () {
     });
 
     it('public interface', function () {
-        const jobManager = new JobManager({});
-
         should.exist(jobManager.addJob);
         should.exist(jobManager.hasExecutedSuccessfully);
+        should.exist(jobManager.awaitOneOffCompletion);
         should.exist(jobManager.awaitCompletion);
+        should.exist(jobManager.allSettled);
+        should.exist(jobManager.removeJob);
+        should.exist(jobManager.shutdown);
+        should.exist(jobManager.inlineJobHandler);
+        should.exist(jobManager.addQueuedJob);
     });
 
     describe('Add a job', function () {
         describe('Inline jobs', function () {
             it('adds a job to a queue', async function () {
                 const spy = sinon.spy();
-                const jobManager = new JobManager({
-                    JobModel: sinon.stub().resolves()
-                });
-
                 jobManager.addJob({
                     job: spy,
                     data: 'test data',
                     offloaded: false
                 });
-                should(jobManager.queue.idle()).be.false();
+                should(jobManager.inlineQueue.idle()).be.false();
 
                 // give time to execute the job
                 await delay(1);
 
-                should(jobManager.queue.idle()).be.true();
+                should(jobManager.inlineQueue.idle()).be.true();
                 should(spy.called).be.true();
                 should(spy.args[0][0]).equal('test data');
             });
 
             it('handles failed job gracefully', async function () {
                 const spy = sinon.stub().throws();
-                const jobManager = new JobManager({});
+                const jobModelSpy = {
+                    findOne: sinon.spy()
+                };
 
                 jobManager.addJob({
                     job: spy,
                     data: 'test data',
                     offloaded: false
                 });
-                should(jobManager.queue.idle()).be.false();
+                should(jobManager.inlineQueue.idle()).be.false();
 
                 // give time to execute the job
                 await delay(1);
 
-                should(jobManager.queue.idle()).be.true();
+                should(jobManager.inlineQueue.idle()).be.true();
                 should(spy.called).be.true();
                 should(spy.args[0][0]).equal('test data');
                 should(logging.error.called).be.true();
+                // a one-off job without a name should not have persistance
+                should(jobModelSpy.findOne.called).be.false();
             });
         });
 
         describe('Offloaded jobs', function () {
             it('fails to schedule for invalid scheduling expression', function () {
-                const jobManager = new JobManager({});
-
                 try {
                     jobManager.addJob({
                         at: 'invalid expression',
@@ -99,8 +126,6 @@ describe('Job Manager', function () {
             });
 
             it('fails to schedule for no job name', function () {
-                const jobManager = new JobManager({});
-
                 try {
                     jobManager.addJob({
                         at: 'invalid expression',
@@ -112,7 +137,6 @@ describe('Job Manager', function () {
             });
 
             it('schedules a job using date format', async function () {
-                const jobManager = new JobManager({});
                 const timeInTenSeconds = new Date(Date.now() + 10);
                 const jobPath = path.resolve(__dirname, './jobs/simple.js');
 
@@ -150,7 +174,6 @@ describe('Job Manager', function () {
             });
 
             it('schedules a job to run immediately', async function () {
-                const jobManager = new JobManager({});
                 const clock = FakeTimers.install({now: Date.now()});
 
                 const jobPath = path.resolve(__dirname, './jobs/simple.js');
@@ -182,7 +205,6 @@ describe('Job Manager', function () {
             });
 
             it('fails to schedule a job with the same name to run immediately one after another', async function () {
-                const jobManager = new JobManager({});
                 const clock = FakeTimers.install({now: Date.now()});
 
                 const jobPath = path.resolve(__dirname, './jobs/simple.js');
@@ -225,18 +247,15 @@ describe('Job Manager', function () {
                     throw new Error('job error');
                 };
                 const spyHandler = sinon.spy();
-                const jobManager = new JobManager({errorHandler: spyHandler});
+                jobManager = new JobManager({errorHandler: spyHandler, config: stubConfig});
+                const completion = jobManager.awaitCompletion('will-fail');
 
                 jobManager.addJob({
                     job,
                     name: 'will-fail'
                 });
 
-                // give time to execute the job
-                // has to be this long because in Node v10 the communication is
-                // done through processes, which takes longer comparing to worker_threads
-                // can be reduced to 100 when Node v10 support is dropped
-                await delay(600);
+                await assert.rejects(completion, /job error/);
 
                 should(spyHandler.called).be.true();
                 should(spyHandler.args[0][0].message).equal('job error');
@@ -245,18 +264,18 @@ describe('Job Manager', function () {
 
             it('uses worker message handler when job sends a message', async function (){
                 const workerMessageHandlerSpy = sinon.spy();
-                const jobManager = new JobManager({workerMessageHandler: workerMessageHandlerSpy});
+                jobManager = new JobManager({workerMessageHandler: workerMessageHandlerSpy, config: stubConfig});
+                const completion = jobManager.awaitCompletion('will-send-msg');
 
                 jobManager.addJob({
                     job: path.resolve(__dirname, './jobs/message.js'),
                     name: 'will-send-msg'
                 });
                 jobManager.bree.run('will-send-msg');
-
+                await delay(100);
                 jobManager.bree.workers['will-send-msg'].postMessage('hello from Ghost!');
 
-                // Give time for worker (worker thread) <-> parent process (job manager) communication
-                await delay(100);
+                await completion;
 
                 should(workerMessageHandlerSpy.called).be.true();
                 should(workerMessageHandlerSpy.args[0][0].name).equal('will-send-msg');
@@ -267,8 +286,6 @@ describe('Job Manager', function () {
 
     describe('Add one off job', function () {
         it('throws if name parameter is not provided', async function () {
-            const jobManager = new JobManager({});
-
             try {
                 await jobManager.addOneOffJob({
                     job: () => {}
@@ -287,7 +304,7 @@ describe('Job Manager', function () {
                     add: sinon.stub().resolves()
                 };
 
-                const jobManager = new JobManager({JobModel});
+                jobManager = new JobManager({JobModel, config: stubConfig});
                 await jobManager.addOneOffJob({
                     job: spy,
                     name: 'unique name',
@@ -305,7 +322,7 @@ describe('Job Manager', function () {
                     add: sinon.stub().throws('should not be called')
                 };
 
-                const jobManager = new JobManager({JobModel});
+                jobManager = new JobManager({JobModel, config: stubConfig});
 
                 try {
                     await jobManager.addOneOffJob({
@@ -330,7 +347,8 @@ describe('Job Manager', function () {
                     edit: sinon.stub().resolves({name: 'successful-oneoff'})
                 };
 
-                const jobManager = new JobManager({JobModel});
+                jobManager = new JobManager({JobModel, config: stubConfig});
+                const completion = jobManager.awaitCompletion('successful-oneoff');
 
                 jobManager.addOneOffJob({
                     job: async () => {
@@ -340,8 +358,7 @@ describe('Job Manager', function () {
                     offloaded: false
                 });
 
-                // allow job to get picked up and executed
-                await delay(20);
+                await completion;
 
                 // tracks the job queued
                 should(JobModel.add.args[0][0].status).equal('queued');
@@ -372,7 +389,8 @@ describe('Job Manager', function () {
                     throw new Error('job error');
                 };
                 const spyHandler = sinon.spy();
-                const jobManager = new JobManager({errorHandler: spyHandler, JobModel});
+                jobManager = new JobManager({errorHandler: spyHandler, JobModel, config: stubConfig});
+                const completion = jobManager.awaitCompletion('failed-oneoff');
 
                 await jobManager.addOneOffJob({
                     job,
@@ -380,8 +398,7 @@ describe('Job Manager', function () {
                     offloaded: false
                 });
 
-                // give time to execute the job
-                await delay(50);
+                await assert.rejects(completion, /job error/);
 
                 // tracks the job start
                 should(JobModel.edit.args[0][0].status).equal('started');
@@ -416,7 +433,8 @@ describe('Job Manager', function () {
                     throw new Error('job error');
                 };
                 const spyHandler = sinon.spy();
-                const jobManager = new JobManager({errorHandler: spyHandler, JobModel});
+                jobManager = new JobManager({errorHandler: spyHandler, JobModel, config: stubConfig});
+                const completion1 = jobManager.awaitCompletion('failed-oneoff');
 
                 await jobManager.addOneOffJob({
                     job,
@@ -425,11 +443,12 @@ describe('Job Manager', function () {
                 });
 
                 // give time to execute the job and fail
-                await delay(50);
+                await assert.rejects(completion1, /job error/);
                 should(JobModel.edit.args[1][0].status).equal('failed');
 
                 // simulate process restart and "fresh" slate to add the job
                 jobManager.removeJob('failed-oneoff');
+                const completion2 = jobManager.awaitCompletion('failed-oneoff');
 
                 await jobManager.addOneOffJob({
                     job,
@@ -438,7 +457,7 @@ describe('Job Manager', function () {
                 });
 
                 // give time to execute the job and fail AGAIN
-                await delay(50);
+                await assert.rejects(completion2, /job error/);
                 should(JobModel.edit.args[3][0].status).equal('started');
                 should(JobModel.edit.args[4][0].status).equal('failed');
             });
@@ -452,7 +471,7 @@ describe('Job Manager', function () {
                     add: sinon.stub().resolves()
                 };
 
-                const jobManager = new JobManager({JobModel});
+                jobManager = new JobManager({JobModel, config: stubConfig});
                 await jobManager.addOneOffJob({
                     job: spy,
                     name: 'unique name',
@@ -469,7 +488,7 @@ describe('Job Manager', function () {
                     add: sinon.stub().throws('should not be called')
                 };
 
-                const jobManager = new JobManager({JobModel});
+                jobManager = new JobManager({JobModel, config: stubConfig});
 
                 try {
                     await jobManager.addOneOffJob({
@@ -493,7 +512,9 @@ describe('Job Manager', function () {
                     edit: sinon.stub().resolves({name: 'successful-oneoff'})
                 };
 
-                const jobManager = new JobManager({JobModel});
+                jobManager = new JobManager({JobModel, config: stubConfig});
+
+                const jobCompletion = jobManager.awaitCompletion('successful-oneoff');
 
                 await jobManager.addOneOffJob({
                     job: path.resolve(__dirname, './jobs/message.js'),
@@ -501,12 +522,12 @@ describe('Job Manager', function () {
                 });
 
                 // allow job to get picked up and executed
-                await delay(50);
+                await delay(100);
 
                 jobManager.bree.workers['successful-oneoff'].postMessage('be done!');
 
                 // allow the message to be passed around
-                await delay(50);
+                await jobCompletion;
 
                 // tracks the job start
                 should(JobModel.edit.args[0][0].status).equal('started');
@@ -533,18 +554,16 @@ describe('Job Manager', function () {
                     throw new Error('job error');
                 };
                 const spyHandler = sinon.spy();
-                const jobManager = new JobManager({errorHandler: spyHandler, JobModel});
+                jobManager = new JobManager({errorHandler: spyHandler, JobModel, config: stubConfig});
+
+                const completion = jobManager.awaitCompletion('failed-oneoff');
 
                 await jobManager.addOneOffJob({
                     job,
                     name: 'failed-oneoff'
                 });
 
-                // give time to execute the job
-                // has to be this long because in Node v10 the communication is
-                // done through processes, which takes longer comparing to worker_threads
-                // can be reduced to 100 when Node v10 support is dropped
-                await delay(100);
+                await assert.rejects(completion, /job error/);
 
                 // still calls the original error handler
                 should(spyHandler.called).be.true();
@@ -590,7 +609,7 @@ describe('Job Manager', function () {
                     })
             };
 
-            const jobManager = new JobManager({JobModel});
+            jobManager = new JobManager({JobModel, config: stubConfig});
             let executed = await jobManager.hasExecutedSuccessfully('solovei');
             should.equal(executed, false);
 
@@ -625,7 +644,7 @@ describe('Job Manager', function () {
                 add: sinon.stub().resolves()
             };
 
-            const jobManager = new JobManager({JobModel});
+            jobManager = new JobManager({JobModel, config: stubConfig});
 
             await jobManager.addOneOffJob({
                 job: jobWithDelay,
@@ -634,14 +653,14 @@ describe('Job Manager', function () {
             });
 
             should.equal(spy.called, false);
-            await jobManager.awaitCompletion('solovei');
+            await jobManager.awaitOneOffCompletion('solovei');
             should.equal(spy.called, true);
         });
     });
 
     describe('Remove a job', function () {
         it('removes a scheduled job from the queue', async function () {
-            const jobManager = new JobManager({});
+            jobManager = new JobManager({config: stubConfig});
 
             const timeInTenSeconds = new Date(Date.now() + 10);
             const jobPath = path.resolve(__dirname, './jobs/simple.js');
@@ -659,9 +678,26 @@ describe('Job Manager', function () {
         });
     });
 
+    describe('Add a queued job', function () {
+        it('submits a job to the job queue if enabled', async function () {
+            stubConfig.get.returns(true);
+            const result = await jobManager.addQueuedJob(queuedJob);
+            should(stubJobQueueManager.addJob.calledOnce).be.true();
+            should(stubJobQueueManager.addJob.firstCall.args[0]).deepEqual(queuedJob);
+            should(result).have.property('id', 'job1');
+        });
+
+        it('does not submit a job to the job queue if disabled', async function () {
+            stubConfig.get.returns(false);
+            const result = await jobManager.addQueuedJob(queuedJob);
+            should(stubJobQueueManager.addJob.called).be.false();
+            should(result).be.undefined();
+        });
+    });
+
     describe('Shutdown', function () {
-        it('gracefully shuts down an inline jobs', async function () {
-            const jobManager = new JobManager({});
+        it('gracefully shuts down inline jobs', async function () {
+            jobManager = new JobManager({config: stubConfig});
 
             jobManager.addJob({
                 job: require('./jobs/timed-job'),
@@ -669,15 +705,15 @@ describe('Job Manager', function () {
                 offloaded: false
             });
 
-            should(jobManager.queue.idle()).be.false();
+            should(jobManager.inlineQueue.idle()).be.false();
 
             await jobManager.shutdown();
 
-            should(jobManager.queue.idle()).be.true();
+            should(jobManager.inlineQueue.idle()).be.true();
         });
 
         it('gracefully shuts down an interval job', async function () {
-            const jobManager = new JobManager({});
+            jobManager = new JobManager({config: stubConfig});
 
             jobManager.addJob({
                 at: 'every 5 seconds',
@@ -694,5 +730,7 @@ describe('Job Manager', function () {
 
             should(Object.keys(jobManager.bree.intervals).length).equal(0);
         });
+
+        it('gracefully shuts down the job queue worker pool');
     });
 });

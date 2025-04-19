@@ -1,10 +1,10 @@
 import Helper from '@ember/component/helper';
-import {inject as service} from '@ember/service';
+import {inject} from 'ghost-admin/decorators/inject';
 
 export default class EnableDeveloperExperimentsHelper extends Helper {
-    @service config;
+    @inject config;
 
     compute() {
-        return this.config.get('enableDeveloperExperiments');
+        return this.config.enableDeveloperExperiments;
     }
 }

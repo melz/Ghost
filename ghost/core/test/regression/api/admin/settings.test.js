@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const should = require('should');
 const supertest = require('supertest');
 const config = require('../../../../core/shared/config');
@@ -78,13 +77,13 @@ describe('Settings API', function () {
         });
 
         it('Can edit only allowed labs keys', async function () {
-            await checkCanEdit('labs', 
+            await checkCanEdit('labs',
                 JSON.stringify({
-                    activitypub: true,
+                    additionalPaymentMethods: true,
                     gibberish: true
                 }),
                 {
-                    activitypub: true
+                    additionalPaymentMethods: true
                 }
             );
         });
@@ -223,6 +222,22 @@ describe('Settings API', function () {
                 .expect('Content-Type', /json/)
                 .expect('Cache-Control', testUtils.cacheRules.private)
                 .expect(422);
+        });
+
+        // If this test fails, it can be safely removed
+        // but the front-end should be updated accordingly,
+        // removing the workaround in place for this specific usecase
+        it('Cannot send an empty array', async function () {
+            const settingsToChange = {
+                settings: []
+            };
+
+            await request.put(localUtils.API.getApiQuery('settings/'))
+                .set('Origin', config.get('url'))
+                .send(settingsToChange)
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(400);
         });
 
         it('Cannot edit notifications key through API', async function () {
@@ -369,7 +384,7 @@ describe('Settings API', function () {
             if (!currentValue || currentValue.value === true) {
                 throw new Error('Invalid key or unchanged value');
             }
-        
+
             let jsonResponse = await api.settings.edit({
                 settings: [{key: 'email_verification_required', value: true}]
             }, testUtils.context.internal);

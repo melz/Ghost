@@ -1,5 +1,5 @@
 const should = require('should');
-const ObjectID = require('bson-objectid');
+const ObjectID = require('bson-objectid').default;
 const errors = require('../../../../lib/domain/errors');
 const Offer = require('../../../../lib/domain/models/Offer');
 const OfferName = require('../../../../lib/domain/models/OfferName');
@@ -258,6 +258,27 @@ describe('Offer', function () {
             }, (err) => {
                 should.ok(err);
             });
+        });
+
+        it('Sets createdAt for new Offers', async function () {
+            const data = {
+                name: 'My Offer',
+                code: 'offer-code',
+                display_title: 'My Offer Title',
+                display_description: 'My Offer Description',
+                cadence: 'month',
+                type: 'fixed',
+                amount: 1000,
+                duration: 'forever',
+                currency: 'USD',
+                tier: {
+                    id: ObjectID()
+                }
+            };
+
+            const offer = await Offer.create(data, mockUniqueChecker);
+
+            should.equal(typeof offer.createdAt, 'string');
         });
     });
 

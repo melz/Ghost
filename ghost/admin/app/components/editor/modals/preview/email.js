@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import validator from 'validator';
 import {action} from '@ember/object';
 import {htmlSafe} from '@ember/template';
+import {inject} from 'ghost-admin/decorators/inject';
 import {inject as service} from '@ember/service';
 import {task, timeout} from 'ember-concurrency';
 import {tracked} from '@glimmer/tracking';
@@ -17,29 +18,51 @@ html {
 }
 `;
 
+const FREE_SEGMENT = 'status:free';
+const PAID_SEGMENT = 'status:-free';
+
+const SEGMENT_OPTIONS = [{
+    name: 'Free member',
+    value: FREE_SEGMENT,
+    alias: 'free'
+}, {
+    name: 'Paid member',
+    value: PAID_SEGMENT,
+    alias: 'paid'
+}];
+
 // TODO: remove duplication with <ModalPostEmailPreview>
 export default class ModalPostPreviewEmailComponent extends Component {
     @service ajax;
-    @service config;
     @service feature;
     @service ghostPaths;
     @service session;
     @service settings;
     @service store;
 
+    @inject config;
+
     @tracked html = '';
     @tracked subject = '';
-    @tracked memberSegment = 'status:free';
     @tracked previewEmailAddress = this.session.user.email;
     @tracked sendPreviewEmailError = '';
+    @tracked newsletter = this.args.post.newsletter || this.args.newsletter;
+    @tracked newslettersList;
 
-    get newsletter() {
-        return this.args.post.newsletter || this.args.newsletter;
+    segments = SEGMENT_OPTIONS;
+
+    constructor() {
+        super(...arguments);
+        this.loadNewslettersTask.perform();
     }
 
     get mailgunIsEnabled() {
-        return this.config.get('mailgunIsConfigured') ||
-            !!(this.settings.get('mailgunApiKey') && this.settings.get('mailgunDomain') && this.settings.get('mailgunBaseUrl'));
+        return this.config.mailgunIsConfigured ||
+            !!(this.settings.mailgunApiKey && this.settings.mailgunDomain && this.settings.mailgunBaseUrl);
+    }
+
+    get selectedSegment() {
+        return this.segments.find(segment => segment.alias === this.args.memberSegment);
     }
 
     @action
@@ -57,20 +80,12 @@ export default class ModalPostPreviewEmailComponent extends Component {
         }
     }
 
-    @action
-    changeMemberSegment(segment) {
-        this.memberSegment = segment;
-
-        if (this._previewIframe) {
-            this.renderEmailPreview(this._previewIframe);
-        }
-    }
-
     @task({drop: true})
     *sendPreviewEmailTask() {
         try {
             const resourceId = this.args.post.id;
             const testEmail = this.previewEmailAddress.trim();
+            const memberSegment = this.selectedSegment.value;
 
             if (!validator.isEmail(testEmail)) {
                 this.sendPreviewEmailError = 'Please enter a valid email';
@@ -83,7 +98,7 @@ export default class ModalPostPreviewEmailComponent extends Component {
             this.sendPreviewEmailError = '';
 
             const url = this.ghostPaths.url.api('/email_previews/posts', resourceId);
-            const data = {emails: [testEmail], memberSegment: this.memberSegment};
+            const data = {emails: [testEmail], memberSegment, newsletter: this.newsletter.slug};
             const options = {
                 data,
                 dataType: 'json'
@@ -109,14 +124,16 @@ export default class ModalPostPreviewEmailComponent extends Component {
     }
 
     async _fetchEmailData() {
-        let {html, subject, memberSegment} = this;
+        let {html, subject, newsletter} = this;
         let {post} = this.args;
+        const memberSegment = this.selectedSegment.value;
 
-        if (html && subject && memberSegment === this._lastMemberSegment) {
+        if (html && subject && memberSegment === this._lastMemberSegment && newsletter.slug === this._lastNewsletterSlug) {
             return {html, subject};
         }
 
         this._lastMemberSegment = memberSegment;
+        this._lastNewsletterSlug = newsletter.slug;
 
         // model is an email
         if (post.html && post.subject) {
@@ -129,7 +146,7 @@ export default class ModalPostPreviewEmailComponent extends Component {
         // model is a post, fetch email preview
         } else {
             let url = new URL(this.ghostPaths.url.api('/email_previews/posts', post.id), window.location.href);
-            url.searchParams.set('memberSegment', this.memberSegment);
+            url.searchParams.set('memberSegment', memberSegment);
             url.searchParams.set('newsletter', this.newsletter.slug);
 
             let response = await this.ajax.request(url.href);
@@ -150,5 +167,21 @@ export default class ModalPostPreviewEmailComponent extends Component {
 
         this.html = html;
         this.subject = subject;
+    }
+
+    @task
+    *loadNewslettersTask() {
+        const newslettersList = yield this.store.query('newsletter', {filter: 'status:active'});
+
+        this.newslettersList = newslettersList;
+    }
+
+    @action
+    setNewsletter(newsletter) {
+        this.newsletter = newsletter;
+
+        if (this._previewIframe) {
+            this.renderEmailPreview(this._previewIframe);
+        }
     }
 }

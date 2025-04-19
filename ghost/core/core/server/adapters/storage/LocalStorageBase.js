@@ -4,10 +4,7 @@ const serveStatic = require('../../../shared/express').static;
 
 const fs = require('fs-extra');
 const path = require('path');
-const Promise = require('bluebird');
-const moment = require('moment');
 const tpl = require('@tryghost/tpl');
-const logging = require('@tryghost/logging');
 const errors = require('@tryghost/errors');
 const constants = require('@tryghost/constants');
 const urlUtils = require('../../../shared/url-utils');
@@ -61,7 +58,15 @@ class LocalStorageBase extends StorageBase {
         targetFilename = filename;
         await fs.mkdirs(targetDir);
 
-        await fs.copy(file.path, targetFilename);
+        try {
+            await fs.copy(file.path, targetFilename);
+        } catch (err) {
+            if (err.code === 'ENAMETOOLONG') {
+                throw new errors.BadRequestError({err});
+            }
+
+            throw err;
+        }
 
         // The src for the image must be in URI format, not a file system path, which in Windows uses \
         // For local file system storage can use relative path so add a slash
@@ -76,6 +81,29 @@ class LocalStorageBase extends StorageBase {
     }
 
     /**
+     * Saves a buffer in the targetPath
+     * @param {Buffer} buffer is an instance of Buffer
+     * @param {String} targetPath relative path NOT including storage path to which the buffer should be written
+     * @returns {Promise<String>} a URL to retrieve the data
+     */
+    async saveRaw(buffer, targetPath) {
+        const storagePath = path.join(this.storagePath, targetPath);
+        const targetDir = path.dirname(storagePath);
+
+        await fs.mkdirs(targetDir);
+        await fs.writeFile(storagePath, buffer);
+
+        // For local file system storage can use relative path so add a slash
+        const fullUrl = (
+            urlUtils.urlJoin('/', urlUtils.getSubdir(),
+                this.staticFileURLPrefix,
+                targetPath)
+        ).replace(new RegExp(`\\${path.sep}`, 'g'), '/');
+
+        return fullUrl;
+    }
+
+    /**
      *
      * @param {String} url full url under which the stored content is served, result of save method
      * @returns {String} path under which the content is stored
@@ -83,8 +111,18 @@ class LocalStorageBase extends StorageBase {
     urlToPath(url) {
         let filePath;
 
-        if (url.match(this.staticFileUrl)) {
+        const prefix = urlUtils.urlJoin('/',
+            urlUtils.getSubdir(),
+            this.staticFileURLPrefix
+        );
+
+        if (url.startsWith(this.staticFileUrl)) {
+            // CASE: full path that includes the site url
             filePath = url.replace(this.staticFileUrl, '');
+            filePath = path.join(this.storagePath, filePath);
+        } else if (url.startsWith(prefix)) {
+            // CASE: The result of the save method doesn't include the site url. So we need to handle this case.
+            filePath = url.replace(prefix, '');
             filePath = path.join(this.storagePath, filePath);
         } else {
             throw new errors.IncorrectUsageError({
@@ -118,16 +156,11 @@ class LocalStorageBase extends StorageBase {
         const {storagePath, errorMessages} = this;
 
         return function serveStaticContent(req, res, next) {
-            const startedAtMoment = moment();
-
             return serveStatic(
                 storagePath,
                 {
                     maxAge: constants.ONE_YEAR_MS,
-                    fallthrough: false,
-                    onEnd: () => {
-                        logging.info('LocalStorageBase.serve', req.path, moment().diff(startedAtMoment, 'ms') + 'ms');
-                    }
+                    fallthrough: false
                 }
             )(req, res, (err) => {
                 if (err) {
@@ -145,6 +178,10 @@ class LocalStorageBase extends StorageBase {
 
                     if (err.statusCode === 403) {
                         return next(new errors.NoPermissionError({err: err}));
+                    }
+
+                    if (err.name === 'RangeNotSatisfiableError') {
+                        return next(new errors.RangeNotSatisfiableError({err}));
                     }
 
                     return next(new errors.InternalServerError({err: err}));

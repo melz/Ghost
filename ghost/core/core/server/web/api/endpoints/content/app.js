@@ -3,11 +3,15 @@ const boolParser = require('express-query-boolean');
 const bodyParser = require('body-parser');
 const express = require('../../../../../shared/express');
 const sentry = require('../../../../../shared/sentry');
+const config = require('../../../../../shared/config');
 const shared = require('../../../shared');
 const routes = require('./routes');
 const errorHandler = require('@tryghost/mw-error-handler');
 const apiVersionCompatibility = require('../../../../services/api-version-compatibility');
 
+/**
+ * @returns {import('express').Application}
+ */
 module.exports = function setupApiApp() {
     debug('Content API setup start');
     const apiApp = express('content api');
@@ -20,8 +24,10 @@ module.exports = function setupApiApp() {
     // Query parsing
     apiApp.use(boolParser());
 
-    // API shouldn't be cached
-    apiApp.use(shared.middleware.cacheControl('private'));
+    // Content API should allow public caching
+    apiApp.use(shared.middleware.cacheControl('public', {
+        maxAge: config.get('caching:contentAPI:maxAge')
+    }));
 
     // Routing
     apiApp.use(routes());

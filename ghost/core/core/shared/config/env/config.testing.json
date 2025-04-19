@@ -12,7 +12,10 @@
         "port": 2369
     },
     "logging": {
-        "level": "fatal"
+        "level": "error"
+    },
+    "security": {
+        "staffDeviceVerification": false
     },
     "spam": {
         "user_login": {
@@ -21,6 +24,18 @@
             "freeRetries": 3
         },
         "user_reset": {
+            "minWait": 3600000,
+            "maxWait": 3600000,
+            "lifetime": 3600,
+            "freeRetries": 4
+        },
+        "user_verification": {
+            "minWait": 3600000,
+            "maxWait": 3600000,
+            "lifetime": 3600,
+            "freeRetries": 4
+        },
+        "send_verification_code": {
             "minWait": 3600000,
             "maxWait": 3600000,
             "lifetime": 3600,
@@ -43,6 +58,18 @@
             "maxWait": 3600000,
             "lifetime": 3600,
             "freeRetries":99
+        },
+        "webmentions_block": {
+            "minWait": 100000,
+            "maxWait": 100000,
+            "lifetime": 3600,
+            "freeRetries": 3
+        },
+        "email_preview_block": {
+            "minWait": 360000,
+            "maxWait": 360000,
+            "lifetime": 3600,
+            "freeRetries": 10
         }
     },
     "privacy": {
@@ -54,10 +81,5 @@
         "fixtures": "test/utils/fixtures/fixtures",
         "defaultSettings": "test/utils/fixtures/default-settings.json",
         "urlCache": "test/utils/fixtures/urls"
-    },
-    "sodoSearch": {
-        "url": "https://cdn.jsdelivr.net/npm/@tryghost/sodo-search@~{version}/umd/sodo-search.min.js",
-        "styles": "https://cdn.jsdelivr.net/npm/@tryghost/sodo-search@~{version}/umd/main.css",
-        "version": "1.0"
     }
 }

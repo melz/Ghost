@@ -2,14 +2,15 @@ import Ember from 'ember';
 import Model, {attr, belongsTo, hasMany} from '@ember-data/model';
 import ValidationEngine from 'ghost-admin/mixins/validation-engine';
 import boundOneWay from 'ghost-admin/utils/bound-one-way';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import {compare, isBlank} from '@ember/utils';
-// eslint-disable-next-line ghost/ember/no-observers
-import {BLANK_DOC} from 'koenig-editor/components/koenig-editor';
 import {computed, observer} from '@ember/object';
 import {equal, filterBy, reads} from '@ember/object/computed';
+import {inject} from 'ghost-admin/decorators/inject';
 import {on} from '@ember/object/evented';
 import {inject as service} from '@ember/service';
+
+const BLANK_LEXICAL = '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
 
 // ember-cli-shims doesn't export these so we must get them manually
 const {Comparable} = Ember;
@@ -66,16 +67,21 @@ function publishedAtCompare(postA, postB) {
 }
 
 export default Model.extend(Comparable, ValidationEngine, {
-    config: service(),
+    session: service(),
     feature: service(),
     ghostPaths: service(),
     clock: service(),
+    search: service(),
     settings: service(),
+    membersUtils: service(),
+
+    config: inject(),
 
     displayName: 'post',
     validationType: 'post',
 
     count: attr(),
+    sentiment: attr(),
     createdAtUTC: attr('moment-utc'),
     excerpt: attr('string'),
     customExcerpt: attr('string'),
@@ -95,7 +101,10 @@ export default Model.extend(Comparable, ValidationEngine, {
     visibility: attr('string'),
     metaDescription: attr('string'),
     metaTitle: attr('string'),
-    mobiledoc: attr('json-string', {defaultValue: () => JSON.parse(JSON.stringify(BLANK_DOC))}),
+    mobiledoc: attr('json-string'),
+    lexical: attr('string', {defaultValue: () => {
+        return BLANK_LEXICAL;
+    }}),
     plaintext: attr('string'),
     publishedAtUTC: attr('moment-utc'),
     slug: attr('string'),
@@ -111,6 +120,7 @@ export default Model.extend(Comparable, ValidationEngine, {
     featureImage: attr('string'),
     featureImageAlt: attr('string'),
     featureImageCaption: attr('string'),
+    showTitleAndFeatureImage: attr('boolean', {defaultValue: true}),
 
     authors: hasMany('user', {embedded: 'always', async: false}),
     createdBy: belongsTo('user', {async: true}),
@@ -118,16 +128,17 @@ export default Model.extend(Comparable, ValidationEngine, {
     newsletter: belongsTo('newsletter', {embedded: 'always', async: false}),
     publishedBy: belongsTo('user', {async: true}),
     tags: hasMany('tag', {embedded: 'always', async: false}),
+    postRevisions: hasMany('post_revisions', {embedded: 'always', async: false}),
 
     primaryAuthor: reads('authors.firstObject'),
     primaryTag: reads('tags.firstObject'),
 
     scratch: null,
+    lexicalScratch: null,
     titleScratch: null,
-
-    // HACK: used for validation so that date/time can be validated based on
-    // eventual status rather than current status
-    statusScratch: null,
+    //This is used to store the initial lexical state from the
+    // secondary editor to get the schema up to date in case its outdated
+    secondaryLexicalState: null,
 
     // For use by date/time pickers - will be validated then converted to UTC
     // on save. Updated by an observer whenever publishedAtUTC changes.
@@ -165,8 +176,61 @@ export default Model.extend(Comparable, ValidationEngine, {
         return this.isScheduled && !!this.newsletter && !this.email;
     }),
 
+    hasBeenEmailed: computed('isPost', 'isSent', 'isPublished', 'email', function () {
+        return this.isPost
+            && (this.isSent || this.isPublished)
+            && this.email && this.email.status !== 'failed';
+    }),
+
+    didEmailFail: computed('isPost', 'isSent', 'isPublished', 'email.status', function () {
+        return this.isPost
+            && (this.isSent || this.isPublished)
+            && this.email && this.email.status === 'failed';
+    }),
+
+    showAudienceFeedback: computed('sentiment', function () {
+        return this.feature.get('audienceFeedback') && this.sentiment !== undefined;
+    }),
+
+    showEmailOpenAnalytics: computed('hasBeenEmailed', 'isSent', 'isPublished', function () {
+        return this.hasBeenEmailed
+            && !this.session.user.isContributor
+            && this.settings.membersSignupAccess !== 'none'
+            && this.email.trackOpens
+            && this.settings.emailTrackOpens;
+    }),
+
+    showEmailClickAnalytics: computed('hasBeenEmailed', 'isSent', 'isPublished', 'email', function () {
+        return this.hasBeenEmailed
+            && !this.session.user.isContributor
+            && this.settings.membersSignupAccess !== 'none'
+            && (this.isSent || this.isPublished)
+            && this.email.trackClicks
+            && this.settings.emailTrackClicks;
+    }),
+
+    showAttributionAnalytics: computed('isPage', 'emailOnly', 'isPublished', 'membersUtils.isMembersInviteOnly', 'settings.membersTrackSources', function () {
+        return (this.isPage || !this.emailOnly)
+                && this.isPublished
+                && this.settings.membersTrackSources
+                && !this.membersUtils.isMembersInviteOnly
+                && !this.session.user.isContributor;
+    }),
+
+    showPaidAttributionAnalytics: computed.and('showAttributionAnalytics', 'membersUtils.paidMembersEnabled'),
+
+    hasAnalyticsPage: computed('isPost', 'showEmailOpenAnalytics', 'showEmailClickAnalytics', 'showAttributionAnalytics', function () {
+        return this.isPost
+            && this.session.user.isAdmin
+            && (
+                this.showEmailOpenAnalytics
+                || this.showEmailClickAnalytics
+                || this.showAttributionAnalytics
+            );
+    }),
+
     previewUrl: computed('uuid', 'ghostPaths.url', 'config.blogUrl', function () {
-        let blogUrl = this.get('config.blogUrl');
+        let blogUrl = this.config.blogUrl;
         let uuid = this.uuid;
         // routeKeywords.preview: 'p'
         let previewKeyword = 'p';
@@ -177,13 +241,15 @@ export default Model.extend(Comparable, ValidationEngine, {
         return this.get('ghostPaths.url').join(blogUrl, previewKeyword, uuid);
     }),
 
+    isFeedbackEnabledForEmail: computed.reads('email.feedbackEnabled'),
+
     isPublic: computed('visibility', function () {
         return this.visibility === 'public' ? true : false;
     }),
 
     visibilitySegment: computed('visibility', 'isPublic', 'tiers', function () {
         if (this.isPublic) {
-            return this.settings.get('defaultContentVisibility') === 'paid' ? 'status:-free' : 'status:free,status:-free';
+            return this.settings.defaultContentVisibility === 'paid' ? 'status:-free' : 'status:free,status:-free';
         } else {
             if (this.visibility === 'members') {
                 return 'status:free,status:-free';
@@ -237,11 +303,22 @@ export default Model.extend(Comparable, ValidationEngine, {
         }
     }),
 
+    clickRate: computed('email.emailCount', 'count.clicks', function () {
+        if (!this.email || !this.email.emailCount) {
+            return 0;
+        }
+        if (!this.count || !this.count.clicks) {
+            return 0;
+        }
+
+        return Math.round(this.count.clicks / this.email.emailCount * 100);
+    }),
+
     _getPublishedAtBlogTZ() {
         let publishedAtUTC = this.publishedAtUTC;
         let publishedAtBlogDate = this.publishedAtBlogDate;
         let publishedAtBlogTime = this.publishedAtBlogTime;
-        let blogTimezone = this.get('settings.timezone');
+        let blogTimezone = this.settings.timezone;
 
         if (!publishedAtUTC && isBlank(publishedAtBlogDate) && isBlank(publishedAtBlogTime)) {
             return null;
@@ -282,7 +359,7 @@ export default Model.extend(Comparable, ValidationEngine, {
 
     _setPublishedAtBlogStrings(momentDate) {
         if (momentDate) {
-            let blogTimezone = this.get('settings.timezone');
+            let blogTimezone = this.settings.timezone;
             let publishedAtBlog = moment.tz(momentDate, blogTimezone);
 
             this.set('publishedAtBlogDate', publishedAtBlog.format('YYYY-MM-DD'));
@@ -363,5 +440,18 @@ export default Model.extend(Comparable, ValidationEngine, {
         let publishedAtBlogTZ = this.publishedAtBlogTZ;
         let publishedAtUTC = publishedAtBlogTZ ? publishedAtBlogTZ.utc() : null;
         this.set('publishedAtUTC', publishedAtUTC);
+    },
+
+    // when a published post is updated, unpublished, or deleted we expire the search content cache
+    save() {
+        const [oldStatus] = this.changedAttributes().status || [];
+
+        return this._super(...arguments).then((res) => {
+            if (this.status === 'published' || oldStatus === 'published') {
+                this.search.expireContent();
+            }
+
+            return res;
+        });
     }
 });

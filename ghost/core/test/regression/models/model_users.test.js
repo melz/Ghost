@@ -2,7 +2,6 @@ const errors = require('@tryghost/errors');
 const should = require('should');
 const sinon = require('sinon');
 const testUtils = require('../../utils');
-const Promise = require('bluebird');
 const _ = require('lodash');
 
 // Stuff we are testing
@@ -206,14 +205,14 @@ describe('User Model', function run() {
                 results.meta.pagination.page.should.equal(1);
                 results.meta.pagination.limit.should.equal('all');
                 results.meta.pagination.pages.should.equal(1);
-                results.data.length.should.equal(9);
+                results.data.length.should.equal(10);
             });
         });
 
         it('can findOne by role name', function () {
             return testUtils.fixtures.createExtraUsers().then(function () {
                 return Promise.all([
-                    UserModel.findOne({role: 'Owner'}), 
+                    UserModel.findOne({role: 'Owner'}),
                     UserModel.findOne({role: 'Editor'})
                 ]);
             }).then(function (results) {

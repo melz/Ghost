@@ -1,7 +1,7 @@
 const {agentProvider, mockManager, fixtureManager, matchers} = require('../../utils/e2e-framework');
-const {anyEtag, anyString} = matchers;
+const {anyContentVersion, anyEtag, anyString, anyContentLength} = matchers;
 
-const uuid = require('uuid');
+const crypto = require('crypto');
 const should = require('should');
 const Papa = require('papaparse');
 const models = require('../../../core/server/models');
@@ -9,8 +9,9 @@ const moment = require('moment');
 
 async function createMember(data) {
     const member = await models.Member.add({
-        email: uuid.v4() + '@example.com',
+        email: crypto.randomUUID() + '@example.com',
         name: '',
+        email_disabled: false,
         ...data
     });
 
@@ -31,13 +32,13 @@ function basicAsserts(member, row) {
 }
 
 /**
- * 
- * @param {(row: any) => void} asserts 
+ *
+ * @param {(row: any) => void} asserts
  */
 async function testOutput(member, asserts, filters = []) {
     // Add default filters that always should match
     filters.push('limit=all');
-    filters.push(`filter=id:${member.id}`);
+    filters.push(`filter=id:'${member.id}'`);
 
     for (const filter of filters) {
         // Test all
@@ -47,11 +48,12 @@ async function testOutput(member, asserts, filters = []) {
             .expectEmptyBody()
             .matchHeaderSnapshot({
                 etag: anyEtag,
-                'content-length': anyString,
+                'content-version': anyContentVersion,
+                'content-length': anyContentLength,
                 'content-disposition': anyString
             });
 
-        res.text.should.match(/id,email,name,note,subscribed_to_emails,complimentary_plan,stripe_customer_id,created_at,deleted_at,labels,products/);
+        res.text.should.match(/id,email,name,note,subscribed_to_emails,complimentary_plan,stripe_customer_id,created_at,deleted_at,labels,tiers/);
 
         let csv = Papa.parse(res.text, {header: true});
         let row = csv.data.find(r => r.id === member.id);
@@ -59,7 +61,7 @@ async function testOutput(member, asserts, filters = []) {
 
         asserts(row);
 
-        if (filter === 'filter=id:${member.id}') {
+        if (filter === `filter=id:'${member.id}'`) {
             csv.data.length.should.eql(1);
         }
     }
@@ -72,8 +74,8 @@ describe('Members API — exportCSV', function () {
         await agent.loginAsOwner();
 
         await models.Product.add({
-            name: 'Extra Paid Product',
-            slug: 'extra-product',
+            name: 'Extra Paid Tier',
+            slug: 'extra-tier',
             type: 'paid',
             active: true,
             visibility: 'public'
@@ -98,7 +100,6 @@ describe('Members API — exportCSV', function () {
     });
 
     beforeEach(function () {
-        mockManager.mockStripe();
         mockManager.mockMail();
     });
 
@@ -106,8 +107,8 @@ describe('Members API — exportCSV', function () {
         mockManager.restore();
     });
 
-    it('Can export products', async function () {
-        // Create a new member with a product
+    it('Can export tiers', async function () {
+        // Create a new member with a product (to be renamed to "tiers" once the changes is done on model layer)
         const member = await createMember({
             name: 'Test member',
             products: tiers
@@ -119,11 +120,11 @@ describe('Members API — exportCSV', function () {
             basicAsserts(member, row);
             should(row.subscribed_to_emails).eql('false');
             should(row.complimentary_plan).eql('');
-            should(row.products.split(',').sort().join(',')).eql(tiersList);
-        }, [`filter=products:${tiers[0].get('slug')}`, 'filter=subscribed:false']);
+            should(row.tiers.split(',').sort().join(',')).eql(tiersList);
+        }, [`filter=tier:[${tiers[0].get('slug')}]`, 'filter=subscribed:false']);
     });
 
-    it('Can export a member without products', async function () {
+    it('Can export a member without tiers', async function () {
         // Create a new member with a product
         const member = await createMember({
             name: 'Test member 2',
@@ -134,7 +135,7 @@ describe('Members API — exportCSV', function () {
             basicAsserts(member, row);
             should(row.subscribed_to_emails).eql('false');
             should(row.complimentary_plan).eql('');
-            should(row.products).eql('');
+            should(row.tiers).eql('');
         }, ['filter=subscribed:false']);
     });
 
@@ -150,14 +151,14 @@ describe('Members API — exportCSV', function () {
             })
         });
 
-        const labelsList = labels.map(label => label.get('name')).join(',');
+        const labelsList = labels.map(label => label.get('name')).sort().join(',');
 
         await testOutput(member, (row) => {
             basicAsserts(member, row);
             should(row.subscribed_to_emails).eql('false');
             should(row.complimentary_plan).eql('');
-            should(row.labels).eql(labelsList);
-            should(row.products).eql('');
+            should(row.labels.split(',').sort().join(',')).eql(labelsList);
+            should(row.tiers).eql('');
         }, [`filter=label:${labels[0].get('slug')}`, 'filter=subscribed:false']);
     });
 
@@ -174,7 +175,7 @@ describe('Members API — exportCSV', function () {
             should(row.subscribed_to_emails).eql('false');
             should(row.complimentary_plan).eql('true');
             should(row.labels).eql('');
-            should(row.products).eql('');
+            should(row.tiers).eql('');
         }, ['filter=status:comped', 'filter=subscribed:false']);
     });
 
@@ -193,7 +194,7 @@ describe('Members API — exportCSV', function () {
             should(row.subscribed_to_emails).eql('true');
             should(row.complimentary_plan).eql('');
             should(row.labels).eql('');
-            should(row.products).eql('');
+            should(row.tiers).eql('');
         }, ['filter=subscribed:true']);
     });
 
@@ -212,7 +213,7 @@ describe('Members API — exportCSV', function () {
         });
 
         // NOTE: we need to create a subscription here because of the way the customer id is currently fetched
-        const subscription = await models.StripeCustomerSubscription.add({
+        await models.StripeCustomerSubscription.add({
             subscription_id: 'sub_123',
             customer_id: customer.get('customer_id'),
             stripe_price_id: 'price_123',
@@ -232,7 +233,7 @@ describe('Members API — exportCSV', function () {
             should(row.subscribed_to_emails).eql('false');
             should(row.complimentary_plan).eql('');
             should(row.labels).eql('');
-            should(row.products).eql('');
+            should(row.tiers).eql('');
             should(row.stripe_customer_id).eql('cus_12345');
         }, ['filter=subscribed:false', 'filter=subscriptions.subscription_id:sub_123']);
     });
