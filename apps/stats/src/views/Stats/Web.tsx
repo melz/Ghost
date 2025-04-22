@@ -4,21 +4,20 @@ import React from 'react';
 import StatsLayout from './layout/StatsLayout';
 import StatsView from './layout/StatsView';
 import WebKpis from './components/WebKpis';
-import {Card, CardContent, CardDescription, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@tryghost/shade';
-import {Header, HeaderActions} from '@src/components/layout/Header';
+import {Card, CardContent, CardDescription, CardHeader, CardTitle, H1, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, ViewHeader, ViewHeaderActions} from '@tryghost/shade';
 import {formatNumber, formatQueryDate} from '@src/utils/data-formatters';
 import {getPeriodText, getRangeDates} from '@src/utils/chart-helpers';
-import {getStatEndpointUrl} from '@src/config/stats-config';
+import {getStatEndpointUrl, getToken} from '@src/config/stats-config';
 import {useGlobalData} from '@src/providers/GlobalDataProvider';
 import {useQuery} from '@tinybirdco/charts';
 
 const Web:React.FC = () => {
-    const {data: configData, isLoading: isConfigLoading} = useGlobalData();
+    const {statsConfig, isLoading: isConfigLoading} = useGlobalData();
     const {range, audience} = useGlobalData();
     const {startDate, endDate, timezone} = getRangeDates(range);
 
     const params = {
-        site_uuid: configData?.config.stats?.id || '',
+        site_uuid: statsConfig?.id || '',
         date_from: formatQueryDate(startDate),
         date_to: formatQueryDate(endDate),
         timezone: timezone,
@@ -26,8 +25,8 @@ const Web:React.FC = () => {
     };
 
     const {data, loading} = useQuery({
-        endpoint: getStatEndpointUrl(configData?.config.stats?.endpoint, 'api_top_pages'),
-        token: configData?.config.stats?.token || '',
+        endpoint: getStatEndpointUrl(statsConfig, 'api_top_pages'),
+        token: getToken(statsConfig),
         params
     });
 
@@ -35,13 +34,13 @@ const Web:React.FC = () => {
 
     return (
         <StatsLayout>
-            <Header>
-                Web
-                <HeaderActions>
+            <ViewHeader>
+                <H1>Web</H1>
+                <ViewHeaderActions>
                     <AudienceSelect />
                     <DateRangeSelect />
-                </HeaderActions>
-            </Header>
+                </ViewHeaderActions>
+            </ViewHeader>
             <StatsView data={data} isLoading={isLoading}>
                 <Card variant='plain'>
                     <CardContent>

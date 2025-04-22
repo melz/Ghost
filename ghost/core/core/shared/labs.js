@@ -26,8 +26,7 @@ const GA_FEATURES = [
     'themeErrorsNotification',
     'announcementBar',
     'customFonts',
-    'contentVisibility',
-    'socialLinks'
+    'contentVisibility'
 ];
 
 // NOTE: this allowlist is meant to be used to filter out any unexpected
@@ -38,18 +37,17 @@ const BETA_FEATURES = [
     'webmentions',
     'editorExcerpt',
     'ActivityPub',
+    'trafficAnalytics',
     'importMemberTier',
     'superEditors'
 ];
 
 const ALPHA_FEATURES = [
-    'NestPlayground',
     'urlCache',
     'emailCustomization',
     'mailEvents',
     'collectionsCard',
     'lexicalIndicators',
-    'adminXDemo',
     'postsX',
     'statsX',
     'captcha',
