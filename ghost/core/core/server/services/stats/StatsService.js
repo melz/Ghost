@@ -23,8 +23,8 @@ class StatsService {
         this.content = deps.content;
     }
 
-    async getMRRHistory() {
-        return this.mrr.getHistory();
+    async getMRRHistory(options = {}) {
+        return this.mrr.getHistory(options);
     }
 
     /**
@@ -156,7 +156,7 @@ class StatsService {
         
         // If no newsletterId is provided, we can't get specific stats
         if (!newsletterId) {
-            return {data: [{total: 0, deltas: []}]};
+            return {data: [{total: 0, values: []}]};
         }
         
         const result = await this.posts.getNewsletterSubscriberStats(newsletterId, otherOptions);

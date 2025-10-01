@@ -79,14 +79,39 @@ async function signout({api, state}) {
 }
 
 async function signin({data, api, state}) {
-    const {t} = state;
+    const {t, labs} = state;
+
+    const includeOTC = labs?.membersSigninOTC ? true : undefined;
 
     try {
         const integrityToken = await api.member.getIntegrityToken();
-        await api.member.sendMagicLink({...data, emailType: 'signin', integrityToken});
+        const payload = {
+            ...data,
+            emailType: 'signin',
+            integrityToken,
+            ...(includeOTC ? {includeOTC: true} : {})
+        };
+        const response = await api.member.sendMagicLink(payload);
+
+        if (includeOTC && response?.otc_ref) {
+            return {
+                page: 'magiclink',
+                lastPage: 'signin',
+                otcRef: response.otc_ref,
+                pageData: {
+                    ...(state.pageData || {}),
+                    email: (data?.email || '').trim()
+                }
+            };
+        }
+
         return {
             page: 'magiclink',
-            lastPage: 'signin'
+            lastPage: 'signin',
+            pageData: {
+                ...(state.pageData || {}),
+                email: (data?.email || '').trim()
+            }
         };
     } catch (e) {
         return {
@@ -94,6 +119,56 @@ async function signin({data, api, state}) {
             popupNotification: createPopupNotification({
                 type: 'signin:failed', autoHide: false, closeable: true, state, status: 'error',
                 message: chooseBestErrorMessage(e, t('Failed to log in, please try again'), t)
+            })
+        };
+    }
+}
+
+function startSigninOTCFromCustomForm({data, state}) {
+    const email = (data?.email || '').trim();
+    const otcRef = data?.otcRef;
+
+    if (!otcRef) {
+        return {};
+    }
+
+    return {
+        showPopup: true,
+        page: 'magiclink',
+        lastPage: 'signin',
+        otcRef,
+        pageData: {
+            ...(state.pageData || {}),
+            email
+        },
+        popupNotification: null
+    };
+}
+
+async function verifyOTC({data, api, state}) {
+    const {t} = state;
+
+    try {
+        const integrityToken = await api.member.getIntegrityToken();
+        const response = await api.member.verifyOTC({...data, integrityToken});
+
+        if (response.redirectUrl) {
+            return window.location.assign(response.redirectUrl);
+        } else {
+            return {
+                action: 'verifyOTC:failed',
+                popupNotification: createPopupNotification({
+                    type: 'verifyOTC:failed', autoHide: false, closeable: true, state, status: 'error',
+                    message: response.message || t('Invalid verification code')
+                })
+            };
+        }
+    } catch (e) {
+        return {
+            action: 'verifyOTC:failed',
+            popupNotification: createPopupNotification({
+                type: 'verifyOTC:failed', autoHide: false, closeable: true, state, status: 'error',
+                message: chooseBestErrorMessage(e, t('Failed to verify code, please try again'), t)
             })
         };
     }
@@ -119,7 +194,11 @@ async function signup({data, state, api}) {
         }
         return {
             page: 'magiclink',
-            lastPage: 'signup'
+            lastPage: 'signup',
+            pageData: {
+                ...(state.pageData || {}),
+                email: (email || '').trim()
+            }
         };
     } catch (e) {
         const {t} = state;
@@ -562,6 +641,8 @@ const Actions = {
     back,
     signout,
     signin,
+    startSigninOTCFromCustomForm,
+    verifyOTC,
     signup,
     updateSubscription,
     cancelSubscription,
