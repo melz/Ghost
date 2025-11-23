@@ -15,16 +15,13 @@ From the repository root:
 # Install dependencies
 yarn
 
-# Build Docker images
-yarn docker:build
-
 # Run the e2e tests
 yarn test:e2e
 ```
 
 ### Running Specific Tests
 
-Within `e2e` folder, run one of the following commands: 
+Within `e2e` folder, run one of the following commands:
 
 ```bash
 # All tests
@@ -39,6 +36,18 @@ yarn test --grep "homepage"
 # With browser visible (for debugging)
 yarn test --debug
 ```
+
+### Testing with React Admin Shell
+
+To run e2e tests against the new React admin shell instead of the Ember admin:
+
+From the repository root:
+
+```bash
+USE_REACT_SHELL=true yarn test:e2e
+```
+
+This builds the React admin (`apps/admin`) and configures Ghost to serve it at `/ghost/` instead of the Ember admin.
 
 ## Tests Development
 
@@ -164,6 +173,7 @@ Test isolation is extremely important to avoid flaky tests that are hard to debu
 3. **Use `data-testid` attributes** for reliable element selection, in case you **cannot** locate elements in a simple way. Example: `page.getByLabel('User Name')`. Avoid, css, xpath locators - they make tests brittle. 
 4. **Clean up test data** when tests modify Ghost state
 5. **Group related tests** in describe blocks
+6. **Do not use should to describe test scenarios**
 
 ## CI Integration
 
@@ -186,6 +196,9 @@ From the e2e directory:
 ```bash
 # Run all tests
 yarn test
+
+# Debug failed tests (keeps containers)
+PRESERVE_ENV=true yarn test
 
 # Run TypeScript type checking
 yarn test:types

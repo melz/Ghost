@@ -8,6 +8,7 @@ const ObjectId = require('bson-objectid').default;
 const {NotFoundError} = require('@tryghost/errors');
 const validator = require('@tryghost/validator');
 const crypto = require('crypto');
+const config = require('../../../../../shared/config');
 
 const messages = {
     noStripeConnection: 'Cannot {action} without a Stripe Connection',
@@ -23,6 +24,8 @@ const messages = {
 };
 
 const SUBSCRIPTION_STATUS_TRIALING = 'trialing';
+
+const WELCOME_EMAIL_SOURCES = ['member'];
 
 /**
  * @typedef {object} ITokenService
@@ -43,6 +46,7 @@ module.exports = class MemberRepository {
      * @param {any} deps.StripeCustomer
      * @param {any} deps.StripeCustomerSubscription
      * @param {any} deps.OfferRedemption
+     * @param {any} deps.Outbox
      * @param {import('../../services/stripe-api')} deps.stripeAPIService
      * @param {any} deps.labsService
      * @param {any} deps.productRepository
@@ -62,6 +66,7 @@ module.exports = class MemberRepository {
         StripeCustomer,
         StripeCustomerSubscription,
         OfferRedemption,
+        Outbox,
         stripeAPIService,
         labsService,
         productRepository,
@@ -78,6 +83,7 @@ module.exports = class MemberRepository {
         this._MemberStatusEvent = MemberStatusEvent;
         this._MemberProductEvent = MemberProductEvent;
         this._OfferRedemption = OfferRedemption;
+        this._Outbox = Outbox;
         this._StripeCustomer = StripeCustomer;
         this._StripeCustomerSubscription = StripeCustomerSubscription;
         this._stripeAPIService = stripeAPIService;
@@ -326,11 +332,53 @@ module.exports = class MemberRepository {
             withRelated.push('newsletters');
         }
 
-        const member = await this._Member.add({
-            ...memberData,
-            ...memberStatusData,
-            labels
-        }, {...options, withRelated});
+        const context = options && options.context || {};
+        const source = this._resolveContextSource(context);
+        const eventData = _.pick(data, ['created_at']);
+
+        const memberAddOptions = {...(options || {}), withRelated};
+        let member;
+        if (config.get('memberWelcomeEmailTestInbox') && WELCOME_EMAIL_SOURCES.includes(source)) {
+            const runMemberCreation = async (transacting) => {
+                const newMember = await this._Member.add({
+                    ...memberData,
+                    ...memberStatusData,
+                    labels
+                }, {...memberAddOptions, transacting});
+
+                const timestamp = eventData.created_at || newMember.get('created_at');
+
+                await this._Outbox.add({
+                    id: ObjectId().toHexString(),
+                    event_type: MemberCreatedEvent.name,
+                    payload: JSON.stringify({
+                        memberId: newMember.id,
+                        email: newMember.get('email'),
+                        name: newMember.get('name'),
+                        source,
+                        timestamp
+                    })
+                }, {transacting});
+
+                return newMember;
+            };
+
+            if (memberAddOptions.transacting) {
+                member = await runMemberCreation(memberAddOptions.transacting);
+            } else {
+                member = await this._Member.transaction(runMemberCreation);
+            }
+        } else {
+            member = await this._Member.add({
+                ...memberData,
+                ...memberStatusData,
+                labels
+            }, memberAddOptions);
+        }
+
+        if (!eventData.created_at) {
+            eventData.created_at = member.get('created_at');
+        }
 
         for (const product of member.related('products').models) {
             await this._MemberProductEvent.add({
@@ -338,15 +386,6 @@ module.exports = class MemberRepository {
                 product_id: product.id,
                 action: 'added'
             }, options);
-        }
-
-        const context = options && options.context || {};
-        const source = this._resolveContextSource(context);
-
-        const eventData = _.pick(data, ['created_at']);
-
-        if (!eventData.created_at) {
-            eventData.created_at = member.get('created_at');
         }
 
         await this._MemberStatusEvent.add({
@@ -401,7 +440,7 @@ module.exports = class MemberRepository {
                     });
                 }
             }
-        }
+        }       
         this.dispatchEvent(MemberCreatedEvent.create({
             memberId: member.id,
             batchId: options.batch_id,
@@ -1179,7 +1218,12 @@ module.exports = class MemberRepository {
                 type: data.attribution?.type ?? stripeSubscriptionData.metadata?.attribution_type ?? null,
                 referrerSource: data.attribution?.referrerSource ?? stripeSubscriptionData.metadata?.referrer_source ?? null,
                 referrerMedium: data.attribution?.referrerMedium ?? stripeSubscriptionData.metadata?.referrer_medium ?? null,
-                referrerUrl: data.attribution?.referrerUrl ?? stripeSubscriptionData.metadata?.referrer_url ?? null
+                referrerUrl: data.attribution?.referrerUrl ?? stripeSubscriptionData.metadata?.referrer_url ?? null,
+                utmSource: data.attribution?.utmSource ?? stripeSubscriptionData.metadata?.utm_source ?? null,
+                utmMedium: data.attribution?.utmMedium ?? stripeSubscriptionData.metadata?.utm_medium ?? null,
+                utmCampaign: data.attribution?.utmCampaign ?? stripeSubscriptionData.metadata?.utm_campaign ?? null,
+                utmTerm: data.attribution?.utmTerm ?? stripeSubscriptionData.metadata?.utm_term ?? null,
+                utmContent: data.attribution?.utmContent ?? stripeSubscriptionData.metadata?.utm_content ?? null
             };
 
             const subscriptionCreatedEvent = SubscriptionCreatedEvent.create({
