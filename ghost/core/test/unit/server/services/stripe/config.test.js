@@ -2,7 +2,7 @@ const should = require('should');
 const sinon = require('sinon');
 const UrlUtils = require('@tryghost/url-utils');
 
-const configUtils = require('../../../../utils/configUtils');
+const configUtils = require('../../../../utils/config-utils');
 
 const {getConfig} = require('../../../../../core/server/services/stripe/config');
 
@@ -68,5 +68,6 @@ describe('Stripe - config', function () {
         should.exist(config.checkoutSessionCancelUrl);
         should.exist(config.checkoutSetupSessionSuccessUrl);
         should.exist(config.checkoutSetupSessionCancelUrl);
+        should.exist(config.billingPortalReturnUrl);
     });
 });

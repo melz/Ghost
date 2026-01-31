@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const supertest = require('supertest');
 const moment = require('moment');
 const testUtils = require('../utils');
-const configUtils = require('../utils/configUtils');
+const configUtils = require('../utils/config-utils');
 const settingsCache = require('../../core/shared/settings-cache');
 const settingsHelpers = require('../../core/server/services/settings-helpers');
 const DomainEvents = require('@tryghost/domain-events');
@@ -645,6 +645,28 @@ describe('Front-end members behavior', function () {
                 member = await loginAsMember('member1@test.com');
             });
 
+            it('clears both ghost-members-ssr and ghost-members-ssr.sig cookies when signature is invalid', async function () {
+                const newRequest = supertest.agent(configUtils.config.get('url'));
+
+                // Send a request with a valid-looking cookie but an invalid signature
+                // This simulates the scenario where the cookie exists but signature verification fails
+                const response = await newRequest.get('/members/api/member')
+                    .set('Cookie', [
+                        'ghost-members-ssr=fake-transient-id',
+                        'ghost-members-ssr.sig=invalid-signature'
+                    ])
+                    .expect(204);
+
+                const setCookieHeaders = response.headers['set-cookie'] || [];
+
+                const mainCookieCleared = setCookieHeaders.some(cookie => cookie.startsWith('ghost-members-ssr=') && cookie.includes('expires=Thu, 01 Jan 1970 00:00:00 GMT'));
+
+                const sigCookieCleared = setCookieHeaders.some(cookie => cookie.startsWith('ghost-members-ssr.sig=') && cookie.includes('expires=Thu, 01 Jan 1970 00:00:00 GMT'));
+
+                assert.ok(sigCookieCleared, 'ghost-members-ssr.sig cookie should be cleared with expiry in the past');
+                assert.ok(mainCookieCleared, 'ghost-members-ssr cookie should be cleared with expiry in the past');
+            });
+
             it('an invalid token causes a set-cookie logout when requesting the identity', async function () {
                 // Check logged in
                 await request.get('/members/api/member')
@@ -863,11 +885,13 @@ describe('Front-end members behavior', function () {
                     'paid',
                     'created_at',
                     'enable_comment_notifications',
+                    'can_comment',
+                    'commenting',
                     'newsletters',
                     'email_suppression',
                     'unsubscribe_url'
                 ]);
-                Object.keys(memberData).should.have.length(14);
+                Object.keys(memberData).should.have.length(16);
                 memberData.should.not.have.property('id');
                 memberData.newsletters.should.have.length(1);
 

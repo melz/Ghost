@@ -90,10 +90,6 @@ export function hasNewsletterSendingEnabled({site}) {
     return site?.editor_default_email_recipients !== 'disabled';
 }
 
-export function allowCompMemberUpgrade({member}) {
-    return member?.subscriptions?.[0]?.tier?.expiry_at !== undefined;
-}
-
 export function getCompExpiry({member}) {
     const subscription = getMemberSubscription({member});
     if (subscription?.tier?.expiry_at) {
@@ -907,7 +903,6 @@ export function getUrlHistory() {
         // Failed to access sessionStorage or something related to that.
         // Log a warning, as this shouldn't happen on a modern browser.
 
-        /* eslint-disable no-console */
         console.warn(`[Portal] Failed to load member URL history:`, error);
     }
 }

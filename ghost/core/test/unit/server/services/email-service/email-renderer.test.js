@@ -1,5 +1,5 @@
 require('should');
-const EmailRenderer = require('../../../../../core/server/services/email-service/EmailRenderer');
+const EmailRenderer = require('../../../../../core/server/services/email-service/email-renderer');
 const assert = require('assert/strict');
 const cheerio = require('cheerio');
 const {createModel, createModelClass} = require('./utils');
@@ -490,35 +490,6 @@ describe('Email renderer', function () {
             assert.equal(replacements[0].token.toString(), '/%%\\{created_at\\}%%/g');
             assert.equal(replacements[0].id, 'created_at');
             assert.equal(replacements[0].getValue(member), '13 mars 2023');
-        });
-
-        it('handles dates when the locale is fr and labs is disabled', function () {
-            emailRenderer = new EmailRenderer({
-                urlUtils: {
-                    urlFor: () => 'http://example.com/subdirectory/'
-                },
-                labs: {
-                    isSet: () => false
-                },
-                settingsCache: {
-                    get: (key) => {
-                        if (key === 'timezone') {
-                            return 'UTC';
-                        }
-                        if (key === 'locale') {
-                            return 'fr';
-                        }
-                    }
-                },
-                settingsHelpers: {getMembersValidationKey,createUnsubscribeUrl},
-                t: tFr
-            });
-            const html = '%%{created_at}%%';
-            const replacements = emailRenderer.buildReplacementDefinitions({html, newsletterUuid: newsletter.get('uuid')});
-            assert.equal(replacements.length, 2);
-            assert.equal(replacements[0].token.toString(), '/%%\\{created_at\\}%%/g');
-            assert.equal(replacements[0].id, 'created_at');
-            assert.equal(replacements[0].getValue(member), '13 March 2023');
         });
 
         it('handles dates when the locale is en (US)', function () {

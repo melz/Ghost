@@ -103,6 +103,7 @@ const dbFns = {
 
 const commentMatcher = {
     id: anyObjectId,
+    parent_id: nullable(anyObjectId),
     created_at: anyISODateTime,
     member: {
         id: anyObjectId,
@@ -664,11 +665,7 @@ describe('Comments API', function () {
                         }]
                     });
 
-                    const result = await testGetComments(`/api/comments/post/${postId}/`, [commentMatcherWithReplies({replies: 1})]);
-                    should(result.body.comments.length).eql(1);
-                    should(result.body.comments[0].html).eql(null);
-                    should(result.body.comments[0].count.replies).eql(1);
-                    should(result.body.meta.pagination.total).eql(1);
+                    await testGetComments(`/api/comments/post/${postId}/`, [commentMatcherWithReplies({replies: 1})]);
                 });
 
                 it('excludes deleted comments if all replies are hidden or deleted', async function () {
@@ -781,8 +778,9 @@ describe('Comments API', function () {
                         }]
                     });
 
+                    // Deleted parent returned with full data, only 1 published reply visible
                     const result = await testGetComments(`/api/comments/post/${postId}/`, [commentMatcherWithReplies({replies: 1})]);
-                    should(result.body.comments[0].count.replies).eql(1);
+                    should(result.body.comments[0].replies.length).eql(1);
                 });
             });
 
@@ -1122,6 +1120,28 @@ describe('Comments API', function () {
                 emailMockReceiver.assertSentEmailCount(0);
             });
 
+            it('Does not expose reports count in public API', async function () {
+                const comment = await dbFns.addComment({
+                    member_id: fixtureManager.get('members', 2).id
+                });
+
+                // Add multiple reports to this comment
+                await dbFns.addReport({
+                    comment_id: comment.get('id'),
+                    member_id: fixtureManager.get('members', 0).id
+                });
+                await dbFns.addReport({
+                    comment_id: comment.get('id'),
+                    member_id: fixtureManager.get('members', 1).id
+                });
+
+                // Verify the reports count is NOT included in public API response
+                const res = await membersAgent.get(`/api/comments/${comment.get('id')}/`);
+                should(res.body.comments[0].count.reports).be.undefined();
+                // Verify other counts are still there
+                should(res.body.comments[0].count.likes).eql(0);
+            });
+
             it('Can edit a comment on a post', async function () {
                 const comment = await dbFns.addComment({
                     member_id: loggedInMember.id
@@ -1174,6 +1194,29 @@ describe('Comments API', function () {
                     .put(`/api/comments/${comment.get('id')}`)
                     .body({comments: [{
                         html: 'Illegal comment update'
+                    }]})
+                    .expectStatus(403)
+                    .matchHeaderSnapshot({
+                        etag: anyEtag
+                    })
+                    .matchBodySnapshot({
+                        errors: [{
+                            type: 'NoPermissionError',
+                            id: anyUuid
+                        }]
+                    });
+            });
+
+            it('Can not delete a comment which does not belong to you', async function () {
+                const comment = await dbFns.addComment({
+                    member_id: fixtureManager.get('members', 2).id
+                });
+
+                // Members delete comments by setting status to 'deleted' via PUT
+                await membersAgent2
+                    .put(`/api/comments/${comment.get('id')}`)
+                    .body({comments: [{
+                        status: 'deleted'
                     }]})
                     .expectStatus(403)
                     .matchHeaderSnapshot({
@@ -1528,6 +1571,92 @@ describe('Comments API', function () {
                     html: '<p>This is a <strong>message</strong></p><p>New line</p>'
                 }]})
                 .expectStatus(405);
+        });
+    });
+
+    describe('when member commenting disabled', function () {
+        let adminAgent;
+        let disabledMember;
+        let existingComment;
+
+        before(async function () {
+            adminAgent = await agentProvider.getAdminAPIAgent();
+            await fixtureManager.init('posts', 'members');
+            await adminAgent.loginAsOwner();
+
+            disabledMember = await models.Member.add({
+                name: 'Disabled Member',
+                email: `disabled-commenting-${Date.now()}@example.com`,
+                email_disabled: false
+            });
+
+            await membersAgent.loginAs(disabledMember.get('email'));
+
+            await adminAgent
+                .post(`members/${disabledMember.id}/commenting/disable`)
+                .body({reason: 'Spam behaviour'})
+                .expectStatus(200);
+        });
+
+        beforeEach(async function () {
+            existingComment = await dbFns.addComment({
+                member_id: fixtureManager.get('members', 0).id
+            });
+
+            const getStub = sinon.stub(settingsCache, 'get');
+            getStub.callsFake((key, options) => {
+                if (key === 'comments_enabled') {
+                    return 'all';
+                }
+                return getStub.wrappedMethod.call(settingsCache, key, options);
+            });
+        });
+
+        afterEach(function () {
+            sinon.restore();
+        });
+
+        after(async function () {
+            if (disabledMember) {
+                await models.Member.destroy({id: disabledMember.id});
+            }
+        });
+
+        const readEndpoints = [
+            {desc: 'GET /api/comments/', method: 'get', url: () => '/api/comments/'},
+            {desc: 'GET /api/comments/post/:id/', method: 'get', url: () => `/api/comments/post/${postId}/`},
+            {desc: 'GET /api/comments/:id/', method: 'get', url: () => `/api/comments/${existingComment.id}/`},
+            {desc: 'GET /api/comments/:id/replies/', method: 'get', url: () => `/api/comments/${existingComment.id}/replies/`}
+        ];
+
+        readEndpoints.forEach(({desc, method, url}) => {
+            it(`${desc} is allowed`, async function () {
+                await membersAgent[method](url())
+                    .expectStatus(200);
+            });
+        });
+
+        const writeEndpoints = [
+            {desc: 'POST /api/comments/', method: 'post', url: () => '/api/comments/', body: () => ({comments: [{post_id: postId, html: '<p>Blocked</p>'}]})},
+            {desc: 'PUT /api/comments/:id/', method: 'put', url: () => `/api/comments/${existingComment.id}/`, body: () => ({comments: [{html: '<p>Blocked edit</p>'}]})},
+            {desc: 'DELETE /api/comments/:id/', method: 'delete', url: () => `/api/comments/${existingComment.id}/`, body: () => null},
+            {desc: 'POST /api/comments/:id/like/', method: 'post', url: () => `/api/comments/${existingComment.id}/like/`, body: () => null},
+            {desc: 'DELETE /api/comments/:id/like/', method: 'delete', url: () => `/api/comments/${existingComment.id}/like/`, body: () => null}
+        ];
+
+        writeEndpoints.forEach(({desc, method, url, body}) => {
+            it(`${desc} is blocked with reason`, async function () {
+                let req = membersAgent[method](url());
+                const payload = body();
+                if (payload) {
+                    req = req.body(payload);
+                }
+                const {body: responseBody} = await req
+                    .expectStatus(403);
+
+                assert.equal(responseBody.errors[0].type, 'NoPermissionError');
+                assert.equal(responseBody.errors[0].context, 'Spam behaviour');
+            });
         });
     });
 

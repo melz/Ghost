@@ -8,10 +8,11 @@ const testUtils = require('../../utils');
 const config = require('../../../core/shared/config');
 const models = require('../../../core/server/models');
 const localUtils = require('./utils');
-const configUtils = require('../../utils/configUtils');
+const configUtils = require('../../utils/config-utils');
 const mockManager = require('../../utils/e2e-framework-mock-manager');
 const sinon = require('sinon');
 const logging = require('@tryghost/logging');
+const errors = require('@tryghost/errors');
 
 describe('Posts API', function () {
     let request;
@@ -52,7 +53,7 @@ describe('Posts API', function () {
         const jsonResponse = res.body;
         should.exist(jsonResponse.posts);
         localUtils.API.checkResponse(jsonResponse, 'posts');
-        jsonResponse.posts.should.have.length(13);
+        jsonResponse.posts.should.have.length(15);
         localUtils.API.checkResponse(jsonResponse.posts[0], 'post');
         localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
         _.isBoolean(jsonResponse.posts[0].featured).should.eql(true);
@@ -61,12 +62,12 @@ describe('Posts API', function () {
 
         // Ensure default order
         jsonResponse.posts[0].slug.should.eql('scheduled-post');
-        jsonResponse.posts[12].slug.should.eql('html-ipsum');
+        jsonResponse.posts[14].slug.should.eql('html-ipsum');
 
         // Absolute urls by default
         jsonResponse.posts[0].url.should.match(new RegExp(`${config.get('url')}/p/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}`));
         jsonResponse.posts[2].url.should.eql(`${config.get('url')}/welcome/`);
-        jsonResponse.posts[11].feature_image.should.eql(`${config.get('url')}/content/images/2018/hey.jpg`);
+        jsonResponse.posts[13].feature_image.should.eql(`${config.get('url')}/content/images/2018/hey.jpg`);
 
         jsonResponse.posts[0].tags.length.should.eql(0);
         jsonResponse.posts[2].tags.length.should.eql(1);
@@ -75,9 +76,9 @@ describe('Posts API', function () {
         jsonResponse.posts[2].authors[0].url.should.eql(`${config.get('url')}/author/ghost/`);
 
         // Check if the newsletter relation is loaded by default and newsletter_id is not returned
-        jsonResponse.posts[12].id.should.eql(testUtils.DataGenerator.Content.posts[0].id);
-        jsonResponse.posts[12].newsletter.id.should.eql(testUtils.DataGenerator.Content.newsletters[0].id);
-        should.not.exist(jsonResponse.posts[12].newsletter_id);
+        jsonResponse.posts[14].id.should.eql(testUtils.DataGenerator.Content.posts[0].id);
+        jsonResponse.posts[14].newsletter.id.should.eql(testUtils.DataGenerator.Content.newsletters[0].id);
+        should.not.exist(jsonResponse.posts[14].newsletter_id);
 
         should(jsonResponse.posts[0].newsletter).be.null();
         should.not.exist(jsonResponse.posts[0].newsletter_id);
@@ -114,7 +115,7 @@ describe('Posts API', function () {
         const jsonResponse = res.body;
         should.exist(jsonResponse.posts);
         localUtils.API.checkResponse(jsonResponse, 'posts');
-        jsonResponse.posts.should.have.length(13);
+        jsonResponse.posts.should.have.length(15);
         localUtils.API.checkResponse(
             jsonResponse.posts[0],
             'post',
@@ -620,7 +621,6 @@ describe('Posts API', function () {
         const id = res.body.posts[0].id;
 
         const updatedPost = res.body.posts[0];
-
         updatedPost.status = 'published';
 
         const loggingStub = sinon.stub(logging, 'error');
@@ -633,6 +633,90 @@ describe('Posts API', function () {
             .expect('Cache-Control', testUtils.cacheRules.private)
             .expect(400);
 
+        sinon.assert.calledOnce(loggingStub);
+    });
+
+    it('Does not change post status when email sending fails', async function () {
+        const emailService = require('../../../core/server/services/email-service');
+        const newsletterSlug = testUtils.DataGenerator.Content.newsletters[1].slug;
+
+        // Create a draft post
+        const post = {
+            title: 'My scheduled email-only post',
+            status: 'draft',
+            mobiledoc: testUtils.DataGenerator.markdownToMobiledoc('my post'),
+            created_at: moment().subtract(2, 'days').toDate(),
+            updated_at: moment().subtract(2, 'days').toDate()
+        };
+
+        const res = await request.post(localUtils.API.getApiQuery('posts'))
+            .set('Origin', config.get('url'))
+            .send({posts: [post]})
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(201);
+
+        const id = res.body.posts[0].id;
+        const createdPost = res.body.posts[0];
+
+        // Schedule the post as email-only with a newsletter
+        createdPost.status = 'scheduled';
+        createdPost.published_at = moment().add(2, 'days').toDate();
+        createdPost.email_only = true;
+
+        const scheduledRes = await request
+            .put(localUtils.API.getApiQuery('posts/' + id + '/?newsletter=' + newsletterSlug))
+            .set('Origin', config.get('url'))
+            .send({posts: [createdPost]})
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(200);
+
+        const scheduledPost = scheduledRes.body.posts[0];
+        scheduledPost.status.should.eql('scheduled');
+
+        // Verify the post is scheduled in the database
+        let model = await models.Post.findOne({
+            id,
+            status: 'all'
+        }, testUtils.context.internal);
+        should(model.get('status')).eql('scheduled');
+
+        // Now stub checkCanSendEmail to throw a HostLimitError (simulating email limits)
+        const checkCanSendEmailStub = sinon.stub(emailService.service, 'checkCanSendEmail')
+            .rejects(new errors.HostLimitError({
+                message: 'Email sending is temporarily disabled'
+            }));
+        const loggingStub = sinon.stub(logging, 'error');
+
+        // Attempt to publish the scheduled email-only post
+        scheduledPost.status = 'published';
+        scheduledPost.published_at = moment().toDate();
+
+        const failedRes = await request
+            .put(localUtils.API.getApiQuery('posts/' + id + '/'))
+            .set('Origin', config.get('url'))
+            .send({posts: [scheduledPost]})
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(403);
+
+        failedRes.body.errors[0].type.should.eql('HostLimitError');
+
+        // CRITICAL: Verify the post status was NOT changed - it should still be scheduled
+        model = await models.Post.findOne({
+            id,
+            status: 'all'
+        }, testUtils.context.internal);
+        should(model.get('status')).eql('scheduled', 'Post should remain scheduled when email sending fails');
+
+        // No email should have been created
+        const email = await models.Email.findOne({
+            post_id: id
+        }, testUtils.context.internal);
+        should.not.exist(email);
+
+        checkCanSendEmailStub.restore();
         sinon.assert.calledOnce(loggingStub);
     });
 

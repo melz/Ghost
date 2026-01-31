@@ -22,6 +22,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -33,7 +34,7 @@ exports[`Comments API Tier-only posts Members with access Can comment on a post 
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "428",
+  "content-length": "445",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -65,6 +66,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -76,7 +78,7 @@ exports[`Comments API Tier-only posts Members with access Can reply to a comment
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "397",
+  "content-length": "436",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -168,6 +170,7 @@ Object {
         "name": "Egon Spengler",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -190,6 +193,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [
         Object {
           "count": Object {
@@ -209,6 +213,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
       ],
@@ -232,7 +237,7 @@ exports[`Comments API when commenting enabled for all when authenticated Browsin
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "1265",
+  "content-length": "1338",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -262,6 +267,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [
         Object {
           "count": Object {
@@ -281,6 +287,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
       ],
@@ -305,6 +312,7 @@ Object {
         "name": "Egon Spengler",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -326,7 +334,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can bro
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "1265",
+  "content-length": "1338",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -356,6 +364,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [
         Object {
           "count": Object {
@@ -375,6 +384,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
       ],
@@ -399,6 +409,7 @@ Object {
         "name": "Egon Spengler",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -420,7 +431,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can bro
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "1265",
+  "content-length": "1338",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -450,6 +461,7 @@ Object {
         "name": "Egon Spengler",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -472,6 +484,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [
         Object {
           "count": Object {
@@ -491,6 +504,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
       ],
@@ -514,7 +528,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can bro
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "1265",
+  "content-length": "1338",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -544,6 +558,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -555,7 +570,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can com
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "428",
+  "content-length": "445",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -587,6 +602,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -598,7 +614,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can edi
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "419",
+  "content-length": "436",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -659,6 +675,7 @@ Object {
         "name": "Egon Spengler",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -670,7 +687,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can lik
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "416",
+  "content-length": "433",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -710,6 +727,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -721,7 +739,37 @@ exports[`Comments API when commenting enabled for all when authenticated Can lik
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "405",
+  "content-length": "444",
+  "content-type": "application/json; charset=utf-8",
+  "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
+  "vary": "Accept-Encoding",
+  "x-powered-by": "Express",
+}
+`;
+
+exports[`Comments API when commenting enabled for all when authenticated Can not delete a comment which does not belong to you 1: [body] 1`] = `
+Object {
+  "errors": Array [
+    Object {
+      "code": null,
+      "context": "Unable to find member",
+      "details": null,
+      "ghostErrorCode": null,
+      "help": null,
+      "id": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
+      "message": "Permission error, cannot edit comment.",
+      "property": null,
+      "type": "NoPermissionError",
+    },
+  ],
+}
+`;
+
+exports[`Comments API when commenting enabled for all when authenticated Can not delete a comment which does not belong to you 2: [headers] 1`] = `
+Object {
+  "access-control-allow-origin": "*",
+  "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
+  "content-length": "247",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -751,6 +799,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -762,7 +811,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can not
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "426",
+  "content-length": "443",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -862,6 +911,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -873,7 +923,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can rem
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "406",
+  "content-length": "423",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -903,6 +953,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -914,7 +965,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can rep
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "397",
+  "content-length": "436",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -946,6 +997,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -957,7 +1009,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can rep
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "397",
+  "content-length": "436",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -989,6 +1041,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -1000,7 +1053,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can rep
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "397",
+  "content-length": "436",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -1032,6 +1085,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -1043,7 +1097,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can rep
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "397",
+  "content-length": "436",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -1083,6 +1137,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "status": "published",
     },
   ],
@@ -1103,7 +1158,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can req
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "463",
+  "content-length": "502",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -1132,6 +1187,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "status": "published",
     },
     Object {
@@ -1152,6 +1208,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "status": "published",
     },
     Object {
@@ -1172,6 +1229,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "status": "published",
     },
     Object {
@@ -1192,6 +1250,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "status": "published",
     },
     Object {
@@ -1212,6 +1271,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "status": "published",
     },
     Object {
@@ -1232,6 +1292,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "status": "published",
     },
     Object {
@@ -1252,6 +1313,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "status": "published",
     },
   ],
@@ -1272,7 +1334,7 @@ exports[`Comments API when commenting enabled for all when authenticated Can ret
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "2656",
+  "content-length": "2929",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -1371,6 +1433,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [
         Object {
           "count": Object {
@@ -1390,6 +1453,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
         Object {
@@ -1410,6 +1474,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
         Object {
@@ -1430,6 +1495,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
       ],
@@ -1443,7 +1509,7 @@ exports[`Comments API when commenting enabled for all when authenticated Limits 
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "1504",
+  "content-length": "1638",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -1473,6 +1539,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [
         Object {
           "count": Object {
@@ -1492,6 +1559,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
       ],
@@ -1515,7 +1583,7 @@ exports[`Comments API when commenting enabled for all when authenticated browse 
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "838",
+  "content-length": "894",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -1601,6 +1669,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -1622,7 +1691,7 @@ exports[`Comments API when commenting enabled for all when authenticated browse 
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "498",
+  "content-length": "515",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -1708,6 +1777,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -1729,7 +1799,7 @@ exports[`Comments API when commenting enabled for all when authenticated browse 
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "498",
+  "content-length": "515",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -1759,6 +1829,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [
         Object {
           "count": Object {
@@ -1778,6 +1849,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
       ],
@@ -1801,7 +1873,7 @@ exports[`Comments API when commenting enabled for all when authenticated browse 
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "838",
+  "content-length": "894",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -1831,6 +1903,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [
         Object {
           "count": Object {
@@ -1850,6 +1923,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
       ],
@@ -1873,7 +1947,7 @@ exports[`Comments API when commenting enabled for all when authenticated browse 
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "837",
+  "content-length": "893",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -1903,6 +1977,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [
         Object {
           "count": Object {
@@ -1922,6 +1997,7 @@ Object {
             "name": "Egon Spengler",
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
         Object {
@@ -1942,6 +2018,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
       ],
@@ -1965,7 +2042,7 @@ exports[`Comments API when commenting enabled for all when authenticated replies
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "1304",
+  "content-length": "1399",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -1995,6 +2072,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -2006,7 +2084,7 @@ exports[`Comments API when commenting enabled for all when authenticated replies
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "450",
+  "content-length": "489",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -2038,6 +2116,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -2049,7 +2128,7 @@ exports[`Comments API when commenting enabled for all when authenticated replies
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "415",
+  "content-length": "454",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -2081,6 +2160,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -2092,7 +2172,7 @@ exports[`Comments API when commenting enabled for all when authenticated replies
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "415",
+  "content-length": "454",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -2124,6 +2204,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -2135,7 +2216,7 @@ exports[`Comments API when commenting enabled for all when authenticated replies
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "435",
+  "content-length": "474",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -2165,6 +2246,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -2176,7 +2258,7 @@ exports[`Comments API when commenting enabled for all when authenticated replies
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "435",
+  "content-length": "474",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -2206,6 +2288,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -2217,7 +2300,7 @@ exports[`Comments API when commenting enabled for all when authenticated replies
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "415",
+  "content-length": "454",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -2249,6 +2332,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -2260,7 +2344,7 @@ exports[`Comments API when commenting enabled for all when authenticated replies
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "415",
+  "content-length": "432",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -2292,6 +2376,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -2303,7 +2388,7 @@ exports[`Comments API when commenting enabled for all when authenticated replies
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "462",
+  "content-length": "501",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -2335,6 +2420,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -2346,7 +2432,7 @@ exports[`Comments API when commenting enabled for all when authenticated replies
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "462",
+  "content-length": "501",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -2376,6 +2462,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [
         Object {
           "count": Object {
@@ -2395,6 +2482,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
       ],
@@ -2418,7 +2506,7 @@ exports[`Comments API when commenting enabled for all when not authenticated Can
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "862",
+  "content-length": "918",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -2448,6 +2536,7 @@ Object {
         "name": "Mr Egg",
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [
         Object {
           "count": Object {
@@ -2467,6 +2556,7 @@ Object {
             "name": null,
             "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
           },
+          "parent_id": Nullable<StringMatching>,
           "status": "published",
         },
       ],
@@ -2490,7 +2580,7 @@ exports[`Comments API when commenting enabled for all when not authenticated Can
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "862",
+  "content-length": "918",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "vary": "Accept-Encoding",
@@ -2670,6 +2760,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -2681,7 +2772,7 @@ exports[`Comments API when paid only commenting Members with access Can comment 
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "428",
+  "content-length": "445",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
@@ -2713,6 +2804,7 @@ Object {
         "name": null,
         "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       },
+      "parent_id": Nullable<StringMatching>,
       "replies": Array [],
       "status": "published",
     },
@@ -2724,7 +2816,7 @@ exports[`Comments API when paid only commenting Members with access Can reply to
 Object {
   "access-control-allow-origin": "*",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "397",
+  "content-length": "436",
   "content-type": "application/json; charset=utf-8",
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
   "location": StringMatching /https\\?:\\\\/\\\\/\\.\\*\\?\\\\/comments\\\\/\\[a-f0-9\\]\\{24\\}\\\\//,
