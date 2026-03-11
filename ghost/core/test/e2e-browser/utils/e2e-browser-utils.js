@@ -260,33 +260,23 @@ const createOffer = async (page, {name, tierName, offerType, amount, discountTyp
         await page.getByTestId('tiers').getByText('No active tiers found').waitFor({state: 'hidden'});
         await page.getByTestId('offers').getByRole('button', {name: 'Manage tiers'}).waitFor({state: 'hidden'});
 
-        // only one of these buttons is ever available - either 'Add offer' or 'Manage offers'
-        const hasExistingOffers = await page.getByTestId('offers').getByRole('button', {name: 'Manage offers'}).isVisible();
-        const isCTA = await page.getByTestId('offers').getByRole('button', {name: 'Add offer'}).isVisible();
+        await page.getByTestId('offers').getByRole('button', {name: 'Manage offers'}).click();
 
-        // Archive other offers to keep the list tidy
-        // We only need 1 offer to be active at a time
-        // Either the list of active offers loads, or the CTA when no offers exist
-        if (hasExistingOffers && !isCTA) {
-            await page.getByTestId('offers').getByRole('button', {name: 'Manage offers'}).click();
+        // Wait for the modal to fully load (retention offers are always present)
+        await page.getByTestId('retention-offer-item').first().waitFor();
 
-            // Selector for the elements with data-testid 'offer-item'
-            // const offerItemsSelector = '[data-testid="offer-item"]';
+        // Archive all existing signup offers to keep the list tidy
+        while (await page.getByTestId('offer-item').count() > 0) {
             await page.getByTestId('offer-item').nth(0).click();
             await page.getByRole('button', {name: 'Archive offer'}).click();
 
             const confirmModal = await page.getByTestId('confirmation-modal');
             await confirmModal.getByRole('button', {name: 'Archive'}).click();
             await confirmModal.waitFor({state: 'hidden'});
-
-            // Still in the offers modal after archiving — click "New offer" directly
-            await page.getByText('New offer').click();
-        } else if (await page.getByTestId('offers').getByRole('button', {name: 'Add offer'}).isVisible()) {
-            await page.getByTestId('offers').getByRole('button', {name: 'Add offer'}).click();
-        } else {
-            await page.getByTestId('offers').getByRole('button', {name: 'Manage offers'}).click();
-            await page.getByText('New offer').click();
         }
+
+        // Click "New offer" to open the creation form
+        await page.getByText('New offer').click();
 
         await page.getByLabel('Offer name').fill(offerName);
 
@@ -298,9 +288,8 @@ const createOffer = async (page, {name, tierName, offerType, amount, discountTyp
             await page.getByLabel('Amount off').fill(`${amount}`);
             if (discountType === 'multiple-months') {
                 await chooseOptionInSelect(page.getByTestId('duration-select-offers'), `Multiple-months`);
-                await page.getByLabel('Duration in months').fill(discountDuration.toString());
-                // await page.locator('[data-test-select="offer-duration"]').selectOption('repeating');
-                // await page.locator('input#duration-months').fill(discountDuration.toString());
+                const durationInput = page.getByTestId('duration-months-input');
+                await durationInput.fill(discountDuration.toString());
             }
 
             if (discountType === 'forever') {
@@ -351,10 +340,34 @@ const submitStripePayment = async (page) => {
         }
     }
 
-    // Wait for submit button complete
-    await page.waitForSelector('[data-testid="hosted-payment-submit-button"].SubmitButton--complete', {state: 'attached'});
+    /**
+     * Retry submit in case Stripe leaves checkout in a transient state.
+     */
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        if (!page.url().includes('checkout.stripe.com')) {
+            return;
+        }
 
-    await page.getByTestId('hosted-payment-submit-button').click();
+        try {
+            // Wait for submit button complete
+            await page.waitForSelector('[data-testid="hosted-payment-submit-button"].SubmitButton--complete', {
+                state: 'attached',
+                timeout: 5_000
+            });
+            await page.getByTestId('hosted-payment-submit-button').click();
+
+            // Stripe can redirect without reaching "load"; "commit" catches early URL change.
+            await page.waitForURL(url => !url.hostname.includes('checkout.stripe.com'), {
+                timeout: 25_000,
+                waitUntil: 'commit'
+            });
+            return;
+        } catch (err) {
+            if (attempt === 3) {
+                throw err;
+            }
+        }
+    }
 };
 
 /**

@@ -5,26 +5,26 @@ import {MemberAvatar} from '@components/member-avatar';
 
 // --- Helpers ---
 
-function formatLocation(geolocation: Member['geolocation']): string {
+function formatLocation(geolocation: Member['geolocation']): {text: string; isKnown: boolean} {
     if (!geolocation) {
-        return 'Unknown';
+        return {text: 'Unknown', isKnown: false};
     }
 
     try {
         const parsed = JSON.parse(geolocation) as {country?: string; region?: string; country_code?: string};
 
         if (!parsed.country) {
-            return 'Unknown';
+            return {text: 'Unknown', isKnown: false};
         }
 
         // For US, show "State, US"
         if (parsed.country_code === 'US' && parsed.region) {
-            return `${parsed.region}, US`;
+            return {text: `${parsed.region}, US`, isKnown: true};
         }
 
-        return parsed.country;
+        return {text: parsed.country, isKnown: true};
     } catch {
-        return 'Unknown';
+        return {text: 'Unknown', isKnown: false};
     }
 }
 
@@ -80,19 +80,20 @@ function MembersListItemStatus({status, tiers}: {status: Member['status']; tiers
 }
 
 function MembersListItemOpenRate({emailOpenRate}: {emailOpenRate: number | null | undefined}) {
+    const isKnown = emailOpenRate !== null && emailOpenRate !== undefined;
     return (
-        <div className="hidden text-sm text-muted-foreground lg:block">
-            {emailOpenRate !== null && emailOpenRate !== undefined
-                ? `${Math.round(emailOpenRate)}%`
-                : 'N/A'}
+        <div className={`hidden text-sm lg:block ${isKnown ? 'text-foreground' : 'text-muted-foreground'}`}>
+            {isKnown ? `${Math.round(emailOpenRate)}%` : 'N/A'}
         </div>
     );
 }
 
 function MembersListItemLocation({geolocation}: {geolocation: Member['geolocation']}) {
+    const location = formatLocation(geolocation);
+
     return (
-        <div className="hidden truncate text-sm text-muted-foreground lg:block">
-            {formatLocation(geolocation)}
+        <div className={`hidden truncate text-sm lg:block ${location.isKnown ? 'text-foreground' : 'text-muted-foreground'}`}>
+            {location.text}
         </div>
     );
 }

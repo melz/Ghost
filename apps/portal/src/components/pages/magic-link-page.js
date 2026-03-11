@@ -97,8 +97,8 @@ export default class MagicLinkPage extends React.Component {
     getDescriptionConfig(submittedEmailOrInbox) {
         return {
             signin: {
-                withOTC: t('An email has been sent to {submittedEmailOrInbox}. Click the link inside or enter your code below.', {submittedEmailOrInbox}),
-                withoutOTC: t('A login link has been sent to your inbox. If it doesn\'t arrive in 3 minutes, be sure to check your spam folder.')
+                withOTC: t('If you have an account, an email has been sent to {submittedEmailOrInbox}. Click the link inside or enter your code below.', {submittedEmailOrInbox}),
+                withoutOTC: t('If you have an account, a login link has been sent to your inbox. If it doesn\'t arrive in 3 minutes, be sure to check your spam folder.')
             },
             signup: t('To complete signup, click the confirmation link in your inbox. If it doesn\'t arrive within 3 minutes, check your spam folder!')
         };
@@ -163,9 +163,8 @@ export default class MagicLinkPage extends React.Component {
     }
 
     renderCloseButton() {
-        const {site, inboxLinks} = this.context;
-        const isInboxLinksEnabled = site.labs?.inboxlinks !== false;
-        if (isInboxLinksEnabled && inboxLinks && !isIos(navigator)) {
+        const {inboxLinks} = this.context;
+        if (inboxLinks && !isIos(navigator)) {
             return <InboxLinkButton inboxLinks={inboxLinks} />;
         } else {
             return (
@@ -234,8 +233,7 @@ export default class MagicLinkPage extends React.Component {
     }
 
     renderOTCForm() {
-        const {action, actionErrorMessage, otcRef, site, inboxLinks} = this.context;
-        const isInboxLinksEnabled = site.labs?.inboxlinks !== false;
+        const {action, actionErrorMessage, otcRef, inboxLinks} = this.context;
         const errors = this.state.errors || {};
 
         if (!otcRef) {
@@ -279,7 +277,7 @@ export default class MagicLinkPage extends React.Component {
                 </section>
 
                 <footer className='gh-portal-signin-footer gh-button-row'>
-                    {isInboxLinksEnabled && inboxLinks && !isIos(navigator) && !this.state.otc ? (
+                    {inboxLinks && !isIos(navigator) && !this.state.otc ? (
                         <InboxLinkButton inboxLinks={inboxLinks} />
                     ) : (
                         <ActionButton
