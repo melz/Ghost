@@ -65,7 +65,7 @@ export type Member = {
     name?: string;
     email?: string;
     avatar_image?: string;
-    status: 'free' | 'paid' | 'comped';
+    status: 'free' | 'paid' | 'comped' | 'gift';
     note?: string;
     subscribed: boolean;
     labels?: MemberLabel[];
@@ -151,7 +151,7 @@ export const useBrowseMembersInfinite = createInfiniteQuery<MembersInfiniteRespo
     path: '/members/',
     defaultSearchParams: {
         include: 'labels,tiers',
-        limit: '50',
+        limit: '100',
         order: 'created_at desc'
     },
     defaultNextPageParams: (lastPage, otherParams) => {

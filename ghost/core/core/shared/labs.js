@@ -24,8 +24,7 @@ const GA_FEATURES = [
     'customFonts',
     'explore',
     'commentModeration',
-    'featurebaseFeedback',
-    'transistor'
+    'featurebaseFeedback'
 ];
 
 // These features are considered publicly available and can be enabled/disabled by users
@@ -42,16 +41,16 @@ const PRIVATE_FEATURES = [
     'importMemberTier',
     'urlCache',
     'lexicalIndicators',
+    'adminUIRefresh',
     'emailCustomization',
     'tagsX',
     'emailUniqueid',
     'themeTranslation',
     'indexnow',
-    'verificationFlow',
-    'membersForward',
-    'welcomeEmailsDesignCustomization',
+    'dripSequences',
     'pictureImageFormats',
-    'smarterCounts'
+    'smarterCounts',
+    'giftSubscriptions'
 ];
 
 module.exports.GA_KEYS = [...GA_FEATURES];

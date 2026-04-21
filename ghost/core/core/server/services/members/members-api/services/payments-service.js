@@ -13,6 +13,7 @@ class PaymentsService {
      * @param {import('../../../offers/application/offers-api')} deps.offersAPI
      * @param {import('../../../stripe/stripe-api')} deps.stripeAPIService
      * @param {{get(key: string): any}} deps.settingsCache
+     * @param {{service: import('../../../gifts/gift-service').GiftService}} deps.giftService
      */
     constructor(deps) {
         /** @private */
@@ -29,6 +30,8 @@ class PaymentsService {
         this.stripeAPIService = deps.stripeAPIService;
         /** @private */
         this.settingsCache = deps.settingsCache;
+        /** @private */
+        this.giftService = deps.giftService;
 
         DomainEvents.subscribe(OfferCreatedEvent, async (event) => {
             await this.getCouponForOffer(event.data.offer.id);
@@ -147,6 +150,58 @@ class PaymentsService {
         };
 
         const session = await this.stripeAPIService.createDonationCheckoutSession(data);
+        return session.url;
+    }
+
+    /**
+     * @param {object} params
+     * @param {import('../../../tiers/tier')} params.tier
+     * @param {'month'|'year'} params.cadence
+     * @param {number} params.duration
+     * @param {string} params.successUrl
+     * @param {string} params.cancelUrl
+     * @param {object} params.metadata
+     * @param {object} [params.member]
+     * @param {boolean} params.isAuthenticated
+     *
+     * @returns {Promise<string>}
+     */
+    async getGiftPaymentLink({tier, cadence, duration, metadata, successUrl, cancelUrl, member, isAuthenticated}) {
+        let customer = null;
+        if (member && isAuthenticated) {
+            customer = await this.getCustomerForMember(member);
+        }
+
+        const amount = tier.getPrice(cadence);
+        const currency = tier.currency.toLowerCase();
+
+        const token = this.giftService.service.generateToken();
+
+        const successUrlObj = new URL(successUrl);
+        successUrlObj.searchParams.set('stripe', 'gift-purchase-success');
+        successUrlObj.searchParams.set('gift_token', token);
+
+        const data = {
+            amount,
+            currency,
+            tierName: tier.name,
+            cadence,
+            duration,
+            metadata: {
+                ...metadata,
+                ghost_gift: 'true',
+                gift_token: token,
+                tier_id: tier.id.toHexString(),
+                cadence,
+                duration: String(duration)
+            },
+            successUrl: successUrlObj.toString(),
+            cancelUrl,
+            customer
+        };
+
+        const session = await this.stripeAPIService.createGiftCheckoutSession(data);
+
         return session.url;
     }
 

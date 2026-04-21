@@ -45,26 +45,6 @@ const membersStats = new MembersStats({
 let membersApi;
 let verificationTrigger;
 
-const sendVerificationEmail = async ({subject, message, amountTriggered}) => {
-    const escalationAddress = config.get('hostSettings:emailVerification:escalationAddress');
-    const replyTo = config.get('user_email');
-    const fromAddress = settingsHelpers.getDefaultEmailAddress();
-
-    if (escalationAddress) {
-        await ghostMailer.send({
-            subject,
-            html: tpl(message, {
-                amountTriggered: amountTriggered,
-                siteUrl: urlUtils.getSiteUrl()
-            }),
-            forceTextContent: true,
-            from: fromAddress,
-            replyTo,
-            to: escalationAddress
-        });
-    }
-};
-
 const initMembersCSVImporter = ({stripeAPIService}) => {
     return makeMembersCSVImporter({
         storagePath: config.getContentPath('data'),
@@ -113,8 +93,6 @@ const initVerificationTrigger = () => {
         isVerified: () => config.get('hostSettings:emailVerification:verified') === true,
         isVerificationRequired: () => settingsCache.get('email_verification_required') === true,
         setVerificationRequired: value => settingsCache.set('email_verification_required', {value}),
-        isVerificationFlowEnabled: () => labsService.isSet('verificationFlow'),
-        sendVerificationEmail,
         sendVerificationWebhook: verificationWebhookService.sendVerificationWebhook.bind(verificationWebhookService),
         membersStats,
         Settings: models.Settings,
@@ -187,6 +165,13 @@ module.exports = {
 
         // Schedule daily cron job to clean expired tokens
         memberJobs.scheduleTokenCleanupJob();
+
+        // Schedule daily cron jobs to clean up consumed/expired gifts and to
+        // send gift reminder emails.
+        if (labsService.isSet('giftSubscriptions')) {
+            memberJobs.scheduleGiftCleanupJob();
+            memberJobs.scheduleGiftReminderJob();
+        }
     },
     contentGating: require('./content-gating'),
 

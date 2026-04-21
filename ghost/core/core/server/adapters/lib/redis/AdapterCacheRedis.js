@@ -1,4 +1,5 @@
 const BaseCacheAdapter = require('@tryghost/adapter-base-cache');
+const errors = require('@tryghost/errors');
 const logging = require('@tryghost/logging');
 const metrics = require('@tryghost/metrics');
 const debug = require('@tryghost/debug')('redis-cache');
@@ -11,16 +12,16 @@ class AdapterCacheRedis extends BaseCacheAdapter {
      *
      * @param {Object} config
      * @param {Object} [config.cache] - caching instance compatible with cache-manager's redis store
-     * @param {String} [config.host] - redis host used in case no cache instance provided
-     * @param {Number} [config.port] - redis port used in case no cache instance provided
-     * @param {String} [config.password] - redis password used in case no cache instance provided
+     * @param {string} [config.host] - redis host used in case no cache instance provided
+     * @param {number} [config.port] - redis port used in case no cache instance provided
+     * @param {string} [config.password] - redis password used in case no cache instance provided
      * @param {Object} [config.clusterConfig] - redis cluster config used in case no cache instance provided
      * @param {Object} [config.storeConfig] - extra redis client config used in case no cache instance provided
-     * @param {Number} [config.ttl] - default cached value Time To Live (expiration) in *seconds*
-     * @param {Number} [config.getTimeoutMilliseconds] - default timeout for cache get operations in *milliseconds*
-     * @param {Number} [config.refreshAheadFactor] - 0-1 number to use to determine how old (as a percentage of ttl) an entry should be before refreshing it
-     * @param {String} [config.keyPrefix] - prefix to use when building a unique cache key, e.g.: 'some_id:image-sizes:'
-     * @param {Boolean} [config.reuseConnection] - specifies if the redis store/connection should be reused within the process
+     * @param {number} [config.ttl] - default cached value Time To Live (expiration) in *seconds*
+     * @param {number} [config.getTimeoutMilliseconds] - default timeout for cache get operations in *milliseconds*
+     * @param {number} [config.refreshAheadFactor] - 0-1 number to use to determine how old (as a percentage of ttl) an entry should be before refreshing it
+     * @param {string} [config.keyPrefix] - prefix to use when building a unique cache key, e.g.: 'some_id:image-sizes:'
+     * @param {boolean} [config.reuseConnection] - specifies if the redis store/connection should be reused within the process
      */
     constructor(config) {
         super();
@@ -140,7 +141,7 @@ class AdapterCacheRedis extends BaseCacheAdapter {
 
     /**
      *
-     * @param {String} internalKey
+     * @param {string} internalKey
      */
     async shouldRefresh(internalKey) {
         if (this.refreshAheadFactor === 0) {
@@ -232,7 +233,7 @@ class AdapterCacheRedis extends BaseCacheAdapter {
 
     /**
      *
-     * @param {String} key
+     * @param {string} key
      * @param {*} value
      */
     async set(key, value) {
@@ -270,17 +271,14 @@ class AdapterCacheRedis extends BaseCacheAdapter {
     }
 
     /**
-     * Helper method to assist "getAll" type of operations
-     * @returns {Promise<Array<String>>} all keys present in the cache
+     * @deprecated The cache adapter interface still requires a `keys` method
+     *             (see @tryghost/adapter-base-cache#requiredFns), but the
+     *             redis adapter does not support enumerating its keys.
      */
-    async keys() {
-        try {
-            return (await this.#getKeys()).map((key) => {
-                return this._removeKeyPrefix(key);
-            });
-        } catch (err) {
-            logging.error(err);
-        }
+    keys() {
+        throw new errors.IncorrectUsageError({
+            message: 'AdapterCacheRedis does not support keys()'
+        });
     }
 }
 
