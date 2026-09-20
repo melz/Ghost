@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Sessions API Staff 2FA can verify a session with 2FA code 1: [body] 1`] = `
 Object {
@@ -65,6 +65,24 @@ Object {
   ],
   "vary": "Accept-Version, Origin, Accept-Encoding",
   "x-powered-by": "Express",
+}
+`;
+
+exports[`Sessions API Staff 2FA requires 2FA again when a different user logs in after logout 1: [body] 1`] = `
+Object {
+  "errors": Array [
+    Object {
+      "code": "2FA_NEW_DEVICE_DETECTED",
+      "context": "A 6-digit sign-in verification code has been sent to your email to keep your account safe.",
+      "details": null,
+      "ghostErrorCode": null,
+      "help": null,
+      "id": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
+      "message": "User must verify session to login.",
+      "property": null,
+      "type": "Needs2FAError",
+    },
+  ],
 }
 `;
 

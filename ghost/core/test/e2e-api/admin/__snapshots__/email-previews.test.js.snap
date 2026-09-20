@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Email Preview API As Admin can send test email 1: [headers] 1`] = `
 Object {
@@ -110,7 +110,7 @@ Object {
 exports[`Email Preview API Read can read post email preview with email card and replacements 2 1`] = `
 Object {
   "html": "<!doctype html>
-<html>
+<html lang=\\"en-gb\\" dir=\\"ltr\\">
     <head>
         <meta name=\\"viewport\\" content=\\"width=device-width\\">
         <meta http-equiv=\\"Content-Type\\" content=\\"text/html; charset=UTF-8\\">
@@ -231,37 +231,6 @@ table[class=body] a[class=small] {
     font-size: 11px !important;
   }
 }
-.kg-nft-link {
-  display: block;
-  text-decoration: none !important;
-  color: #15212A !important;
-  font-family: inherit !important;
-  font-size: 14px;
-  line-height: 1.3;
-  padding-top: 4px;
-  padding-right: 20px;
-  padding-left: 20px;
-  padding-bottom: 4px;
-}
-.kg-twitter-link {
-  display: block;
-  text-decoration: none !important;
-  color: #15212A !important;
-  font-family: inherit !important;
-  font-size: 15px;
-  padding: 8px;
-  line-height: 1.3;
-}
-.kg-cta-link-accent .kg-cta-sponsor-label a {
-  color: #FF1A75 !important;
-}
-.kg-cta-text a:not(.kg-cta-link-accent .kg-cta-text a) {
-  color: #15212A;
-  text-decoration: underline;
-}
-.kg-cta-link-accent .kg-cta-text a {
-  color: #FF1A75 !important;
-}
 @media only screen and (max-width: 620px) {
   table.body .kg-bookmark-card {
     width: 90vw;
@@ -365,27 +334,6 @@ table[class=body] a[class=small] {
     font-weight: inherit;
     line-height: inherit;
   }
-}
-.post-title-link {
-  display: block;
-  margin-top: 32px;
-  color: #15212A;
-  text-align: center;
-  line-height: 1.1;
-}
-.post-title-link-left {
-  text-align: left;
-}
-.view-online-link {
-  word-wrap: none;
-  white-space: nowrap;
-  color: #15212a;
-  color: rgba(0, 0, 0, 0.6);
-  text-decoration: underline !important;
-}
-.kg-audio-link {
-  color: #15212a !important;
-  color: rgba(0, 0, 0, 0.6) !important;
 }
 @media only screen and (max-width: 620px) {
   .hide-mobile {
@@ -653,11 +601,11 @@ table.body h2 span {
         </style>
         <![endif]-->
     </head>
-    <body data-testid=\\"email-preview-body\\" style=\\"background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-size: 18px; line-height: 0; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #15212A;\\">
+    <body data-testid=\\"email-preview-body\\" style=\\"background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-size: 18px; line-height: 0; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #15212A; direction: ltr;\\">
         <span class=\\"preheader\\" style=\\"color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;\\">This is the actual post content...</span>
         <!-- SPACING TO AVOID BODY TEXT BEING DUPLICATED IN PREVIEW TEXT -->
-        <div style=\\"display:none; max-height:0; overflow:hidden; mso-hide: all;\\" aria-hidden=\\"true\\" role=\\"presentation\\">
-            &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD;  &#xA0;
+        <div class=\\"preheader-spacing\\" style=\\"display:none; max-height:0; overflow:hidden; mso-hide: all;\\" aria-hidden=\\"true\\" role=\\"presentation\\">
+            &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad;  &#xa0;
         </div>
 
         <!-- HEADER WITH FULL-WIDTH BACKGROUND -->
@@ -670,7 +618,7 @@ table.body h2 span {
                             <table border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"600\\">
                 <![endif]-->
                 <tr>
-                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                     <td class=\\"container\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">
                         <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
                         <!-- Header content constrained to 600px -->
@@ -698,7 +646,9 @@ table.body h2 span {
                                                     <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\\" width=\\"100%\\">
                                                         <tr>
                                                             <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; font-size: 36px; line-height: 1.1; font-weight: 700; text-align: center; color: #000000;\\" valign=\\"top\\" align=\\"center\\">
-                                                                <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/\\" class=\\"post-title-link\\" style=\\"text-decoration: none; display: block; margin-top: 32px; text-align: center; line-height: 1.1; overflow-wrap: anywhere; color: #000000;\\" target=\\"_blank\\">Post with email-only card</a>
+                                                                <h1 class=\\"post-title-heading\\" style=\\"margin-top: 0; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; text-rendering: optimizeLegibility; margin: 0; font-size: 36px; line-height: 1.1; font-weight: 700;\\">
+                                                                    <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/\\" class=\\"post-title-link\\" style=\\"text-decoration: none; display: block; margin-top: 32px; text-align: center; line-height: 1.1; overflow-wrap: anywhere; color: #000000;\\" target=\\"_blank\\">Post with email-only card</a>
+                                                                </h1>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -730,7 +680,7 @@ table.body h2 span {
                         </table>
                         </div>
                     </td>
-                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                 </tr>
                 <!--[if mso]>
                             </table>
@@ -750,7 +700,7 @@ table.body h2 span {
                         <table border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"600\\">
             <![endif]-->
             <tr>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                 <td class=\\"container\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; display: block; max-width: 600px; margin: 0 auto;\\" valign=\\"top\\">
                     <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
                         <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" class=\\"main\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 20px 0; width: 100%; max-width: 600px; background: #ffffff; background-color: #ffffff;\\" bgcolor=\\"#ffffff\\">                            <tr>
@@ -770,6 +720,20 @@ table.body h2 span {
 
                             <!-- END MAIN CONTENT AREA -->
 
+                                <tr>
+                                    <td class=\\"feedback-buttons-container\\" dir=\\"ltr\\" width=\\"100%\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; padding: 32px 0 24px; border-bottom: 1px solid #e0e7eb; text-align: center; background-color: #ffffff;\\" valign=\\"top\\" bgcolor=\\"#ffffff\\">
+                                        <table class=\\"feedback-buttons\\" role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: auto; width: 100%;\\" width=\\"100%\\">
+                                            <tr>
+                                                    <td dir=\\"ltr\\" valign=\\"top\\" align=\\"center\\" style=\\"font-size: 18px; color: #15212A; box-sizing: border-box; vertical-align: top; font-family: inherit; text-align: center; padding: 0 4px 4px; cursor: pointer; width: 100%;\\" width=\\"100%\\">
+                                                        <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/#ghost-comments-root\\" target=\\"_blank\\" style=\\"color: #FF1A75; text-decoration: none; overflow-wrap: anywhere;\\">
+                                                            <img src=\\"https://static.ghost.org/v5.0.0/images/comment-mobile.png\\" border=\\"0\\" width=\\"42\\" height=\\"42\\" alt=\\"Comment\\" style=\\"border: none; -ms-interpolation-mode: bicubic; max-width: 100%; display: block; margin: 0 auto; vertical-align: middle;\\">
+                                                            <p class=\\"feedback-button-text\\" style=\\"display: inline-block; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; color: #15212A; font-weight: 500; margin: 1em 0 0 0; line-height: 1.4; word-break: break-word; font-size: 13px;\\">Comment</p>
+                                                        </a>
+                                                    </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
 
 
 
@@ -777,7 +741,7 @@ table.body h2 span {
                                 <td class=\\"wrapper\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; box-sizing: border-box;\\" valign=\\"top\\">
                                     <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; padding-top: 40px; padding-bottom: 30px;\\">
                                         <tr>
-                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: #15212a; color: rgba(0, 0, 0, 0.6); margin-top: 20px; text-align: center; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5; font-size: 13px;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xA9; 2025 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #15212a; color: rgba(0, 0, 0, 0.6); text-decoration: underline; font-size: 13px;\\" target=\\"_blank\\">Unsubscribe</a></td>
+                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: #15212a; color: rgba(0, 0, 0, 0.6); margin-top: 20px; text-align: center; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5; font-size: 13px;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xa9; 2025 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #15212a; color: rgba(0, 0, 0, 0.6); text-decoration: underline; font-size: 13px;\\" target=\\"_blank\\">Unsubscribe</a></td>
                                         </tr>
 
                                             <tr>
@@ -790,7 +754,7 @@ table.body h2 span {
                         <!-- END CENTERED WHITE CONTAINER -->
                     </div>
                 </td>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
             </tr>
 
             <!--[if mso]>
@@ -824,8 +788,6 @@ Object {
   "html": "
 
 
-
- ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­  
 
 
 
@@ -871,7 +833,12 @@ Default Newsletter [http://127.0.0.1:2369/]
 
 
 
+
+
+
+
 Post with email-only card [http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/]
+
 
 
 
@@ -960,6 +927,26 @@ Another email card with a similar replacement, Jamie
 
 
 
+
+
+Comment
+
+
+[http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/#ghost-comments-root]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Ghost © 2025 – Unsubscribe [http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid]
 
 
@@ -988,7 +975,7 @@ exports[`Email Preview API Read can read post email preview with email card and 
 Object {
   "access-control-allow-origin": "http://127.0.0.1:2369",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "35596",
+  "content-length": "35794",
   "content-type": "application/json; charset=utf-8",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
@@ -1012,7 +999,7 @@ Object {
 exports[`Email Preview API Read can read post email preview with fields 2 1`] = `
 Object {
   "html": "<!doctype html>
-<html>
+<html lang=\\"en-gb\\" dir=\\"ltr\\">
     <head>
         <meta name=\\"viewport\\" content=\\"width=device-width\\">
         <meta http-equiv=\\"Content-Type\\" content=\\"text/html; charset=UTF-8\\">
@@ -1133,37 +1120,6 @@ table[class=body] a[class=small] {
     font-size: 11px !important;
   }
 }
-.kg-nft-link {
-  display: block;
-  text-decoration: none !important;
-  color: #15212A !important;
-  font-family: inherit !important;
-  font-size: 14px;
-  line-height: 1.3;
-  padding-top: 4px;
-  padding-right: 20px;
-  padding-left: 20px;
-  padding-bottom: 4px;
-}
-.kg-twitter-link {
-  display: block;
-  text-decoration: none !important;
-  color: #15212A !important;
-  font-family: inherit !important;
-  font-size: 15px;
-  padding: 8px;
-  line-height: 1.3;
-}
-.kg-cta-link-accent .kg-cta-sponsor-label a {
-  color: #FF1A75 !important;
-}
-.kg-cta-text a:not(.kg-cta-link-accent .kg-cta-text a) {
-  color: #15212A;
-  text-decoration: underline;
-}
-.kg-cta-link-accent .kg-cta-text a {
-  color: #FF1A75 !important;
-}
 @media only screen and (max-width: 620px) {
   table.body .kg-bookmark-card {
     width: 90vw;
@@ -1267,27 +1223,6 @@ table[class=body] a[class=small] {
     font-weight: inherit;
     line-height: inherit;
   }
-}
-.post-title-link {
-  display: block;
-  margin-top: 32px;
-  color: #15212A;
-  text-align: center;
-  line-height: 1.1;
-}
-.post-title-link-left {
-  text-align: left;
-}
-.view-online-link {
-  word-wrap: none;
-  white-space: nowrap;
-  color: #15212a;
-  color: rgba(0, 0, 0, 0.6);
-  text-decoration: underline !important;
-}
-.kg-audio-link {
-  color: #15212a !important;
-  color: rgba(0, 0, 0, 0.6) !important;
 }
 @media only screen and (max-width: 620px) {
   .hide-mobile {
@@ -1555,11 +1490,11 @@ table.body h2 span {
         </style>
         <![endif]-->
     </head>
-    <body data-testid=\\"email-preview-body\\" style=\\"background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-size: 18px; line-height: 0; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #15212A;\\">
+    <body data-testid=\\"email-preview-body\\" style=\\"background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-size: 18px; line-height: 0; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #15212A; direction: ltr;\\">
         <span class=\\"preheader\\" style=\\"color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;\\">This is my custom excerpt!</span>
         <!-- SPACING TO AVOID BODY TEXT BEING DUPLICATED IN PREVIEW TEXT -->
-        <div style=\\"display:none; max-height:0; overflow:hidden; mso-hide: all;\\" aria-hidden=\\"true\\" role=\\"presentation\\">
-            &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD;  &#xA0;
+        <div class=\\"preheader-spacing\\" style=\\"display:none; max-height:0; overflow:hidden; mso-hide: all;\\" aria-hidden=\\"true\\" role=\\"presentation\\">
+            &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad;  &#xa0;
         </div>
 
         <!-- HEADER WITH FULL-WIDTH BACKGROUND -->
@@ -1572,7 +1507,7 @@ table.body h2 span {
                             <table border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"600\\">
                 <![endif]-->
                 <tr>
-                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                     <td class=\\"container\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">
                         <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
                         <!-- Header content constrained to 600px -->
@@ -1600,7 +1535,9 @@ table.body h2 span {
                                                     <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\\" width=\\"100%\\">
                                                         <tr>
                                                             <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; font-size: 36px; line-height: 1.1; font-weight: 700; text-align: center; color: #000000;\\" valign=\\"top\\" align=\\"center\\">
-                                                                <a href=\\"http://127.0.0.1:2369/html-ipsum/\\" class=\\"post-title-link\\" style=\\"text-decoration: none; display: block; margin-top: 32px; text-align: center; line-height: 1.1; overflow-wrap: anywhere; color: #000000;\\" target=\\"_blank\\">HTML Ipsum</a>
+                                                                <h1 class=\\"post-title-heading\\" style=\\"margin-top: 0; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; text-rendering: optimizeLegibility; margin: 0; font-size: 36px; line-height: 1.1; font-weight: 700;\\">
+                                                                    <a href=\\"http://127.0.0.1:2369/html-ipsum/\\" class=\\"post-title-link\\" style=\\"text-decoration: none; display: block; margin-top: 32px; text-align: center; line-height: 1.1; overflow-wrap: anywhere; color: #000000;\\" target=\\"_blank\\">HTML Ipsum</a>
+                                                                </h1>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -1637,7 +1574,7 @@ table.body h2 span {
                         </table>
                         </div>
                     </td>
-                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                 </tr>
                 <!--[if mso]>
                             </table>
@@ -1657,7 +1594,7 @@ table.body h2 span {
                         <table border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"600\\">
             <![endif]-->
             <tr>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                 <td class=\\"container\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; display: block; max-width: 600px; margin: 0 auto;\\" valign=\\"top\\">
                     <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
                         <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" class=\\"main\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 20px 0; width: 100%; max-width: 600px; background: #ffffff; background-color: #ffffff;\\" bgcolor=\\"#ffffff\\">                            <tr>
@@ -1666,7 +1603,7 @@ table.body h2 span {
                                         <tr class=\\"post-content-row\\">
                                             <td class=\\"post-content-sans-serif\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; font-size: 17px; line-height: 1.5; color: #15212A; padding-bottom: 20px; border-bottom: 1px solid #e0e7eb; max-width: 600px;\\" valign=\\"top\\">
                                                 <!-- POST CONTENT START -->
-                                                <!--kg-card-begin: markdown--><h1 style=\\"margin-top: 0; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; line-height: 1.11; font-weight: 700; text-rendering: optimizeLegibility; margin: 1.5em 0 0.5em 0; font-size: 42px; color: #15212A;\\">HTML Ipsum Presents</h1><p style=\\"margin: 0 0 1.5em 0; line-height: 1.6; color: #15212A;\\"><strong style=\\"font-weight: 700;\\">Pellentesque habitant morbi tristique</strong> senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. <em>Aenean ultricies mi vitae est.</em> Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, <code style=\\"font-size: 0.9em; background: #F2F7FA; word-break: break-all; padding: 1px 7px; border-radius: 3px; color: #FF1A75;\\">commodo vitae</code>, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. <a href=\\"#\\" style=\\"overflow-wrap: anywhere; color: #FF1A75; text-decoration: underline;\\" target=\\"_blank\\">Donec non enim</a> in turpis pulvinar facilisis. Ut felis.</p><h2 style=\\"margin-top: 0; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; line-height: 1.11; font-weight: 700; text-rendering: optimizeLegibility; margin: 1.5em 0 0.5em 0; font-size: 32px; color: #15212A;\\">Header Level 2</h2><ol style=\\"margin: 0 0 1.5em 0; line-height: 1.6; padding-left: 1.3em; padding-right: 1.5em; list-style: decimal; max-width: 100%;\\"><li style=\\"margin: 0.5em 0; padding-left: 0.3em; line-height: 1.6; color: #15212A;\\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</li><li style=\\"margin: 0.5em 0; padding-left: 0.3em; line-height: 1.6; color: #15212A;\\">Aliquam tincidunt mauris eu risus.</li></ol><blockquote style=\\"margin: 0; padding: 0; border-left: #FF1A75 2px solid; font-size: 17px; font-weight: 500; line-height: 1.6; letter-spacing: -0.2px;\\"><p style=\\"line-height: 1.6; margin: 2em 25px; font-size: 1em; padding: 0; color: #15212A;\\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus magna. Cras in mi at felis aliquet congue. Ut a est eget ligula molestie gravida. Curabitur massa. Donec eleifend, libero at sagittis mollis, tellus est malesuada tellus, at luctus turpis elit sit amet quam. Vivamus pretium ornare est.</p></blockquote><h3 style=\\"margin-top: 0; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; line-height: 1.11; font-weight: 700; text-rendering: optimizeLegibility; margin: 1.5em 0 0.5em 0; font-size: 26px; color: #15212A;\\">Header Level 3</h3><ul style=\\"margin: 0 0 1.5em 0; line-height: 1.6; padding-left: 1.3em; padding-right: 1.5em; list-style: disc; max-width: 100%;\\"><li style=\\"margin: 0.5em 0; padding-left: 0.3em; line-height: 1.6; color: #15212A;\\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</li><li style=\\"margin: 0.5em 0; padding-left: 0.3em; line-height: 1.6; color: #15212A;\\">Aliquam tincidunt mauris eu risus.</li></ul><pre style=\\"white-space: pre-wrap; overflow: auto; background: #15212A; padding: 15px; border-radius: 3px; line-height: 1.2; color: #ffffff;\\"><code style=\\"font-size: 0.9em;\\">#header h1 a{display: block;width: 300px;height: 80px;}</code></pre><!--kg-card-end: markdown-->
+                                                <h1 style=\\"margin-top: 0; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; line-height: 1.11; font-weight: 700; text-rendering: optimizeLegibility; margin: 1.5em 0 0.5em 0; font-size: 42px; color: #15212A;\\">HTML Ipsum Presents</h1><p style=\\"margin: 0 0 1.5em 0; line-height: 1.6; color: #15212A;\\"><strong style=\\"font-weight: 700;\\">Pellentesque habitant morbi tristique</strong> senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. <em>Aenean ultricies mi vitae est.</em> Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, <code style=\\"font-size: 0.9em; background: #F2F7FA; word-break: break-all; padding: 1px 7px; border-radius: 3px; color: #FF1A75;\\">commodo vitae</code>, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. <a href=\\"#\\" style=\\"overflow-wrap: anywhere; color: #FF1A75; text-decoration: underline;\\" target=\\"_blank\\">Donec non enim</a> in turpis pulvinar facilisis. Ut felis.</p><h2 style=\\"margin-top: 0; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; line-height: 1.11; font-weight: 700; text-rendering: optimizeLegibility; margin: 1.5em 0 0.5em 0; font-size: 32px; color: #15212A;\\">Header Level 2</h2><ol style=\\"margin: 0 0 1.5em 0; line-height: 1.6; padding-left: 1.3em; padding-right: 1.5em; list-style: decimal; max-width: 100%;\\"><li style=\\"margin: 0.5em 0; padding-left: 0.3em; line-height: 1.6; color: #15212A;\\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</li><li style=\\"margin: 0.5em 0; padding-left: 0.3em; line-height: 1.6; color: #15212A;\\">Aliquam tincidunt mauris eu risus.</li></ol><blockquote style=\\"margin: 0; padding: 0; border-left: #FF1A75 2px solid; font-size: 17px; font-weight: 500; line-height: 1.6; letter-spacing: -0.2px;\\"><p style=\\"line-height: 1.6; margin: 2em 25px; font-size: 1em; padding: 0; color: #15212A;\\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus magna. Cras in mi at felis aliquet congue. Ut a est eget ligula molestie gravida. Curabitur massa. Donec eleifend, libero at sagittis mollis, tellus est malesuada tellus, at luctus turpis elit sit amet quam. Vivamus pretium ornare est.</p></blockquote><h3 style=\\"margin-top: 0; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; line-height: 1.11; font-weight: 700; text-rendering: optimizeLegibility; margin: 1.5em 0 0.5em 0; font-size: 26px; color: #15212A;\\">Header Level 3</h3><ul style=\\"margin: 0 0 1.5em 0; line-height: 1.6; padding-left: 1.3em; padding-right: 1.5em; list-style: disc; max-width: 100%;\\"><li style=\\"margin: 0.5em 0; padding-left: 0.3em; line-height: 1.6; color: #15212A;\\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</li><li style=\\"margin: 0.5em 0; padding-left: 0.3em; line-height: 1.6; color: #15212A;\\">Aliquam tincidunt mauris eu risus.</li></ul><pre style=\\"white-space: pre-wrap; overflow: auto; background: #15212A; padding: 15px; border-radius: 3px; line-height: 1.2; color: #ffffff;\\"><code style=\\"font-size: 0.9em;\\">#header h1 a{display: block;width: 300px;height: 80px;}</code></pre>
                                                 <!-- POST CONTENT END -->
 
                                             </td>
@@ -1677,6 +1614,20 @@ table.body h2 span {
 
                             <!-- END MAIN CONTENT AREA -->
 
+                                <tr>
+                                    <td class=\\"feedback-buttons-container\\" dir=\\"ltr\\" width=\\"100%\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; padding: 32px 0 24px; border-bottom: 1px solid #e0e7eb; text-align: center; background-color: #ffffff;\\" valign=\\"top\\" bgcolor=\\"#ffffff\\">
+                                        <table class=\\"feedback-buttons\\" role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: auto; width: 100%;\\" width=\\"100%\\">
+                                            <tr>
+                                                    <td dir=\\"ltr\\" valign=\\"top\\" align=\\"center\\" style=\\"font-size: 18px; color: #15212A; box-sizing: border-box; vertical-align: top; font-family: inherit; text-align: center; padding: 0 4px 4px; cursor: pointer; width: 100%;\\" width=\\"100%\\">
+                                                        <a href=\\"http://127.0.0.1:2369/html-ipsum/#ghost-comments-root\\" target=\\"_blank\\" style=\\"color: #FF1A75; text-decoration: none; overflow-wrap: anywhere;\\">
+                                                            <img src=\\"https://static.ghost.org/v5.0.0/images/comment-mobile.png\\" border=\\"0\\" width=\\"42\\" height=\\"42\\" alt=\\"Comment\\" style=\\"border: none; -ms-interpolation-mode: bicubic; max-width: 100%; display: block; margin: 0 auto; vertical-align: middle;\\">
+                                                            <p class=\\"feedback-button-text\\" style=\\"display: inline-block; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; color: #15212A; font-weight: 500; margin: 1em 0 0 0; line-height: 1.4; word-break: break-word; font-size: 13px;\\">Comment</p>
+                                                        </a>
+                                                    </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
 
 
 
@@ -1684,7 +1635,7 @@ table.body h2 span {
                                 <td class=\\"wrapper\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; box-sizing: border-box;\\" valign=\\"top\\">
                                     <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; padding-top: 40px; padding-bottom: 30px;\\">
                                         <tr>
-                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: #15212a; color: rgba(0, 0, 0, 0.6); margin-top: 20px; text-align: center; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5; font-size: 13px;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xA9; 2025 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #15212a; color: rgba(0, 0, 0, 0.6); text-decoration: underline; font-size: 13px;\\" target=\\"_blank\\">Unsubscribe</a></td>
+                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: #15212a; color: rgba(0, 0, 0, 0.6); margin-top: 20px; text-align: center; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5; font-size: 13px;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xa9; 2025 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #15212a; color: rgba(0, 0, 0, 0.6); text-decoration: underline; font-size: 13px;\\" target=\\"_blank\\">Unsubscribe</a></td>
                                         </tr>
 
                                             <tr>
@@ -1697,7 +1648,7 @@ table.body h2 span {
                         <!-- END CENTERED WHITE CONTAINER -->
                     </div>
                 </td>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
             </tr>
 
             <!--[if mso]>
@@ -1731,8 +1682,6 @@ Object {
   "html": "
 
 
-
- ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­  
 
 
 
@@ -1778,7 +1727,12 @@ Default Newsletter [http://127.0.0.1:2369/]
 
 
 
+
+
+
+
 HTML Ipsum [http://127.0.0.1:2369/html-ipsum/]
+
 
 
 
@@ -1884,6 +1838,26 @@ Header Level 3
 
 
 
+
+
+Comment
+
+
+[http://127.0.0.1:2369/html-ipsum/#ghost-comments-root]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Ghost © 2025 – Unsubscribe [http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid]
 
 
@@ -1912,7 +1886,7 @@ exports[`Email Preview API Read can read post email preview with fields 4: [head
 Object {
   "access-control-allow-origin": "http://127.0.0.1:2369",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "40030",
+  "content-length": "40114",
   "content-type": "application/json; charset=utf-8",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
@@ -1967,7 +1941,7 @@ Object {
 exports[`Email Preview API Read has custom content transformations for email compatibility 2 1`] = `
 Object {
   "html": "<!doctype html>
-<html>
+<html lang=\\"en-gb\\" dir=\\"ltr\\">
     <head>
         <meta name=\\"viewport\\" content=\\"width=device-width\\">
         <meta http-equiv=\\"Content-Type\\" content=\\"text/html; charset=UTF-8\\">
@@ -2088,37 +2062,6 @@ table[class=body] a[class=small] {
     font-size: 11px !important;
   }
 }
-.kg-nft-link {
-  display: block;
-  text-decoration: none !important;
-  color: #15212A !important;
-  font-family: inherit !important;
-  font-size: 14px;
-  line-height: 1.3;
-  padding-top: 4px;
-  padding-right: 20px;
-  padding-left: 20px;
-  padding-bottom: 4px;
-}
-.kg-twitter-link {
-  display: block;
-  text-decoration: none !important;
-  color: #15212A !important;
-  font-family: inherit !important;
-  font-size: 15px;
-  padding: 8px;
-  line-height: 1.3;
-}
-.kg-cta-link-accent .kg-cta-sponsor-label a {
-  color: #FF1A75 !important;
-}
-.kg-cta-text a:not(.kg-cta-link-accent .kg-cta-text a) {
-  color: #15212A;
-  text-decoration: underline;
-}
-.kg-cta-link-accent .kg-cta-text a {
-  color: #FF1A75 !important;
-}
 @media only screen and (max-width: 620px) {
   table.body .kg-bookmark-card {
     width: 90vw;
@@ -2222,27 +2165,6 @@ table[class=body] a[class=small] {
     font-weight: inherit;
     line-height: inherit;
   }
-}
-.post-title-link {
-  display: block;
-  margin-top: 32px;
-  color: #15212A;
-  text-align: center;
-  line-height: 1.1;
-}
-.post-title-link-left {
-  text-align: left;
-}
-.view-online-link {
-  word-wrap: none;
-  white-space: nowrap;
-  color: #15212a;
-  color: rgba(0, 0, 0, 0.6);
-  text-decoration: underline !important;
-}
-.kg-audio-link {
-  color: #15212a !important;
-  color: rgba(0, 0, 0, 0.6) !important;
 }
 @media only screen and (max-width: 620px) {
   .hide-mobile {
@@ -2510,11 +2432,11 @@ table.body h2 span {
         </style>
         <![endif]-->
     </head>
-    <body data-testid=\\"email-preview-body\\" style=\\"background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-size: 18px; line-height: 0; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #15212A;\\">
+    <body data-testid=\\"email-preview-body\\" style=\\"background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-size: 18px; line-height: 0; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #15212A; direction: ltr;\\">
         <span class=\\"preheader\\" style=\\"color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;\\">Testing links in email excerpt and apostrophes &#39;</span>
         <!-- SPACING TO AVOID BODY TEXT BEING DUPLICATED IN PREVIEW TEXT -->
-        <div style=\\"display:none; max-height:0; overflow:hidden; mso-hide: all;\\" aria-hidden=\\"true\\" role=\\"presentation\\">
-            &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD;  &#xA0;
+        <div class=\\"preheader-spacing\\" style=\\"display:none; max-height:0; overflow:hidden; mso-hide: all;\\" aria-hidden=\\"true\\" role=\\"presentation\\">
+            &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad;  &#xa0;
         </div>
 
         <!-- HEADER WITH FULL-WIDTH BACKGROUND -->
@@ -2527,7 +2449,7 @@ table.body h2 span {
                             <table border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"600\\">
                 <![endif]-->
                 <tr>
-                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                     <td class=\\"container\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">
                         <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
                         <!-- Header content constrained to 600px -->
@@ -2555,7 +2477,9 @@ table.body h2 span {
                                                     <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\\" width=\\"100%\\">
                                                         <tr>
                                                             <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; font-size: 36px; line-height: 1.1; font-weight: 700; text-align: center; color: #000000;\\" valign=\\"top\\" align=\\"center\\">
-                                                                <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/\\" class=\\"post-title-link\\" style=\\"text-decoration: none; display: block; margin-top: 32px; text-align: center; line-height: 1.1; overflow-wrap: anywhere; color: #000000;\\" target=\\"_blank\\">Post with email-only card</a>
+                                                                <h1 class=\\"post-title-heading\\" style=\\"margin-top: 0; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; text-rendering: optimizeLegibility; margin: 0; font-size: 36px; line-height: 1.1; font-weight: 700;\\">
+                                                                    <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/\\" class=\\"post-title-link\\" style=\\"text-decoration: none; display: block; margin-top: 32px; text-align: center; line-height: 1.1; overflow-wrap: anywhere; color: #000000;\\" target=\\"_blank\\">Post with email-only card</a>
+                                                                </h1>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -2587,7 +2511,7 @@ table.body h2 span {
                         </table>
                         </div>
                     </td>
-                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                 </tr>
                 <!--[if mso]>
                             </table>
@@ -2607,7 +2531,7 @@ table.body h2 span {
                         <table border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"600\\">
             <![endif]-->
             <tr>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                 <td class=\\"container\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; display: block; max-width: 600px; margin: 0 auto;\\" valign=\\"top\\">
                     <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
                         <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" class=\\"main\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 20px 0; width: 100%; max-width: 600px; background: #ffffff; background-color: #ffffff;\\" bgcolor=\\"#ffffff\\">                            <tr>
@@ -2627,6 +2551,20 @@ table.body h2 span {
 
                             <!-- END MAIN CONTENT AREA -->
 
+                                <tr>
+                                    <td class=\\"feedback-buttons-container\\" dir=\\"ltr\\" width=\\"100%\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; padding: 32px 0 24px; border-bottom: 1px solid #e0e7eb; text-align: center; background-color: #ffffff;\\" valign=\\"top\\" bgcolor=\\"#ffffff\\">
+                                        <table class=\\"feedback-buttons\\" role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: auto; width: 100%;\\" width=\\"100%\\">
+                                            <tr>
+                                                    <td dir=\\"ltr\\" valign=\\"top\\" align=\\"center\\" style=\\"font-size: 18px; color: #15212A; box-sizing: border-box; vertical-align: top; font-family: inherit; text-align: center; padding: 0 4px 4px; cursor: pointer; width: 100%;\\" width=\\"100%\\">
+                                                        <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/#ghost-comments-root\\" target=\\"_blank\\" style=\\"color: #FF1A75; text-decoration: none; overflow-wrap: anywhere;\\">
+                                                            <img src=\\"https://static.ghost.org/v5.0.0/images/comment-mobile.png\\" border=\\"0\\" width=\\"42\\" height=\\"42\\" alt=\\"Comment\\" style=\\"border: none; -ms-interpolation-mode: bicubic; max-width: 100%; display: block; margin: 0 auto; vertical-align: middle;\\">
+                                                            <p class=\\"feedback-button-text\\" style=\\"display: inline-block; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; color: #15212A; font-weight: 500; margin: 1em 0 0 0; line-height: 1.4; word-break: break-word; font-size: 13px;\\">Comment</p>
+                                                        </a>
+                                                    </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
 
 
 
@@ -2634,7 +2572,7 @@ table.body h2 span {
                                 <td class=\\"wrapper\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; box-sizing: border-box;\\" valign=\\"top\\">
                                     <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; padding-top: 40px; padding-bottom: 30px;\\">
                                         <tr>
-                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: #15212a; color: rgba(0, 0, 0, 0.6); margin-top: 20px; text-align: center; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5; font-size: 13px;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xA9; 2025 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #15212a; color: rgba(0, 0, 0, 0.6); text-decoration: underline; font-size: 13px;\\" target=\\"_blank\\">Unsubscribe</a></td>
+                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: #15212a; color: rgba(0, 0, 0, 0.6); margin-top: 20px; text-align: center; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5; font-size: 13px;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xa9; 2025 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #15212a; color: rgba(0, 0, 0, 0.6); text-decoration: underline; font-size: 13px;\\" target=\\"_blank\\">Unsubscribe</a></td>
                                         </tr>
 
                                             <tr>
@@ -2647,7 +2585,7 @@ table.body h2 span {
                         <!-- END CENTERED WHITE CONTAINER -->
                     </div>
                 </td>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
             </tr>
 
             <!--[if mso]>
@@ -2681,8 +2619,6 @@ Object {
   "html": "
 
 
-
- ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­  
 
 
 
@@ -2728,7 +2664,12 @@ Default Newsletter [http://127.0.0.1:2369/]
 
 
 
+
+
+
+
 Post with email-only card [http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/]
+
 
 
 
@@ -2811,6 +2752,26 @@ Testing links [https://ghost.org/] in email excerpt and apostrophes '
 
 
 
+
+
+Comment
+
+
+[http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/#ghost-comments-root]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Ghost © 2025 – Unsubscribe [http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid]
 
 
@@ -2852,7 +2813,7 @@ exports[`Email Preview API Read has custom content transformations for email com
 Object {
   "access-control-allow-origin": "http://127.0.0.1:2369",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "35308",
+  "content-length": "35506",
   "content-type": "application/json; charset=utf-8",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
@@ -3113,7 +3074,7 @@ table.body figcaption a {
                         <table border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"600\\">
             <![endif]-->
             <tr>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                 <td class=\\"container\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; font-size: 18px; vertical-align: top; color: #15212A; display: block; max-width: 600px; margin: 0 auto;\\" valign=\\"top\\">
                     <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
                         <!-- START CENTERED WHITE CONTAINER -->
@@ -3178,7 +3139,7 @@ table.body figcaption a {
                                 <td class=\\"wrapper\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; font-size: 18px; vertical-align: top; color: #15212A; box-sizing: border-box; padding: 0 20px;\\" valign=\\"top\\">
                                     <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; padding-top: 40px; padding-bottom: 30px;\\">
                                         <tr>
-                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; vertical-align: top; color: #738a94; margin-top: 20px; text-align: center; font-size: 13px; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5em;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xA9; 2023 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #738a94; text-decoration: underline;\\" target=\\"_blank\\">Unsubscribe</a></td>
+                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; vertical-align: top; color: #738a94; margin-top: 20px; text-align: center; font-size: 13px; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5em;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xa9; 2023 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #738a94; text-decoration: underline;\\" target=\\"_blank\\">Unsubscribe</a></td>
                                         </tr>
 
                                             <tr>
@@ -3192,7 +3153,7 @@ table.body figcaption a {
                         <!-- END CENTERED WHITE CONTAINER -->
                     </div>
                 </td>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
             </tr>
 
             <!--[if mso]>
@@ -3236,7 +3197,7 @@ Object {
 exports[`Email Preview API Read uses the newsletter provided through ?newsletter=slug 2 1`] = `
 Object {
   "html": "<!doctype html>
-<html>
+<html lang=\\"en-gb\\" dir=\\"ltr\\">
     <head>
         <meta name=\\"viewport\\" content=\\"width=device-width\\">
         <meta http-equiv=\\"Content-Type\\" content=\\"text/html; charset=UTF-8\\">
@@ -3357,37 +3318,6 @@ table[class=body] a[class=small] {
     font-size: 11px !important;
   }
 }
-.kg-nft-link {
-  display: block;
-  text-decoration: none !important;
-  color: #15212A !important;
-  font-family: inherit !important;
-  font-size: 14px;
-  line-height: 1.3;
-  padding-top: 4px;
-  padding-right: 20px;
-  padding-left: 20px;
-  padding-bottom: 4px;
-}
-.kg-twitter-link {
-  display: block;
-  text-decoration: none !important;
-  color: #15212A !important;
-  font-family: inherit !important;
-  font-size: 15px;
-  padding: 8px;
-  line-height: 1.3;
-}
-.kg-cta-link-accent .kg-cta-sponsor-label a {
-  color: #FF1A75 !important;
-}
-.kg-cta-text a:not(.kg-cta-link-accent .kg-cta-text a) {
-  color: #15212A;
-  text-decoration: underline;
-}
-.kg-cta-link-accent .kg-cta-text a {
-  color: #FF1A75 !important;
-}
 @media only screen and (max-width: 620px) {
   table.body .kg-bookmark-card {
     width: 90vw;
@@ -3491,27 +3421,6 @@ table[class=body] a[class=small] {
     font-weight: inherit;
     line-height: inherit;
   }
-}
-.post-title-link {
-  display: block;
-  margin-top: 32px;
-  color: #15212A;
-  text-align: center;
-  line-height: 1.1;
-}
-.post-title-link-left {
-  text-align: left;
-}
-.view-online-link {
-  word-wrap: none;
-  white-space: nowrap;
-  color: #15212a;
-  color: rgba(0, 0, 0, 0.6);
-  text-decoration: underline !important;
-}
-.kg-audio-link {
-  color: #15212a !important;
-  color: rgba(0, 0, 0, 0.6) !important;
 }
 @media only screen and (max-width: 620px) {
   .hide-mobile {
@@ -3779,11 +3688,11 @@ table.body h2 span {
         </style>
         <![endif]-->
     </head>
-    <body data-testid=\\"email-preview-body\\" style=\\"background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-size: 18px; line-height: 0; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #15212A;\\">
+    <body data-testid=\\"email-preview-body\\" style=\\"background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-size: 18px; line-height: 0; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #15212A; direction: ltr;\\">
         <span class=\\"preheader\\" style=\\"color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;\\">Testing links in email excerpt and apostrophes &#39;</span>
         <!-- SPACING TO AVOID BODY TEXT BEING DUPLICATED IN PREVIEW TEXT -->
-        <div style=\\"display:none; max-height:0; overflow:hidden; mso-hide: all;\\" aria-hidden=\\"true\\" role=\\"presentation\\">
-            &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD;  &#xA0;
+        <div class=\\"preheader-spacing\\" style=\\"display:none; max-height:0; overflow:hidden; mso-hide: all;\\" aria-hidden=\\"true\\" role=\\"presentation\\">
+            &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad;  &#xa0;
         </div>
 
         <!-- HEADER WITH FULL-WIDTH BACKGROUND -->
@@ -3796,7 +3705,7 @@ table.body h2 span {
                             <table border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"600\\">
                 <![endif]-->
                 <tr>
-                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                     <td class=\\"container title-serif\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">
                         <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
                         <!-- Header content constrained to 600px -->
@@ -3831,7 +3740,9 @@ table.body h2 span {
                                                     <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\\" width=\\"100%\\">
                                                         <tr>
                                                             <td style=\\"vertical-align: top; font-family: Georgia, serif; letter-spacing: -0.01em; font-size: 36px; line-height: 1.1; font-weight: 700; text-align: center; color: #000000;\\" valign=\\"top\\" align=\\"center\\">
-                                                                <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/\\" class=\\"post-title-link\\" style=\\"text-decoration: none; display: block; margin-top: 32px; text-align: center; line-height: 1.1; overflow-wrap: anywhere; color: #000000;\\" target=\\"_blank\\">Post with email-only card</a>
+                                                                <h1 class=\\"post-title-heading\\" style=\\"margin-top: 0; text-rendering: optimizeLegibility; margin: 0; font-size: 36px; line-height: 1.1; font-weight: 700; font-family: Georgia, serif; letter-spacing: -0.01em;\\">
+                                                                    <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/\\" class=\\"post-title-link\\" style=\\"text-decoration: none; display: block; margin-top: 32px; text-align: center; line-height: 1.1; overflow-wrap: anywhere; color: #000000;\\" target=\\"_blank\\">Post with email-only card</a>
+                                                                </h1>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -3863,7 +3774,7 @@ table.body h2 span {
                         </table>
                         </div>
                     </td>
-                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                 </tr>
                 <!--[if mso]>
                             </table>
@@ -3883,7 +3794,7 @@ table.body h2 span {
                         <table border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"600\\">
             <![endif]-->
             <tr>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                 <td class=\\"container title-serif\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; display: block; max-width: 600px; margin: 0 auto;\\" valign=\\"top\\">
                     <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
                         <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" class=\\"main\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 20px 0; width: 100%; max-width: 600px; background: #ffffff; background-color: #ffffff;\\" bgcolor=\\"#ffffff\\">                            <tr>
@@ -3903,6 +3814,20 @@ table.body h2 span {
 
                             <!-- END MAIN CONTENT AREA -->
 
+                                <tr>
+                                    <td class=\\"feedback-buttons-container\\" dir=\\"ltr\\" width=\\"100%\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; padding: 32px 0 24px; border-bottom: 1px solid #e0e7eb; text-align: center; background-color: #ffffff;\\" valign=\\"top\\" bgcolor=\\"#ffffff\\">
+                                        <table class=\\"feedback-buttons\\" role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: auto; width: 100%;\\" width=\\"100%\\">
+                                            <tr>
+                                                    <td dir=\\"ltr\\" valign=\\"top\\" align=\\"center\\" style=\\"font-size: 18px; color: #15212A; box-sizing: border-box; vertical-align: top; font-family: inherit; text-align: center; padding: 0 4px 4px; cursor: pointer; width: 100%;\\" width=\\"100%\\">
+                                                        <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/#ghost-comments-root\\" target=\\"_blank\\" style=\\"color: #FF1A75; text-decoration: none; overflow-wrap: anywhere;\\">
+                                                            <img src=\\"https://static.ghost.org/v5.0.0/images/comment-mobile.png\\" border=\\"0\\" width=\\"42\\" height=\\"42\\" alt=\\"Comment\\" style=\\"border: none; -ms-interpolation-mode: bicubic; max-width: 100%; display: block; margin: 0 auto; vertical-align: middle;\\">
+                                                            <p class=\\"feedback-button-text\\" style=\\"display: inline-block; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; color: #15212A; font-weight: 500; margin: 1em 0 0 0; line-height: 1.4; word-break: break-word; font-size: 13px;\\">Comment</p>
+                                                        </a>
+                                                    </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
 
 
 
@@ -3910,7 +3835,7 @@ table.body h2 span {
                                 <td class=\\"wrapper\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; box-sizing: border-box;\\" valign=\\"top\\">
                                     <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; padding-top: 40px; padding-bottom: 30px;\\">
                                         <tr>
-                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: #15212a; color: rgba(0, 0, 0, 0.6); margin-top: 20px; text-align: center; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5; font-size: 13px;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xA9; 2025 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #15212a; color: rgba(0, 0, 0, 0.6); text-decoration: underline; font-size: 13px;\\" target=\\"_blank\\">Unsubscribe</a></td>
+                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: #15212a; color: rgba(0, 0, 0, 0.6); margin-top: 20px; text-align: center; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5; font-size: 13px;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xa9; 2025 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #15212a; color: rgba(0, 0, 0, 0.6); text-decoration: underline; font-size: 13px;\\" target=\\"_blank\\">Unsubscribe</a></td>
                                         </tr>
 
                                             <tr>
@@ -3923,7 +3848,7 @@ table.body h2 span {
                         <!-- END CENTERED WHITE CONTAINER -->
                     </div>
                 </td>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
             </tr>
 
             <!--[if mso]>
@@ -3957,8 +3882,6 @@ Object {
   "html": "
 
 
-
- ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­  
 
 
 
@@ -4011,7 +3934,12 @@ Daily newsletter [http://127.0.0.1:2369/]
 
 
 
+
+
+
+
 Post with email-only card [http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/]
+
 
 
 
@@ -4094,6 +4022,26 @@ Testing links [https://ghost.org/] in email excerpt and apostrophes '
 
 
 
+
+
+Comment
+
+
+[http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/#ghost-comments-root]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Ghost © 2025 – Unsubscribe [http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid]
 
 
@@ -4135,7 +4083,7 @@ exports[`Email Preview API Read uses the newsletter provided through ?newsletter
 Object {
   "access-control-allow-origin": "http://127.0.0.1:2369",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "36185",
+  "content-length": "36351",
   "content-type": "application/json; charset=utf-8",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
@@ -4401,7 +4349,7 @@ table.body figcaption a {
         <![endif]-->
 
         <tr>
-            <td style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+            <td style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
             <td class=\\"container\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; font-size: 18px; vertical-align: top; color: #15212A; display: block; max-width: 600px; margin: 0 auto;\\" valign=\\"top\\">
                 <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
 
@@ -4481,7 +4429,7 @@ table.body figcaption a {
                                 <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; padding-top: 40px; padding-bottom: 30px;\\">
                                     
                                     <tr>
-                                        <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; vertical-align: top; color: #738a94; margin-top: 20px; text-align: center; font-size: 13px; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5em;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xA9; 2022 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?preview=1\\" style=\\"overflow-wrap: anywhere; color: #738a94; text-decoration: underline;\\" target=\\"_blank\\">Unsubscribe</a></td>
+                                        <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; vertical-align: top; color: #738a94; margin-top: 20px; text-align: center; font-size: 13px; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5em;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xa9; 2022 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?preview=1\\" style=\\"overflow-wrap: anywhere; color: #738a94; text-decoration: underline;\\" target=\\"_blank\\">Unsubscribe</a></td>
                                     </tr>
 
                                     
@@ -4497,7 +4445,7 @@ table.body figcaption a {
                     <!-- END CENTERED WHITE CONTAINER -->
                 </div>
             </td>
-            <td style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+            <td style=\\"font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif, &#39;Apple Color Emoji&#39;, &#39;Segoe UI Emoji&#39;, &#39;Segoe UI Symbol&#39;; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
         </tr>
 
     <!--[if mso]>
@@ -4545,7 +4493,7 @@ Object {
 exports[`Email Preview API Read uses the posts newsletter by default 2 1`] = `
 Object {
   "html": "<!doctype html>
-<html>
+<html lang=\\"en-gb\\" dir=\\"ltr\\">
     <head>
         <meta name=\\"viewport\\" content=\\"width=device-width\\">
         <meta http-equiv=\\"Content-Type\\" content=\\"text/html; charset=UTF-8\\">
@@ -4666,37 +4614,6 @@ table[class=body] a[class=small] {
     font-size: 11px !important;
   }
 }
-.kg-nft-link {
-  display: block;
-  text-decoration: none !important;
-  color: #15212A !important;
-  font-family: inherit !important;
-  font-size: 14px;
-  line-height: 1.3;
-  padding-top: 4px;
-  padding-right: 20px;
-  padding-left: 20px;
-  padding-bottom: 4px;
-}
-.kg-twitter-link {
-  display: block;
-  text-decoration: none !important;
-  color: #15212A !important;
-  font-family: inherit !important;
-  font-size: 15px;
-  padding: 8px;
-  line-height: 1.3;
-}
-.kg-cta-link-accent .kg-cta-sponsor-label a {
-  color: #FF1A75 !important;
-}
-.kg-cta-text a:not(.kg-cta-link-accent .kg-cta-text a) {
-  color: #15212A;
-  text-decoration: underline;
-}
-.kg-cta-link-accent .kg-cta-text a {
-  color: #FF1A75 !important;
-}
 @media only screen and (max-width: 620px) {
   table.body .kg-bookmark-card {
     width: 90vw;
@@ -4800,27 +4717,6 @@ table[class=body] a[class=small] {
     font-weight: inherit;
     line-height: inherit;
   }
-}
-.post-title-link {
-  display: block;
-  margin-top: 32px;
-  color: #15212A;
-  text-align: center;
-  line-height: 1.1;
-}
-.post-title-link-left {
-  text-align: left;
-}
-.view-online-link {
-  word-wrap: none;
-  white-space: nowrap;
-  color: #15212a;
-  color: rgba(0, 0, 0, 0.6);
-  text-decoration: underline !important;
-}
-.kg-audio-link {
-  color: #15212a !important;
-  color: rgba(0, 0, 0, 0.6) !important;
 }
 @media only screen and (max-width: 620px) {
   .hide-mobile {
@@ -5088,11 +4984,11 @@ table.body h2 span {
         </style>
         <![endif]-->
     </head>
-    <body data-testid=\\"email-preview-body\\" style=\\"background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-size: 18px; line-height: 0; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #15212A;\\">
+    <body data-testid=\\"email-preview-body\\" style=\\"background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-size: 18px; line-height: 0; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #15212A; direction: ltr;\\">
         <span class=\\"preheader\\" style=\\"color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;\\">Testing links in email excerpt and apostrophes &#39;</span>
         <!-- SPACING TO AVOID BODY TEXT BEING DUPLICATED IN PREVIEW TEXT -->
-        <div style=\\"display:none; max-height:0; overflow:hidden; mso-hide: all;\\" aria-hidden=\\"true\\" role=\\"presentation\\">
-            &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#x2007;&#x34F; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD; &#xAD;  &#xA0;
+        <div class=\\"preheader-spacing\\" style=\\"display:none; max-height:0; overflow:hidden; mso-hide: all;\\" aria-hidden=\\"true\\" role=\\"presentation\\">
+            &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#x2007;&#x34f; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad; &#xad;  &#xa0;
         </div>
 
         <!-- HEADER WITH FULL-WIDTH BACKGROUND -->
@@ -5105,7 +5001,7 @@ table.body h2 span {
                             <table border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"600\\">
                 <![endif]-->
                 <tr>
-                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                     <td class=\\"container title-serif\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">
                         <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
                         <!-- Header content constrained to 600px -->
@@ -5140,7 +5036,9 @@ table.body h2 span {
                                                     <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\\" width=\\"100%\\">
                                                         <tr>
                                                             <td style=\\"vertical-align: top; font-family: Georgia, serif; letter-spacing: -0.01em; font-size: 36px; line-height: 1.1; font-weight: 700; text-align: center; color: #000000;\\" valign=\\"top\\" align=\\"center\\">
-                                                                <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/\\" class=\\"post-title-link\\" style=\\"text-decoration: none; display: block; margin-top: 32px; text-align: center; line-height: 1.1; overflow-wrap: anywhere; color: #000000;\\" target=\\"_blank\\">Post with email-only card</a>
+                                                                <h1 class=\\"post-title-heading\\" style=\\"margin-top: 0; text-rendering: optimizeLegibility; margin: 0; font-size: 36px; line-height: 1.1; font-weight: 700; font-family: Georgia, serif; letter-spacing: -0.01em;\\">
+                                                                    <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/\\" class=\\"post-title-link\\" style=\\"text-decoration: none; display: block; margin-top: 32px; text-align: center; line-height: 1.1; overflow-wrap: anywhere; color: #000000;\\" target=\\"_blank\\">Post with email-only card</a>
+                                                                </h1>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -5172,7 +5070,7 @@ table.body h2 span {
                         </table>
                         </div>
                     </td>
-                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                    <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                 </tr>
                 <!--[if mso]>
                             </table>
@@ -5192,7 +5090,7 @@ table.body h2 span {
                         <table border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"600\\">
             <![endif]-->
             <tr>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
                 <td class=\\"container title-serif\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; display: block; max-width: 600px; margin: 0 auto;\\" valign=\\"top\\">
                     <div class=\\"content\\" style=\\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px;\\">
                         <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" class=\\"main\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 20px 0; width: 100%; max-width: 600px; background: #ffffff; background-color: #ffffff;\\" bgcolor=\\"#ffffff\\">                            <tr>
@@ -5212,6 +5110,20 @@ table.body h2 span {
 
                             <!-- END MAIN CONTENT AREA -->
 
+                                <tr>
+                                    <td class=\\"feedback-buttons-container\\" dir=\\"ltr\\" width=\\"100%\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; padding: 32px 0 24px; border-bottom: 1px solid #e0e7eb; text-align: center; background-color: #ffffff;\\" valign=\\"top\\" bgcolor=\\"#ffffff\\">
+                                        <table class=\\"feedback-buttons\\" role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: auto; width: 100%;\\" width=\\"100%\\">
+                                            <tr>
+                                                    <td dir=\\"ltr\\" valign=\\"top\\" align=\\"center\\" style=\\"font-size: 18px; color: #15212A; box-sizing: border-box; vertical-align: top; font-family: inherit; text-align: center; padding: 0 4px 4px; cursor: pointer; width: 100%;\\" width=\\"100%\\">
+                                                        <a href=\\"http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/#ghost-comments-root\\" target=\\"_blank\\" style=\\"color: #FF1A75; text-decoration: none; overflow-wrap: anywhere;\\">
+                                                            <img src=\\"https://static.ghost.org/v5.0.0/images/comment-mobile.png\\" border=\\"0\\" width=\\"42\\" height=\\"42\\" alt=\\"Comment\\" style=\\"border: none; -ms-interpolation-mode: bicubic; max-width: 100%; display: block; margin: 0 auto; vertical-align: middle;\\">
+                                                            <p class=\\"feedback-button-text\\" style=\\"display: inline-block; font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; color: #15212A; font-weight: 500; margin: 1em 0 0 0; line-height: 1.4; word-break: break-word; font-size: 13px;\\">Comment</p>
+                                                        </a>
+                                                    </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
 
 
 
@@ -5219,7 +5131,7 @@ table.body h2 span {
                                 <td class=\\"wrapper\\" align=\\"center\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A; box-sizing: border-box;\\" valign=\\"top\\">
                                     <table role=\\"presentation\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" width=\\"100%\\" style=\\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; padding-top: 40px; padding-bottom: 30px;\\">
                                         <tr>
-                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: #15212a; color: rgba(0, 0, 0, 0.6); margin-top: 20px; text-align: center; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5; font-size: 13px;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xA9; 2025 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #15212a; color: rgba(0, 0, 0, 0.6); text-decoration: underline; font-size: 13px;\\" target=\\"_blank\\">Unsubscribe</a></td>
+                                            <td class=\\"footer\\" style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: #15212a; color: rgba(0, 0, 0, 0.6); margin-top: 20px; text-align: center; padding-bottom: 10px; padding-top: 10px; padding-left: 30px; padding-right: 30px; line-height: 1.5; font-size: 13px;\\" valign=\\"top\\" align=\\"center\\">Ghost &#xa9; 2025 &#x2013; <a href=\\"http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid\\" style=\\"overflow-wrap: anywhere; color: #15212a; color: rgba(0, 0, 0, 0.6); text-decoration: underline; font-size: 13px;\\" target=\\"_blank\\">Unsubscribe</a></td>
                                         </tr>
 
                                             <tr>
@@ -5232,7 +5144,7 @@ table.body h2 span {
                         <!-- END CENTERED WHITE CONTAINER -->
                     </div>
                 </td>
-                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xA0;</td>
+                <td style=\\"font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; vertical-align: top; color: #15212A;\\" valign=\\"top\\">&#xa0;</td>
             </tr>
 
             <!--[if mso]>
@@ -5266,8 +5178,6 @@ Object {
   "html": "
 
 
-
- ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­  
 
 
 
@@ -5320,7 +5230,12 @@ Daily newsletter [http://127.0.0.1:2369/]
 
 
 
+
+
+
+
 Post with email-only card [http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/]
+
 
 
 
@@ -5403,6 +5318,26 @@ Testing links [https://ghost.org/] in email excerpt and apostrophes '
 
 
 
+
+
+Comment
+
+
+[http://127.0.0.1:2369/p/d52c42ae-2755-455c-80ec-70b2ec55c904/#ghost-comments-root]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Ghost © 2025 – Unsubscribe [http://127.0.0.1:2369/unsubscribe/?uuid=example-uuid&key=803e513e2d8b88e759d8f433779659af335d7308b4cbac809600d563f6b49a76&newsletter=requested-newsletter-uuid]
 
 
@@ -5444,7 +5379,7 @@ exports[`Email Preview API Read uses the posts newsletter by default 4: [headers
 Object {
   "access-control-allow-origin": "http://127.0.0.1:2369",
   "cache-control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-  "content-length": "36185",
+  "content-length": "36351",
   "content-type": "application/json; charset=utf-8",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "etag": StringMatching /\\(\\?:W\\\\/\\)\\?"\\(\\?:\\[ !#-\\\\x7E\\\\x80-\\\\xFF\\]\\*\\|\\\\r\\\\n\\[\\\\t \\]\\|\\\\\\\\\\.\\)\\*"/,
