@@ -6,38 +6,39 @@ import {
   MAX_LONG_TEXT_BYTES,
   isMetafieldChangeSource,
   partTypesOf,
-  subFieldsOf,
+  partsOf,
   type Address,
   type FieldType,
 } from '../src/index.ts';
 
 // This asserts only the catalog's *contract* — which field types exist, and which of
 // them have parts. The behavioural outcomes (per-type value validation, the composite
-// address round-tripping, sub-field 422s) are proven end-to-end through the member
+// address round-tripping, part 422s) are proven end-to-end through the member
 // metafields HTTP API integration tests, which exercise this catalog together with
 // the backend storage and the wire format.
 describe('metafield-types catalog', function () {
-  it('offers the expected field types, and says which of them have parts', function () {
-    // Whether a value has parts is the only structural fact the backend reads off a
-    // type: it decides how many rows the value occupies and what they are keyed by.
-    const parts = Object.fromEntries(FIELD_TYPE_IDS.map((id) => [id, subFieldsOf(id)]));
-    assert.deepEqual(parts, {
+  // Integrations depend on a published version of this package and talk to sites on
+  // other Ghost versions, so a type that has shipped keeps its parts and their types
+  // for good: an integration with a newer package would otherwise send a part an older
+  // site refuses. New structure is a new type. Add a type here once it has shipped.
+  it('never changes a type once it has shipped', function () {
+    const shipped = {
       short_text: null,
       long_text: null,
-      address: ['line1', 'line2', 'city', 'state', 'postal_code', 'country'],
-    });
-  });
+      address: {
+        line1: 'short_text',
+        line2: 'short_text',
+        city: 'short_text',
+        state: 'short_text',
+        postal_code: 'postal_code',
+        country: 'country_code',
+      },
+    };
 
-  it("declares each part's own type", function () {
-    assert.deepEqual(partTypesOf('address'), {
-      line1: 'short_text',
-      line2: 'short_text',
-      city: 'short_text',
-      state: 'short_text',
-      postal_code: 'postal_code',
-      country: 'country_code',
-    });
-    assert.equal(partTypesOf('short_text'), null);
+    for (const [type, parts] of Object.entries(shipped)) {
+      assert.ok(FIELD_TYPE_IDS.includes(type as FieldType), `${type} still exists`);
+      assert.deepEqual(partTypesOf(type as FieldType), parts, `${type} keeps its parts`);
+    }
   });
 
   it('reads a type it has never heard of as having no parts', function () {
@@ -45,7 +46,7 @@ describe('metafield-types catalog', function () {
     // the server it talks to does: the type is a string off the wire, asserted not
     // checked. Failing here would take the surface down over a field it merely cannot
     // render, so it degrades and the server stays authoritative.
-    assert.equal(subFieldsOf('a_type_from_the_future' as FieldType), null);
+    assert.equal(partsOf('a_type_from_the_future' as FieldType), null);
   });
 
   describe('text is trimmed, whatever type it belongs to', function () {
@@ -96,8 +97,8 @@ describe('metafield-types catalog', function () {
     });
   });
 
-  // The rule that replaced per-sub-field requiredness. An end-to-end test can't
-  // pin it: the CSV and admin paths both strip blank sub-fields before a value
+  // The rule that replaced per-part requiredness. An end-to-end test can't
+  // pin it: the CSV and admin paths both strip blank parts before a value
   // reaches the catalog, so neither ever presents the empty case this rejects.
   describe('an address must name at least one part', function () {
     const parse = (value: unknown) => FIELD_TYPES.address.value.safeParse(value).success;
@@ -144,9 +145,9 @@ describe('metafield-types catalog', function () {
       assert.equal(parse({ line1: '', city: '' }), true);
     });
 
-    it('lets a sub-field whose rule is a format be emptied too', function () {
-      // Empty is a statement about the write, not about the sub-field, so every
-      // sub-field takes it alike. A bound admits the empty string on its own; a
+    it('lets a part whose rule is a format be emptied too', function () {
+      // Empty is a statement about the write, not about the part, so every
+      // part takes it alike. A bound admits the empty string on its own; a
       // pattern does not, which would leave a country the one part of an address
       // that could be set but never removed.
       assert.equal(parse({ line1: '62 Ghost Lane', city: 'Dublin', country: '' }), true);
@@ -195,7 +196,7 @@ describe('metafield-types catalog', function () {
       assert.equal(parseCountry('!!').success, false);
     });
 
-    it('trims a sub-field, so its bound measures the value and not the padding', function () {
+    it('trims a part, so its bound measures the value and not the padding', function () {
       const result = FIELD_TYPES.address.value.safeParse({
         line1: '  1 Main St  ',
         country: ' GB ',
@@ -281,7 +282,7 @@ describe('metafield-types catalog', function () {
         ['long_text', 'x'.repeat(MAX_LONG_TEXT_BYTES + 1)],
         ['address', {}],
         ['address', { city: 42 }],
-        ...subFieldsOf('address')!.map(
+        ...partsOf('address')!.map(
           (part) => ['address', { [part]: 'x'.repeat(256) }] as [FieldType, unknown],
         ),
       ];
